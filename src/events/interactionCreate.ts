@@ -1,7 +1,7 @@
 import { Interaction } from 'discord.js';
-import { BotEvent } from 'typings/event';
 
-import { pluralize } from '../util/format';
+import { pluralize } from 'src/lib/format';
+import { BotEvent } from 'typings/event';
 
 /**
  * This file handles any incoming slash commands sent by users

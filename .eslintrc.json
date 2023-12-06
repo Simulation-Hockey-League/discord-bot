@@ -12,6 +12,7 @@
 	"parserOptions": {
 		"ecmaVersion": 2021
 	},
+  
 	"rules": {
     "@typescript-eslint/no-restricted-imports": "error",
     "@typescript-eslint/explicit-function-return-type": "off",
@@ -37,6 +38,7 @@
       }
     ],
     "import/no-useless-path-segments": "error",
+    "sort-imports": ["error", { "ignoreDeclarationSort": true }],
     "import/order": [
       "error",
       {
@@ -44,7 +46,7 @@
           "order": "asc",
           "caseInsensitive": true
         },
-        "newlines-between": "always",
+        "newlines-between": "always-and-inside-groups",
         "groups": [
           "builtin",
           "external",
