@@ -1,4 +1,4 @@
-import { Interaction } from 'discord.js';
+import { Events, Interaction } from 'discord.js';
 
 import { pluralize } from 'src/lib/format';
 import { BotEvent } from 'typings/event';
@@ -7,7 +7,7 @@ import { BotEvent } from 'typings/event';
  * This file handles any incoming slash commands sent by users
  */
 export default {
-  name: 'interactionCreate',
+  name: Events.InteractionCreate,
   execute: (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);

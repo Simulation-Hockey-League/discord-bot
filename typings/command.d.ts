@@ -1,9 +1,9 @@
 import {
-  SlashCommandBuilder,
   AutocompleteInteraction,
+  CacheType,
   ChatInputCommandInteraction,
   ModalSubmitInteraction,
-  CacheType,
+  SlashCommandBuilder,
 } from 'discord.js';
 
 export interface SlashCommand {

@@ -1,10 +1,10 @@
-import { Message } from 'discord.js';
+import { Events, Message } from 'discord.js';
 
 import { Config } from 'src/lib/config/config';
 import { BotEvent } from 'typings/event';
 
 export default {
-  name: 'messageCreate',
+  name: Events.MessageCreate,
   execute: async (message: Message) => {
     if (
       message.guildId !== Config.indexUpdateServerId ||

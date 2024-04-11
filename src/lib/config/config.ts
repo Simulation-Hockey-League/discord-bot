@@ -28,4 +28,26 @@ export const Config = {
       team: (groupNumber: number) => `${groupNumber}!C17:V167`,
     },
   },
+  leagues: {
+    shl: {
+      id: 0,
+      logoUrl: 'https://i.imgur.com/16bLqHF.png',
+      cupName: 'Challenge Cup',
+    },
+    smjhl: {
+      id: 1,
+      logoUrl: 'https://i.imgur.com/7M65irp.png',
+      cupName: 'Four Star Cup',
+    },
+    iihf: {
+      id: 2,
+      logoUrl: 'https://i.imgur.com/7BeajZI.png',
+      cupName: '',
+    },
+    wjc: {
+      id: 3,
+      logoUrl: 'https://i.imgur.com/aK7iEjI.png',
+      cupName: '',
+    },
+  } as const,
 };
