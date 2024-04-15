@@ -1,6 +1,7 @@
 import { Events, Interaction } from 'discord.js';
 
 import { pluralize } from 'src/lib/format';
+import { logger } from 'src/lib/logger';
 import { BotEvent } from 'typings/event';
 
 /**
@@ -42,7 +43,7 @@ export default {
       const command = interaction.client.commands.get(interaction.commandName);
 
       if (!command) {
-        console.error(
+        logger.error(
           `No command matching ${interaction.commandName} was found.`,
         );
         return;
@@ -51,20 +52,20 @@ export default {
       try {
         command.autocomplete?.(interaction);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
       }
     } else if (interaction.isModalSubmit()) {
       const command = interaction.client.commands.get(interaction.customId);
 
       if (!command) {
-        console.error(`No command matching ${interaction.customId} was found.`);
+        logger.error(`No command matching ${interaction.customId} was found.`);
         return;
       }
 
       try {
         command.modal?.(interaction);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
       }
     }
   },
