@@ -28,7 +28,10 @@
     "execMap": {
       "ts": "ts-node"
     },
-    "ignore": ["build/*", ".vscode/*"],
+    "ignore": [
+      "build/*",
+      ".vscode/*"
+    ],
     "delay": "2500"
   }
 }
