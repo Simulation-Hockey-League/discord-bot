@@ -49,5 +49,5 @@ export const Config = {
       logoUrl: 'https://i.imgur.com/aK7iEjI.png',
       cupName: '',
     },
-  } as const,
+  },
 };
