@@ -40,8 +40,10 @@ class IndexApiClient {
       league: this.#leagueId.toString(),
       ...additionalQueryParams,
     });
-    logger.info(
-      `IndexClient: Fetching data for ${url}?${queryParams.toString()}`,
+    logger.debug(
+      `IndexClient: ${
+        this.#leagueId
+      } Fetching data for ${url}?${queryParams.toString()}`,
     );
     return await fetch(
       `${

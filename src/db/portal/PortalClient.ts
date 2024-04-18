@@ -6,10 +6,8 @@ class PortalApiClient {
   #userInfo: Array<{ userID: number; username: string }> = [];
   #activePlayers: Array<PortalPlayer> = [];
 
-  constructor() {
-    this.getUserInfo();
-    this.getActivePlayers();
-  }
+  #loaded = false;
+  #lastLoadTimestamp = 0;
 
   async #getData<T>(
     data: Array<T>,
@@ -24,7 +22,7 @@ class PortalApiClient {
     const queryParams = new URLSearchParams({
       ...additionalQueryParams,
     });
-    logger.info(
+    logger.debug(
       `PortalClient: Fetching data for ${url}?${queryParams.toString()}`,
     );
     const response = await fetch(
@@ -59,8 +57,24 @@ class PortalApiClient {
   }
 
   async reload(): Promise<void> {
-    await this.getUserInfo(true);
-    await this.getActivePlayers(true);
+    this.#loaded = false;
+
+    await Promise.all([
+      await this.getUserInfo(true),
+      await this.getActivePlayers(true),
+    ]);
+
+    this.#lastLoadTimestamp = Date.now();
+    this.#loaded = true;
+  }
+
+  async reloadIfError() {
+    if (
+      !this.#loaded ||
+      Date.now() - this.#lastLoadTimestamp >= 30 * 60 * 1000 // 12 hours in milliseconds
+    ) {
+      this.reload();
+    }
   }
 }
 
