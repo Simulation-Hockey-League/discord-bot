@@ -1,0 +1,26 @@
+diff --git a/node_modules/keyv-file/lib/index.js b/node_modules/keyv-file/lib/index.js
+index e9ed61e..bfc515c 100644
+--- a/node_modules/keyv-file/lib/index.js
++++ b/node_modules/keyv-file/lib/index.js
+@@ -68,10 +68,6 @@ class KeyvFile {
+             if (!data) {
+                 return defaults;
+             }
+-            else if (this.isExpired(data)) {
+-                this.delete(key);
+-                return defaults;
+-            }
+             else {
+                 return data.value;
+             }
+@@ -86,9 +82,7 @@ class KeyvFile {
+     keys() {
+         let keys = [];
+         for (const key of this._cache.keys()) {
+-            if (!this.isExpired(this._cache.get(key))) {
+-                keys.push(key);
+-            }
++            keys.push(key);  
+         }
+         return keys;
+     }

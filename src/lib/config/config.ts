@@ -3,7 +3,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 export const Config = {
   indexApiUrlV1: `https://index.simulationhockey.com/api/v1`,
   indexApiUrlV2: `https://index.simulationhockey.com/api/v2`,
-  portalApiUrl: `https://index.simulationhockey.com/portal`,
+  portalApiUrl: `https://portal.simulationhockey.com/api/v1`,
   googleSheetUrl: (sheetId: string) =>
     `https://docs.google.com/spreadsheets/d/${sheetId}`,
   devTeamIds: [

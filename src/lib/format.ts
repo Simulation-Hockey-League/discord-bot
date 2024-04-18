@@ -18,3 +18,6 @@ export const suffix = (i: number) => {
   }
   return `${i}th`;
 };
+
+export const hexColorToInt = (hex: string) =>
+  parseInt(hex.replace(/^#/, ''), 16);
