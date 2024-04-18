@@ -1,4 +1,10 @@
 import { Events, Message } from 'discord.js';
+import {
+  IndexClient,
+  ShlIndexApiClient,
+  SmjhlIndexApiClient,
+} from 'src/db/index/IndexClient';
+import { leagueStringToLeagueType } from 'src/db/index/shared';
 
 import { Config } from 'src/lib/config/config';
 import { BotEvent } from 'typings/event';
@@ -25,9 +31,11 @@ export default {
     const league = groups && 'league' in groups ? groups.league : null;
 
     if (league !== null) {
-      // Reload league data for current season
+      logger.info(`Reloading ${league} index for season ${season}`);
+      IndexClient(leagueStringToLeagueType(league)).reload(season ?? undefined);
     } else {
-      // Reload SHL and SMJHL for current season
+      ShlIndexApiClient.reload(season ?? undefined);
+      SmjhlIndexApiClient.reload(season ?? undefined);
     }
   },
 } satisfies BotEvent;
