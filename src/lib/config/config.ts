@@ -51,3 +51,9 @@ export const Config = {
     },
   },
 };
+
+export enum UserRole {
+  REGULAR = 0,
+  SERVER_ADMIN = 1,
+  BOT_OWNERS = 2,
+}

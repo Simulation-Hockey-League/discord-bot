@@ -5,6 +5,7 @@ import {
   ModalSubmitInteraction,
   SlashCommandBuilder,
 } from 'discord.js';
+import { UserRole } from 'src/lib/config/config';
 
 export interface SlashCommand {
   command: SlashCommandBuilder;
@@ -12,4 +13,5 @@ export interface SlashCommand {
   autocomplete?: (interaction: AutocompleteInteraction) => void;
   modal?: (interaction: ModalSubmitInteraction<CacheType>) => void;
   cooldown?: number; // in seconds
+  minRole?: UserRole;
 }

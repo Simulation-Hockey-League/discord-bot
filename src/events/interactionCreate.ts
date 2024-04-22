@@ -2,6 +2,7 @@ import { Events, Interaction } from 'discord.js';
 
 import { pluralize } from 'src/lib/format';
 import { logger } from 'src/lib/logger';
+import { checkRole } from 'src/lib/role';
 import { BotEvent } from 'typings/event';
 
 /**
@@ -17,6 +18,14 @@ export default {
       );
 
       if (!command) return;
+
+      if (command.minRole && !checkRole(interaction.member, command.minRole)) {
+        interaction.reply({
+          content: 'You do not have permission to run this command.',
+          ephemeral: true,
+        });
+        return;
+      }
 
       if (command.cooldown && cooldown) {
         if (Date.now() < cooldown) {

@@ -7,6 +7,7 @@ import {
 import { leagueStringToLeagueType } from 'src/db/index/shared';
 
 import { Config } from 'src/lib/config/config';
+import { logger } from 'src/lib/logger';
 import { BotEvent } from 'typings/event';
 
 export default {
