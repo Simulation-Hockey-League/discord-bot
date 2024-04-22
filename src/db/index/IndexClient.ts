@@ -4,15 +4,18 @@ import { Config } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { logger } from 'src/lib/logger';
 
-import type {
+import {
   AvailableSeason,
+  DetailedTeamStats,
+  GoalieStats,
   LeagueConference,
   LeagueDivision,
+  PlayerStats,
   TeamInfo,
   TeamStats,
 } from 'typings/statsindex';
 
-import { LeagueType } from './shared';
+import { LeagueType, SeasonType, seasonTypeToApiName } from './shared';
 
 class IndexApiClient {
   #leagueId: LeagueType;
@@ -22,6 +25,11 @@ class IndexApiClient {
   #divisions: Map<number, Array<LeagueDivision>> = new Map();
   #standings: Map<number, Array<TeamStats>> = new Map();
   #teamInfo: Map<number, Array<TeamInfo>> = new Map();
+  #detailedTeamStats: Map<number, Array<DetailedTeamStats>> = new Map();
+  #playerStats: Map<SeasonType, Map<number, Array<PlayerStats>>> = new Map();
+  #goalieStats: Map<SeasonType, Map<number, Array<GoalieStats>>> = new Map();
+  // schedule
+  // playoffs
 
   #loaded: boolean = false;
   #lastLoadTimestamp = 0;
@@ -198,12 +206,108 @@ class IndexApiClient {
     return result;
   }
 
+  async getDetailedTeamStats(
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<DetailedTeamStats>> {
+    const result = await this.#getData(
+      this.#detailedTeamStats,
+      reload,
+      'v1',
+      ['teams/stats'],
+      season,
+    );
+    if (season) {
+      this.#detailedTeamStats.set(season, result);
+    }
+    return result;
+  }
+
+  async getPlayerStats(
+    seasonType: SeasonType,
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<PlayerStats>> {
+    if (!this.#playerStats.has(seasonType)) {
+      this.#playerStats.set(seasonType, new Map());
+    }
+    const teamsByAbbr = (await this.getTeamInfo(season, reload)).reduce(
+      (acc, team) => {
+        acc[team.abbreviation] = team;
+        return acc;
+      },
+      {} as Record<string, TeamInfo>,
+    );
+
+    const result = (
+      await this.#getData(
+        this.#playerStats.get(seasonType)!,
+        reload,
+        'v1',
+        ['players/stats'],
+        season,
+        { type: seasonTypeToApiName(seasonType) },
+      )
+    ).map((player) => ({
+      ...player,
+      seasonType,
+      teamId: teamsByAbbr[player.team].id,
+    }));
+
+    if (season) {
+      this.#playerStats.get(seasonType)!.set(season, result);
+    }
+    return result;
+  }
+
+  async getGoalieStats(
+    seasonType: SeasonType,
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<GoalieStats>> {
+    if (!this.#goalieStats.has(seasonType)) {
+      this.#goalieStats.set(seasonType, new Map());
+    }
+    const teamsByAbbr = (await this.getTeamInfo(season, reload)).reduce(
+      (acc, team) => {
+        acc[team.abbreviation] = team;
+        return acc;
+      },
+      {} as Record<string, TeamInfo>,
+    );
+
+    const result = (
+      await this.#getData(
+        this.#goalieStats.get(seasonType)!,
+        reload,
+        'v1',
+        ['goalies/stats'],
+        season,
+        { type: seasonTypeToApiName(seasonType) },
+      )
+    ).map((player) => ({
+      ...player,
+      seasonType,
+      teamId: teamsByAbbr[player.team].id,
+    }));
+
+    if (season) {
+      this.#goalieStats.get(seasonType)!.set(season, result);
+    }
+    return result;
+  }
+
   async #load(season: number) {
     await Promise.all([
       this.getConferences(season, true),
       this.getStandings(season, true),
       this.getDivisions(season, true),
       this.getTeamInfo(season, true),
+      this.getDetailedTeamStats(season, true),
+      this.getPlayerStats(SeasonType.REGULAR, season, true),
+      this.getPlayerStats(SeasonType.POST, season, true),
+      this.getGoalieStats(SeasonType.REGULAR, season, true),
+      this.getGoalieStats(SeasonType.POST, season, true),
     ]);
   }
 

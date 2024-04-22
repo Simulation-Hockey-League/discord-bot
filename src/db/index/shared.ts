@@ -5,6 +5,12 @@ export enum LeagueType {
   WJC = 3,
 }
 
+export enum SeasonType {
+  PRE = 'ps',
+  REGULAR = 'rs',
+  POST = 'po',
+}
+
 export const leagueStringToLeagueType = (
   league: string | null | undefined,
 ): LeagueType => {
@@ -19,5 +25,16 @@ export const leagueStringToLeagueType = (
       return LeagueType.WJC;
     default:
       return LeagueType.SHL;
+  }
+};
+
+export const seasonTypeToApiName = (seasonType: SeasonType): string => {
+  switch (seasonType) {
+    case SeasonType.PRE:
+      return 'preseason';
+    case SeasonType.REGULAR:
+      return 'regular';
+    case SeasonType.POST:
+      return 'playoffs';
   }
 };

@@ -1,5 +1,11 @@
 export type League = 'SHL' | 'SMJHL' | 'IIHF' | 'WJC';
 
+enum SeasonType {
+  PRE = 'ps',
+  REGULAR = 'rs',
+  POST = 'po',
+}
+
 export type AvailableSeason = {
   id: number;
   name: string;
@@ -63,4 +69,110 @@ export type TeamInfo = {
     secondary: string;
     text: string;
   };
+};
+
+export type DetailedTeamStats = {
+  id: number;
+  season: number;
+  league: number;
+  conference: number;
+  division: number;
+  name: string;
+  abbreviation: string;
+  gamesPlayed: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  shotsFor: number;
+  shotsAgainst: number;
+  faceoffPct: number;
+  shotsBlocked: number;
+  hits: number;
+  takeaways: number;
+  giveaways: number;
+  penaltyMinutesPerGame: number;
+  ppOpportunities: number;
+  ppGoalsFor: number;
+  ppGoalsAgainst: number;
+  shOpportunities: number;
+  shGoalsFor: number;
+  shGoalsAgainst: number;
+};
+
+export type PlayerStats = {
+  id: number;
+  sthsId?: number;
+  name: string;
+  position: string;
+  team: string;
+  teamId: number;
+  gamesPlayed: number;
+  league: number;
+  season: number;
+  timeOnIce: number;
+  goals: number;
+  assists: number;
+  points: number;
+  plusMinus: number;
+  pim: number;
+  ppGoals: number;
+  ppAssists: number;
+  ppPoints: number;
+  ppTimeOnIce: number;
+  shGoals: number;
+  shAssists: number;
+  shPoints: number;
+  shTimeOnIce: number;
+  fights: number;
+  fightWins: number;
+  fightLosses: number;
+  hits: number;
+  giveaways: number;
+  takeaways: number;
+  shotsOnGoal: number;
+  shotsBlocked: number;
+  gameRating: number;
+  offensiveGameRating: number;
+  defensiveGameRating: number;
+  faceoffs?: number;
+  faceoffWins?: number;
+  gwg: number;
+  advancedStats: {
+    PDO: number;
+    GF60: number;
+    GA60: number;
+    SF60: number;
+    SA60: number;
+    CF: number;
+    CA: number;
+    CFPct: number;
+    CFPctRel: number;
+    FF: number;
+    FA: number;
+    FFPct: number;
+    FFPctRel: number;
+  };
+  seasonType: SeasonType;
+};
+
+export type GoalieStats = {
+  id: number;
+  sthsId?: number;
+  name: string;
+  league: number;
+  season: number;
+  team: string;
+  teamId: number;
+  gamesPlayed: number;
+  minutes: number;
+  wins: number;
+  losses: number;
+  ot: number;
+  shotsAgainst: number;
+  saves: number;
+  goalsAgainst: number;
+  gaa: number;
+  shutouts: number;
+  savePct: number;
+  gameRating: number;
+  seasonType: SeasonType;
 };
