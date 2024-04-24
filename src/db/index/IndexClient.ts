@@ -22,6 +22,7 @@ import {
   SeasonType,
   seasonTypeToApiName,
   seasonTypeToLongName,
+  toLeagueType,
 } from './shared';
 
 export class IndexApiClient {
@@ -450,7 +451,10 @@ export class IndexApiClient {
     }
   }
 
-  static get(league: LeagueType) {
+  static get(league: LeagueType | string | null | undefined) {
+    if (typeof league === 'string' || league === null || league === undefined) {
+      league = toLeagueType(league);
+    }
     switch (league) {
       case LeagueType.SHL:
         return ShlIndexApiClient;

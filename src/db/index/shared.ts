@@ -11,9 +11,7 @@ export enum SeasonType {
   POST = 'po',
 }
 
-export const leagueStringToLeagueType = (
-  league: string | null | undefined,
-): LeagueType => {
+export const toLeagueType = (league: string | null | undefined): LeagueType => {
   switch (league?.toUpperCase()) {
     case 'SHL':
       return LeagueType.SHL;

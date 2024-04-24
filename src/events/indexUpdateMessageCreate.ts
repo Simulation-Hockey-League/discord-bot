@@ -4,7 +4,6 @@ import {
   ShlIndexApiClient,
   SmjhlIndexApiClient,
 } from 'src/db/index/IndexClient';
-import { leagueStringToLeagueType } from 'src/db/index/shared';
 
 import { Config } from 'src/lib/config/config';
 import { logger } from 'src/lib/logger';
@@ -33,9 +32,7 @@ export default {
 
     if (league !== null) {
       logger.info(`Reloading ${league} index for season ${season}`);
-      IndexApiClient.get(leagueStringToLeagueType(league)).reload(
-        season ?? undefined,
-      );
+      IndexApiClient.get(league).reload(season ?? undefined);
     } else {
       ShlIndexApiClient.reload(season ?? undefined);
       SmjhlIndexApiClient.reload(season ?? undefined);

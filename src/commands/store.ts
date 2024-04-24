@@ -1,6 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/IndexClient';
-import { leagueStringToLeagueType } from 'src/db/index/shared';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { UserInfo, users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
@@ -36,9 +35,7 @@ export default {
     const players = await PortalClient.getActivePlayers();
     const player = players.find((p) => p.uid === user.userID);
 
-    const teams = await IndexApiClient.get(
-      leagueStringToLeagueType(player?.currentLeague),
-    ).getTeamInfo();
+    const teams = await IndexApiClient.get(player?.currentLeague).getTeamInfo();
     const team = teams.find((team) => team.id === player?.currentTeamID);
 
     const userInfo: UserInfo = {
