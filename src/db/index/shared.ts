@@ -38,3 +38,14 @@ export const seasonTypeToApiName = (seasonType: SeasonType): string => {
       return 'playoffs';
   }
 };
+
+export const seasonTypeToLongName = (seasonType: SeasonType): string => {
+  switch (seasonType) {
+    case SeasonType.PRE:
+      return 'Pre-Season';
+    case SeasonType.REGULAR:
+      return 'Regular Season';
+    case SeasonType.POST:
+      return 'Playoffs';
+  }
+};

@@ -7,17 +7,24 @@ import { logger } from 'src/lib/logger';
 import {
   AvailableSeason,
   DetailedTeamStats,
+  GameInfo,
   GoalieStats,
   LeagueConference,
   LeagueDivision,
   PlayerStats,
+  PlayoffSeries,
   TeamInfo,
   TeamStats,
 } from 'typings/statsindex';
 
-import { LeagueType, SeasonType, seasonTypeToApiName } from './shared';
+import {
+  LeagueType,
+  SeasonType,
+  seasonTypeToApiName,
+  seasonTypeToLongName,
+} from './shared';
 
-class IndexApiClient {
+export class IndexApiClient {
   #leagueId: LeagueType;
 
   #availableSeasons: Array<AvailableSeason> = [];
@@ -28,8 +35,8 @@ class IndexApiClient {
   #detailedTeamStats: Map<number, Array<DetailedTeamStats>> = new Map();
   #playerStats: Map<SeasonType, Map<number, Array<PlayerStats>>> = new Map();
   #goalieStats: Map<SeasonType, Map<number, Array<GoalieStats>>> = new Map();
-  // schedule
-  // playoffs
+  #schedule: Map<SeasonType, Map<number, Array<GameInfo>>> = new Map();
+  #playoffs: Map<number, Array<Array<PlayoffSeries>>> = new Map();
 
   #loaded: boolean = false;
   #lastLoadTimestamp = 0;
@@ -297,6 +304,113 @@ class IndexApiClient {
     return result;
   }
 
+  async getStats<T extends boolean>(
+    seasonType: SeasonType,
+    season?: number,
+    isGoalie: T = false as T,
+  ): Promise<T extends true ? Array<GoalieStats> : Array<PlayerStats>> {
+    return isGoalie
+      ? (this.getGoalieStats(seasonType, season) as any)
+      : (this.getPlayerStats(seasonType, season) as any);
+  }
+
+  async #getSchedule(
+    seasonType: SeasonType,
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<GameInfo>> {
+    if (!this.#schedule.has(seasonType)) {
+      this.#schedule.set(seasonType, new Map());
+    }
+    const teamInfoById = (await this.getTeamInfo(season, reload)).reduce(
+      (acc, team) => {
+        acc[team.id] = team;
+        return acc;
+      },
+      {} as Record<number, TeamInfo>,
+    );
+
+    const result = (
+      await this.#getData(
+        this.#schedule.get(seasonType)!,
+        reload,
+        'v1',
+        ['schedule'],
+        season,
+        { type: seasonTypeToLongName(seasonType) },
+      )
+    )
+      .map((game) => ({
+        ...game,
+        seasonType,
+        homeTeamInfo: teamInfoById[game.homeTeam],
+        awayTeamInfo: teamInfoById[game.awayTeam],
+      }))
+      .filter((game) => game.type !== 'Pre-Season');
+    if (season) {
+      this.#schedule.get(seasonType)!.set(season, result);
+    }
+    return result;
+  }
+
+  async getSchedule(
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<GameInfo>> {
+    const regularGames = await this.#getSchedule(
+      SeasonType.REGULAR,
+      season,
+      reload,
+    );
+    const postseasonGames = await this.#getSchedule(
+      SeasonType.POST,
+      season,
+      reload,
+    );
+    return [...regularGames, ...postseasonGames].sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+  }
+
+  async getPlayoffs(
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<Array<PlayoffSeries>>> {
+    const teamInfoById = (await this.getTeamInfo(season, reload)).reduce(
+      (acc, team) => {
+        acc[team.id] = team;
+        return acc;
+      },
+      {} as Record<number, TeamInfo>,
+    );
+
+    const result = (
+      await this.#getData(
+        this.#playoffs,
+        reload,
+        'v1',
+        ['standings/playoffs'],
+        season,
+      )
+    ).map((round) =>
+      round.map((series) => ({
+        ...series,
+        team1: {
+          ...series.team1,
+          teamInfo: teamInfoById[series.team1.id],
+        },
+        team2: {
+          ...series.team2,
+          teamInfo: teamInfoById[series.team2.id],
+        },
+      })),
+    );
+    if (season) {
+      this.#playoffs.set(season, result);
+    }
+    return result;
+  }
+
   async #load(season: number) {
     await Promise.all([
       this.getConferences(season, true),
@@ -308,6 +422,8 @@ class IndexApiClient {
       this.getPlayerStats(SeasonType.POST, season, true),
       this.getGoalieStats(SeasonType.REGULAR, season, true),
       this.getGoalieStats(SeasonType.POST, season, true),
+      this.getSchedule(season, true),
+      this.getPlayoffs(season, true),
     ]);
   }
 
@@ -333,24 +449,28 @@ class IndexApiClient {
       this.reload();
     }
   }
+
+  static get(league: LeagueType) {
+    switch (league) {
+      case LeagueType.SHL:
+        return ShlIndexApiClient;
+      case LeagueType.SMJHL:
+        return SmjhlIndexApiClient;
+      case LeagueType.IIHF:
+        return IihfIndexApiClient;
+      case LeagueType.WJC:
+        return WjcIndexApiClient;
+      default:
+        return assertUnreachable(league);
+    }
+  }
+
+  static getByTeam(teamInfo: TeamInfo) {
+    return IndexApiClient.get(teamInfo.league);
+  }
 }
 
 export const ShlIndexApiClient = new IndexApiClient(LeagueType.SHL);
 export const SmjhlIndexApiClient = new IndexApiClient(LeagueType.SMJHL);
 export const IihfIndexApiClient = new IndexApiClient(LeagueType.IIHF);
 export const WjcIndexApiClient = new IndexApiClient(LeagueType.WJC);
-
-export const IndexClient = (league: LeagueType) => {
-  switch (league) {
-    case LeagueType.SHL:
-      return ShlIndexApiClient;
-    case LeagueType.SMJHL:
-      return SmjhlIndexApiClient;
-    case LeagueType.IIHF:
-      return IihfIndexApiClient;
-    case LeagueType.WJC:
-      return WjcIndexApiClient;
-    default:
-      return assertUnreachable(league);
-  }
-};

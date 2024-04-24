@@ -1,6 +1,6 @@
 import { Events, Message } from 'discord.js';
 import {
-  IndexClient,
+  IndexApiClient,
   ShlIndexApiClient,
   SmjhlIndexApiClient,
 } from 'src/db/index/IndexClient';
@@ -33,7 +33,9 @@ export default {
 
     if (league !== null) {
       logger.info(`Reloading ${league} index for season ${season}`);
-      IndexClient(leagueStringToLeagueType(league)).reload(season ?? undefined);
+      IndexApiClient.get(leagueStringToLeagueType(league)).reload(
+        season ?? undefined,
+      );
     } else {
       ShlIndexApiClient.reload(season ?? undefined);
       SmjhlIndexApiClient.reload(season ?? undefined);

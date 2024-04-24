@@ -176,3 +176,38 @@ export type GoalieStats = {
   gameRating: number;
   seasonType: SeasonType;
 };
+
+export type GameInfo = {
+  season: number;
+  league: number;
+  date: string;
+  homeTeam: number;
+  homeScore: number;
+  awayTeam: number;
+  awayScore: number;
+  type: 'Pre-Season' | 'Regular Season' | 'Playoffs';
+  played: number;
+  overtime: number;
+  shootout: number;
+  slug: string;
+  gameid: number | null;
+  seasonType: SeasonType;
+  awayTeamInfo: TeamInfo;
+  homeTeamInfo: TeamInfo;
+};
+
+type PlayoffSeriesTeam = {
+  id: number;
+  wins: number;
+  name: string;
+  nickname: string;
+  abbr: string;
+  teamInfo: TeamInfo;
+};
+
+export type PlayoffSeries = {
+  league: number;
+  season: number;
+  team1: PlayoffSeriesTeam;
+  team2: PlayoffSeriesTeam;
+};
