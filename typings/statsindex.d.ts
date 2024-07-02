@@ -35,7 +35,7 @@ type Record = {
   OTL: number;
 };
 
-export type TeamStats = {
+export interface TeamStats {
   id: number;
   name: string;
   gp: number;
@@ -49,9 +49,32 @@ export type TeamStats = {
   home: Record;
   away: Record;
   shootout: Record;
+}
+
+export type HydratedTeamStats = TeamStats & {
+  teamInfo: IndexTeamInfo;
+  detailedStats: DetailedTeamStats;
+  regularSeasonPlayerStats: PlayerStats[];
+  leaguePosition: number;
+  conferencePosition: number;
+  divisionPosition: number;
+  goalsForRank: number;
+  goalsAgainstRank: number;
+  pdoRank: number;
+  corsiRank: number;
+  shotsForRank: number;
+  shotsAgainstRank: number;
+  shotDiffRank: number;
+  pimsRank: number;
+  ppRank: number;
+  pkRank: number;
+  goalsPerGame: number;
+  goalsAgainstPerGame: number;
+  pdo: number;
+  corsi: number;
 };
 
-export type TeamInfo = {
+export type IndexTeamInfo = {
   id: number;
   season: number;
   league: number;
@@ -157,6 +180,7 @@ export type PlayerStats = {
 export type GoalieStats = {
   id: number;
   sthsId?: number;
+  position: 'G';
   name: string;
   league: number;
   season: number;
@@ -170,9 +194,9 @@ export type GoalieStats = {
   shotsAgainst: number;
   saves: number;
   goalsAgainst: number;
-  gaa: number;
+  gaa: string;
   shutouts: number;
-  savePct: number;
+  savePct: string;
   gameRating: number;
   seasonType: SeasonType;
 };
@@ -192,8 +216,8 @@ export type GameInfo = {
   slug: string;
   gameid: number | null;
   seasonType: SeasonType;
-  awayTeamInfo: TeamInfo;
-  homeTeamInfo: TeamInfo;
+  awayTeamInfo: IndexTeamInfo;
+  homeTeamInfo: IndexTeamInfo;
 };
 
 type PlayoffSeriesTeam = {
@@ -202,7 +226,7 @@ type PlayoffSeriesTeam = {
   name: string;
   nickname: string;
   abbr: string;
-  teamInfo: TeamInfo;
+  IndexTeamInfo: IndexTeamInfo;
 };
 
 export type PlayoffSeries = {

@@ -4,16 +4,17 @@ import { Config } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { logger } from 'src/lib/logger';
 
+import { TeamInfo } from 'src/lib/teams';
 import {
   AvailableSeason,
   DetailedTeamStats,
   GameInfo,
   GoalieStats,
+  IndexTeamInfo,
   LeagueConference,
   LeagueDivision,
   PlayerStats,
   PlayoffSeries,
-  TeamInfo,
   TeamStats,
 } from 'typings/statsindex';
 
@@ -23,7 +24,7 @@ import {
   seasonTypeToApiName,
   seasonTypeToLongName,
   toLeagueType,
-} from './shared';
+} from '../shared';
 
 export class IndexApiClient {
   #leagueId: LeagueType;
@@ -32,7 +33,7 @@ export class IndexApiClient {
   #conferences: Map<number, Array<LeagueConference>> = new Map();
   #divisions: Map<number, Array<LeagueDivision>> = new Map();
   #standings: Map<number, Array<TeamStats>> = new Map();
-  #teamInfo: Map<number, Array<TeamInfo>> = new Map();
+  #teamInfo: Map<number, Array<IndexTeamInfo>> = new Map();
   #detailedTeamStats: Map<number, Array<DetailedTeamStats>> = new Map();
   #playerStats: Map<SeasonType, Map<number, Array<PlayerStats>>> = new Map();
   #goalieStats: Map<SeasonType, Map<number, Array<GoalieStats>>> = new Map();
@@ -200,7 +201,7 @@ export class IndexApiClient {
   async getTeamInfo(
     season?: number,
     reload: boolean = false,
-  ): Promise<Array<TeamInfo>> {
+  ): Promise<Array<IndexTeamInfo>> {
     const result = await this.#getData(
       this.#teamInfo,
       reload,
@@ -244,7 +245,7 @@ export class IndexApiClient {
         acc[team.abbreviation] = team;
         return acc;
       },
-      {} as Record<string, TeamInfo>,
+      {} as Record<string, IndexTeamInfo>,
     );
 
     const result = (
@@ -281,7 +282,7 @@ export class IndexApiClient {
         acc[team.abbreviation] = team;
         return acc;
       },
-      {} as Record<string, TeamInfo>,
+      {} as Record<string, IndexTeamInfo>,
     );
 
     const result = (
@@ -328,7 +329,7 @@ export class IndexApiClient {
         acc[team.id] = team;
         return acc;
       },
-      {} as Record<number, TeamInfo>,
+      {} as Record<number, IndexTeamInfo>,
     );
 
     const result = (
@@ -382,7 +383,7 @@ export class IndexApiClient {
         acc[team.id] = team;
         return acc;
       },
-      {} as Record<number, TeamInfo>,
+      {} as Record<number, IndexTeamInfo>,
     );
 
     const result = (
@@ -470,7 +471,7 @@ export class IndexApiClient {
   }
 
   static getByTeam(teamInfo: TeamInfo) {
-    return IndexApiClient.get(teamInfo.league);
+    return IndexApiClient.get(teamInfo.leagueType);
   }
 }
 

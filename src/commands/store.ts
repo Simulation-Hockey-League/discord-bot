@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { IndexApiClient } from 'src/db/index/IndexClient';
+import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { UserInfo, users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
@@ -50,7 +50,7 @@ export default {
 
     await interaction.reply({
       embeds: [
-        BaseEmbed(interaction, team?.colors.primary)
+        BaseEmbed(interaction, { teamColor: team?.colors.primary })
           .setDescription(
             isOverwritingStoredInfo
               ? `Updated user info for ${interaction.user.toString()}.`

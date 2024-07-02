@@ -3,7 +3,7 @@ import {
   IndexApiClient,
   ShlIndexApiClient,
   SmjhlIndexApiClient,
-} from 'src/db/index/IndexClient';
+} from 'src/db/index/api/IndexApiClient';
 
 import { Config } from 'src/lib/config/config';
 import { logger } from 'src/lib/logger';

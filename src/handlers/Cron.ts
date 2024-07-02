@@ -2,7 +2,7 @@ import { CronJob } from 'cron';
 import {
   ShlIndexApiClient,
   SmjhlIndexApiClient,
-} from 'src/db/index/IndexClient';
+} from 'src/db/index/api/IndexApiClient';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { logger } from 'src/lib/logger';
 

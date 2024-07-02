@@ -11,6 +11,12 @@ export enum SeasonType {
   POST = 'po',
 }
 
+export enum PositionFilter {
+  F = 'F',
+  D = 'D',
+  G = 'G',
+}
+
 export const toLeagueType = (league: string | null | undefined): LeagueType => {
   switch (league?.toUpperCase()) {
     case 'SHL':

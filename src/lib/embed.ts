@@ -9,13 +9,29 @@ import { hexColorToInt } from './format';
 
 export const BaseEmbed = (
   interaction: ChatInputCommandInteraction<CacheType>,
-  teamColor?: string,
-  forceColor?: string,
+  {
+    logoUrl,
+    teamColor,
+    forceColor,
+  }: {
+    logoUrl?: string;
+    teamColor?: string;
+    forceColor?: string;
+  },
 ) => {
   const color =
     forceColor ||
     teamColor || // users.get(interaction.user.id)?.teamName ||
     '#7289da';
 
-  return new EmbedBuilder().setColor(hexColorToInt(color));
+  const embed = new EmbedBuilder()
+    .setColor(hexColorToInt(color))
+    .setTimestamp()
+    .setFooter({
+      text: 'Built with ❤️ by the SHL Developer Team',
+    });
+  if (logoUrl) {
+    embed.setThumbnail(logoUrl);
+  }
+  return embed;
 };

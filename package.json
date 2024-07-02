@@ -15,10 +15,13 @@
     "cron": "^3.1.7",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
+    "fuzzysort": "^3.0.2",
     "keyv": "^4.5.4",
-    "keyv-file": "^0.3.1"
+    "keyv-file": "^0.3.1",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.0",
     "@types/node": "^20.10.2",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
