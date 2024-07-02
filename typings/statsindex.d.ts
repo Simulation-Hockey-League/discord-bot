@@ -158,7 +158,7 @@ export type PlayerStats = {
   defensiveGameRating: number;
   faceoffs?: number;
   faceoffWins?: number;
-  gwg: number;
+  gwg: number | undefined;
   advancedStats: {
     PDO: number;
     GF60: number;

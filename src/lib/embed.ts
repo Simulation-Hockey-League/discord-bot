@@ -28,7 +28,7 @@ export const BaseEmbed = (
     .setColor(hexColorToInt(color))
     .setTimestamp()
     .setFooter({
-      text: 'Built with ❤️ by the SHL Developer Team',
+      text: 'Made with ❤️ by the SHL Developer Team',
     });
   if (logoUrl) {
     embed.setThumbnail(logoUrl);

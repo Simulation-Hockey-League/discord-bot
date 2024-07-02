@@ -34,13 +34,17 @@ export const withPlayerStats = (
             `Goals: ${playerStats.goals}`,
             `Assists: ${playerStats.assists}`,
             `Points: ${playerStats.points}`,
-            `Plus/Minus: ${playerStats.plusMinus}`,
+            `Plus/Minus: ${playerStats.plusMinus > 0 ? '+' : ''}${
+              playerStats.plusMinus
+            }`,
             `Shots: ${playerStats.shotsOnGoal}`,
             `Shooting %: ${(
               (100 * playerStats.goals) /
               (playerStats.shotsOnGoal || 1)
             ).toFixed(2)}`,
-            `GWG: ${playerStats.gwg ?? '-'}`,
+            `GWG: ${
+              typeof playerStats.gwg === 'number' ? playerStats.gwg : '-'
+            }`,
           ].join('\n'),
           inline: true,
         },
