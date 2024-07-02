@@ -30,7 +30,7 @@ export default {
     )
     .addStringOption((option) =>
       option
-        .setName('season_type')
+        .setName('type')
         .setDescription('The season type (i.e. regular, playoffs, etc.)')
         .setChoices(
           { name: 'Regular', value: SeasonType.REGULAR },
@@ -42,7 +42,7 @@ export default {
   execute: async (interaction) => {
     const season = interaction.options.getNumber('season') ?? undefined;
     const targetName = interaction.options.getString('name');
-    const seasonType = interaction.options.getString('season type') as
+    const seasonType = interaction.options.getString('type') as
       | SeasonType
       | undefined;
     const currentUserInfo = await users.get(interaction.user.id);
@@ -57,12 +57,12 @@ export default {
       return;
     }
 
+    await interaction.deferReply();
     const playerStats = await getPlayerStats(name, seasonType, season);
 
     if (!playerStats) {
-      await interaction.reply({
+      await interaction.editReply({
         content: 'Could not find player with that name.',
-        ephemeral: true,
       });
       return;
     }
@@ -71,7 +71,7 @@ export default {
     const teams = await IndexApiClient.get(playerStats.league).getTeamInfo();
     const team = teams.find((team) => team.id === playerStats?.teamId);
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [
         withPlayerStats(
           BaseEmbed(interaction, {

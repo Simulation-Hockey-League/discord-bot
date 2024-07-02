@@ -1,5 +1,8 @@
 import { EmbedBuilder } from 'discord.js';
+import { SeasonType } from 'src/db/index/shared';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
+
+import { DynamicConfig } from './config/dynamicConfig';
 
 export const toToi = (minutes: number, games: number): string => {
   const avg = minutes / (games || 0) / 60;
@@ -8,13 +11,22 @@ export const toToi = (minutes: number, games: number): string => {
   return `${avgMinutes}:${avgSeconds.toString().padStart(2, '0')}`;
 };
 
+// Populate the embed with player stats fields based on the playerStats response
 export const withPlayerStats = (
   embed: EmbedBuilder,
   playerStats: PlayerStats | GoalieStats,
 ): EmbedBuilder => {
+  const currentSeason = DynamicConfig.get('currentSeason');
+  const seasonInfo = `Season: ${playerStats.season}${
+    playerStats.seasonType === SeasonType.POST ? ' | Playoffs' : ''
+  }`;
   if ('advancedStats' in playerStats) {
     return embed
-      .setDescription(`Games played: ${playerStats.gamesPlayed}`)
+      .setDescription(
+        `Games played: ${playerStats.gamesPlayed}${
+          playerStats.season !== currentSeason ? `\n${seasonInfo}` : ''
+        }`,
+      )
       .addFields(
         {
           name: 'Stats',
@@ -97,6 +109,9 @@ export const withPlayerStats = (
         },
       );
   } else {
+    if (playerStats.season !== currentSeason) {
+      embed.setDescription(seasonInfo);
+    }
     return embed.addFields({
       name: 'Stats',
       value: [
