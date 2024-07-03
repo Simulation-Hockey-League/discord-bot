@@ -203,7 +203,7 @@ export const getPlayerStatsByFuzzyName = async (
   const playoffs = await getSthsOrFhmSkaterStats(
     leagueType,
     SeasonType.POST,
-    regular[0].season,
+    regular?.[0]?.season,
   );
 
   const playoffMatch = fuzzysort.go(name, playoffs, {
@@ -251,7 +251,7 @@ export const getGoalieStatsByFuzzyName = async (
   const playoffs = await getSthsOrFhmGoalieStats(
     leagueType,
     SeasonType.POST,
-    regular[0].season,
+    regular?.[0]?.season,
   );
 
   const playoffMatch = fuzzysort.go(name, playoffs, {

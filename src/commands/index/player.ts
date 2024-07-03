@@ -62,7 +62,9 @@ export default {
 
     if (!playerStats) {
       await interaction.editReply({
-        content: `Could not find player with the name ${name}.`,
+        content: `Could not find ${name}${
+          season ? ` in season ${season}` : ''
+        }.`,
       });
       return;
     }

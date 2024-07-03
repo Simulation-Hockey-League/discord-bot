@@ -79,7 +79,7 @@ export const withPlayerStats = (
                 ? `(${(
                     (100 * playerStats.faceoffWins) /
                     playerStats.faceoffs
-                  ).toFixed(0)})`
+                  ).toFixed(0)}%)`
                 : ''
             }`,
           ].join('\n'),

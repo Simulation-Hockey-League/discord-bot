@@ -1,4 +1,6 @@
 import { Events, Interaction } from 'discord.js';
+import { Config } from 'src/lib/config/config';
+import { ErrorEmbed } from 'src/lib/embed';
 
 import { pluralize } from 'src/lib/format';
 import { logger } from 'src/lib/logger';
@@ -10,7 +12,7 @@ import { BotEvent } from 'typings/event';
  */
 export default {
   name: Events.InteractionCreate,
-  execute: (interaction: Interaction) => {
+  execute: async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);
       const cooldown = interaction.client.cooldowns.get(
@@ -47,7 +49,34 @@ export default {
           Date.now() + command.cooldown * 1000,
         );
       }
-      command.execute(interaction);
+      try {
+        await command.execute(interaction);
+      } catch (e) {
+        if (!interaction.replied && !interaction.deferred) {
+          interaction.reply({
+            content:
+              'There was an internal error while executing this command. If you see this message let a developer know.',
+            ephemeral: true,
+          });
+        } else {
+          interaction.followUp({
+            content:
+              'There was an internal error while executing this command. If you see this message let a developer know.',
+          });
+        }
+        const channel = interaction.client.channels.cache.get(
+          Config.botErrorChannelId,
+        );
+
+        if (channel?.isTextBased() && e instanceof Error) {
+          channel.send({
+            embeds: [ErrorEmbed(interaction, e)],
+          });
+        }
+        logger.error(
+          'An Unhandled Error occured, check the Developer Discord for more information',
+        );
+      }
     } else if (interaction.isAutocomplete()) {
       const command = interaction.client.commands.get(interaction.commandName);
 

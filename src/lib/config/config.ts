@@ -19,6 +19,7 @@ export const Config = {
   indexUpdateChannelId: isDevelopment
     ? process.env.TEST_CHANNEL_ID
     : '816772168045953084',
+  botErrorChannelId: '1257895502234783905',
   fantasy: {
     noSwapName: 'None',
     ranges: {
