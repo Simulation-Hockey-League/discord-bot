@@ -64,11 +64,11 @@ export default {
               'There was an internal error while executing this command. If you see this message let a developer know.',
           });
         }
+
         const channel = interaction.client.channels.cache.get(
           Config.botErrorChannelId,
         );
-
-        if (channel?.isTextBased() && e instanceof Error) {
+        if (channel?.isTextBased()) {
           channel.send({
             embeds: [ErrorEmbed(interaction, e)],
           });

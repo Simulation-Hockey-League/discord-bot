@@ -40,12 +40,14 @@ export const BaseEmbed = (
 
 export const ErrorEmbed = (
   interaction: ChatInputCommandInteraction<CacheType>,
-  error: Error,
+  error: unknown,
 ) => {
   return new EmbedBuilder()
     .setColor(0xff0000)
     .setTimestamp()
-    .setTitle(`Unhandled ${error.name} Occurred`)
+    .setTitle(
+      `Unhandled ${error instanceof Error ? error?.name : 'Error'} Occurred`,
+    )
     .setDescription(
       `Error occured while executing command \`/${interaction.commandName}\`.`,
     )
@@ -77,7 +79,9 @@ export const ErrorEmbed = (
       },
       {
         name: 'Raw Error',
-        value: `\`\`\`js\n${error.stack}\`\`\``,
+        value: `\`\`\`js\n${
+          error instanceof Error ? error.stack : error
+        }\`\`\``,
       },
     );
 };
