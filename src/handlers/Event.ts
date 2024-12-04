@@ -2,6 +2,7 @@ import { readdirSync } from 'fs';
 import { join } from 'path';
 
 import { Client } from 'discord.js';
+import { logger } from 'src/lib/logger';
 import { BotEvent } from 'typings/event';
 
 module.exports = (client: Client) => {
@@ -14,6 +15,6 @@ module.exports = (client: Client) => {
     event.once
       ? client.once(event.name, event.execute)
       : client.on(event.name, event.execute);
-    console.log(`✔ Successfully loaded event ${event.name}`);
+    logger.info(`✔ Successfully loaded event ${event.name}`);
   });
 };

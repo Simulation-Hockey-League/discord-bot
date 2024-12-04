@@ -1,10 +1,12 @@
-import { Client } from 'discord.js';
+import { Client, Events } from 'discord.js';
+
+import { logger } from 'src/lib/logger';
 import { BotEvent } from 'typings/event';
 
 export default {
-  name: 'ready',
+  name: Events.ClientReady,
   once: true,
   execute: (client: Client) => {
-    console.log(`🚀 Ready! Logged in as ${client.user?.tag}`);
+    logger.info(`🚀 Ready! Logged in as ${client.user?.tag}`);
   },
 } satisfies BotEvent;

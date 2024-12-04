@@ -1,14 +1,18 @@
-import { Interaction } from 'discord.js';
-import { BotEvent } from 'typings/event';
+import { Events, Interaction } from 'discord.js';
+import { Config } from 'src/lib/config/config';
+import { ErrorEmbed } from 'src/lib/embed';
 
-import { pluralize } from '../util/format';
+import { pluralize } from 'src/lib/format';
+import { logger } from 'src/lib/logger';
+import { checkRole } from 'src/lib/role';
+import { BotEvent } from 'typings/event';
 
 /**
  * This file handles any incoming slash commands sent by users
  */
 export default {
-  name: 'interactionCreate',
-  execute: (interaction: Interaction) => {
+  name: Events.InteractionCreate,
+  execute: async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);
       const cooldown = interaction.client.cooldowns.get(
@@ -16,6 +20,14 @@ export default {
       );
 
       if (!command) return;
+
+      if (command.minRole && !checkRole(interaction.member, command.minRole)) {
+        interaction.reply({
+          content: 'You do not have permission to run this command.',
+          ephemeral: true,
+        });
+        return;
+      }
 
       if (command.cooldown && cooldown) {
         if (Date.now() < cooldown) {
@@ -37,12 +49,39 @@ export default {
           Date.now() + command.cooldown * 1000,
         );
       }
-      command.execute(interaction);
+      try {
+        await command.execute(interaction);
+      } catch (e) {
+        if (!interaction.replied && !interaction.deferred) {
+          interaction.reply({
+            content:
+              'There was an internal error while executing this command. If you see this message let a developer know.',
+            ephemeral: true,
+          });
+        } else {
+          interaction.followUp({
+            content:
+              'There was an internal error while executing this command. If you see this message let a developer know.',
+          });
+        }
+
+        const channel = interaction.client.channels.cache.get(
+          Config.botErrorChannelId,
+        );
+        if (channel?.isTextBased() && 'send' in channel) {
+          channel.send({
+            embeds: [ErrorEmbed(interaction, e)],
+          });
+        }
+        logger.error(
+          'An Unhandled Error occured, check the Developer Discord for more information',
+        );
+      }
     } else if (interaction.isAutocomplete()) {
       const command = interaction.client.commands.get(interaction.commandName);
 
       if (!command) {
-        console.error(
+        logger.error(
           `No command matching ${interaction.commandName} was found.`,
         );
         return;
@@ -51,20 +90,20 @@ export default {
       try {
         command.autocomplete?.(interaction);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
       }
     } else if (interaction.isModalSubmit()) {
       const command = interaction.client.commands.get(interaction.customId);
 
       if (!command) {
-        console.error(`No command matching ${interaction.customId} was found.`);
+        logger.error(`No command matching ${interaction.customId} was found.`);
         return;
       }
 
       try {
         command.modal?.(interaction);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
       }
     }
   },

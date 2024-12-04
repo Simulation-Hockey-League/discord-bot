@@ -1,14 +1,17 @@
 import { readdirSync } from 'fs';
 import { join } from 'path';
 
-// eslint-disable-next-line import/order
 import { Client, Collection, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
 
 import { SlashCommand } from 'typings/command';
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 client.commands = new Collection<string, SlashCommand>();
