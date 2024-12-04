@@ -12,6 +12,7 @@ export const Config = {
     '330186318921334784', // caltroit
     '102175890393288704', // luke
     '176202363089059840', // teddy
+    '225009798846873600', // lemonoppy
   ],
   indexUpdateServerId: isDevelopment
     ? process.env.TEST_SERVER_ID
