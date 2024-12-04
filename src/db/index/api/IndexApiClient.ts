@@ -83,7 +83,7 @@ export class IndexApiClient {
     additionalQueryParams?: Record<string, string>,
   ): Promise<T[]> {
     const season = _season ?? DynamicConfig.currentSeason.get();
-    if (season < 53) {
+    if (season < 1) {
       return [];
     }
     let result = data.get(season);

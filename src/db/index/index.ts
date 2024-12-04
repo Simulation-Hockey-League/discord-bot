@@ -145,10 +145,6 @@ const getSthsOrFhmSkaterStats = async (
   seasonType: SeasonType,
   season?: number,
 ) => {
-  if (!!season && season < 53) {
-    // TODO(STHS): Return sths data here
-    return [];
-  }
   return IndexApiClient.get(leagueType).getPlayerStats(seasonType, season);
 };
 
@@ -157,10 +153,6 @@ const getSthsOrFhmGoalieStats = async (
   seasonType: SeasonType,
   season?: number,
 ) => {
-  if (!!season && season < 53) {
-    // TODO(STHS): Return sths data here
-    return [];
-  }
   return IndexApiClient.get(leagueType).getGoalieStats(seasonType, season);
 };
 
