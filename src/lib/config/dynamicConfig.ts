@@ -11,8 +11,8 @@ class DynamicConfigKeyv extends KeyvFile {
     });
   }
 
-  currentSeason = makeField<number>(this, 'currentSeason', 0);
-  fantasySheetId = makeField<string>(
+  currentSeason = makeField<number, number>(this, 'currentSeason', 0);
+  fantasySheetId = makeField<string, string>(
     this,
     'fantasySheetId',
     '1CpuPOsETOHsasTAePIbREXbi0W_i1MeoPeQQC',

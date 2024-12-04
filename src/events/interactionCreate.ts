@@ -68,7 +68,7 @@ export default {
         const channel = interaction.client.channels.cache.get(
           Config.botErrorChannelId,
         );
-        if (channel?.isTextBased()) {
+        if (channel?.isTextBased() && 'send' in channel) {
           channel.send({
             embeds: [ErrorEmbed(interaction, e)],
           });
