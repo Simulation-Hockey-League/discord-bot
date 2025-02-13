@@ -177,7 +177,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/978053209199366194/Malamutes.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Malamutes:970738688332025886>',
   },
   ANCHORAGE: {
     fullName: 'Anchorage Armada',
@@ -185,7 +185,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786290342495256627/anc.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Armada:829958769135583242>',
   },
   CAROLINA: {
     fullName: 'Carolina Kraken',
@@ -193,7 +193,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280907833212928/car.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Kraken:956735648964948038>',
   },
   COLORADO: {
     fullName: 'Colorado Raptors',
@@ -201,7 +201,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/830573975423811614/col.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Raptors:829958769164812288>',
   },
   DETROIT: {
     fullName: 'Detroit Falcons',
@@ -209,7 +209,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280913746264094/det.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Falcons:829958086713802782>',
   },
   KELOWNA: {
     fullName: 'Kelowna Knights',
@@ -217,7 +217,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281054293590046/kel.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Knights:956728074605572135>',
   },
   MAINE: {
     fullName: 'Maine Timber',
@@ -225,7 +225,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281402844053574/met.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Timber:829958772084441098>',
   },
   NEVADA: {
     fullName: 'Nevada Battleborn',
@@ -233,7 +233,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/859176692013334548/nbb.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Battleborn:1223729005287440385>',
   },
   NEWFOUNDLAND: {
     fullName: 'Newfoundland Berserkers',
@@ -241,7 +241,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281425946017842/nl.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Berserkers:829958772104888320>',
   },
   QUEBEC: {
     fullName: 'Quebec City Citadelles',
@@ -249,7 +249,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281433132040202/qcc.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Citadelles:829958771606290513>',
   },
   ST_LOUIS: {
     fullName: 'St. Louis Scarecrows',
@@ -257,7 +257,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281370367688714/stl.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Scarecrows:956738082852462592>',
   },
   VANCOUVER: {
     fullName: 'Vancouver Whalers',
@@ -265,7 +265,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786290849302315008/van.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:whalers:1140696580580712478>',
   },
   REGINA: {
     fullName: 'Regina Elk',
@@ -273,7 +273,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/880182591020474408/reg.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Walleye:1268413459251597423>',
   },
   GREAT_FALLS: {
     fullName: 'Great Falls Grizzlies',
@@ -281,7 +281,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/880183060199534673/gfg.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Grizzlies:918196555155116034>',
   },
   SAN_DIEGO: {
     fullName: 'San Diego Tidal',
@@ -289,7 +289,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://media.discordapp.net/attachments/1219423597492310126/1222236845719425074/SanDiegoTidal_finished.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Tidal:1222247870611329065>',
   },
   OTTAWA: {
     fullName: 'Ottawa Highlanders',
@@ -297,7 +297,7 @@ export const Teams = Object.freeze({
     logoUrl:
       'https://media.discordapp.net/attachments/1152983677685469204/1219793270650048714/HighlandersMascotLogo.png',
     leagueType: LeagueType.SMJHL,
-		emoji: '<:Inferno:829949803299209226>',
+		emoji: '<:Highlanders:1219713166146277489>',
   },
 
   // OTHER
