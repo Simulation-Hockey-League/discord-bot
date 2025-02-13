@@ -1,9 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getPlayerStats, getStandings } from 'src/db/index';
-import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
-import { SeasonType, toLeagueType } from 'src/db/index/shared';
+import { getStandings } from 'src/db/index';
+import { LeagueType, toLeagueType } from 'src/db/index/shared';
+import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { BaseEmbed } from 'src/lib/embed';
-import { logger } from 'src/lib/logger';
 import { withStandingsStats } from 'src/lib/standings';
 
 import { SlashCommand } from 'typings/command';
@@ -37,16 +36,18 @@ export default {
 		)
     .setDescription('Get season rankings.'),
   execute: async (interaction) => {
-		const league = toLeagueType(interaction.options.getString('league'));
+		const league = toLeagueType(interaction.options.getString('league'))
 		const playoffs = interaction.options.getBoolean('playoffs') ?? false;
-		const season = interaction.options.getNumber('season') ?? undefined;
+
+		const currentSeason = DynamicConfig.get('currentSeason');
+		const season = interaction.options.getNumber('season') ?? currentSeason;
 
     await interaction.deferReply();
     const seasonStats = await getStandings(league, season);
 
-    if (!seasonStats) {
+    if (!seasonStats || seasonStats?.length <= 0) {
       await interaction.editReply({
-        content: `Could not find ${playoffs ? `playoff` : ''} standings for ${league}${
+        content: `Could not find${playoffs ? ` playoff` : ''} standings for ${LeagueType[league]}${
           season ? ` in season ${season}` : ''
         }.`,
       });
@@ -55,6 +56,11 @@ export default {
 
     await interaction.editReply({
       embeds: [
+				withStandingsStats(
+					BaseEmbed(interaction, {})
+						.setTitle(`Season ${season}${playoffs ? ` Playoff ` : ` Regular Season `}Standings`),
+					seasonStats,
+				)
       ],
     });
   },
