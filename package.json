@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start:dev": "NODE_ENV=development nodemon -r tsconfig-paths/register --files src/index.ts | pino-pretty -i pid,hostname - t 'yyyy-mm-dd HH:MM:ss'",
+    "start:dev": "NODE_ENV=development & nodemon -r tsconfig-paths/register --files src/index.ts | pino-pretty -i pid,hostname - t 'yyyy-mm-dd HH:MM:ss'",
     "start:prod": "ts-node -r tsconfig-paths/register --files src/index.ts",
     "patch-package": "patch-package",
     "postinstall": "patch-package"

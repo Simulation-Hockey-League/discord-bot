@@ -5,6 +5,7 @@ import { PortalPlayer } from 'typings/portal';
 class PortalApiClient {
   #userInfo: Array<{ userID: number; username: string }> = [];
   #activePlayers: Array<PortalPlayer> = [];
+  #getPlayer: Array<PortalPlayer> = [];
 
   #loaded = false;
   #lastLoadTimestamp = 0;
@@ -54,6 +55,16 @@ class PortalApiClient {
       { status: 'active' },
     );
     return this.#activePlayers;
+  }
+
+  async getPlayer(
+    portalID: string,
+    reload: boolean = false,
+  ): Promise<PortalPlayer | undefined> {
+    const players = await this.#getData(this.#getPlayer, reload, ['player'], {
+      pid: portalID,
+    });
+    return players[0];
   }
 
   async reload(): Promise<void> {

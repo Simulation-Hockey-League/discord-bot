@@ -44,6 +44,7 @@ export default {
       forumUserId: user.userID,
       playerName: player?.name,
       teamName: team?.name,
+      portalID: String(player?.pid),
     };
 
     users.set(interaction.user.id, userInfo);

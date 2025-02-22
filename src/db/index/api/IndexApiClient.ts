@@ -470,6 +470,97 @@ export class IndexApiClient {
     }
   }
 
+  async getPlayerCareerStats(
+    id: number,
+    league: LeagueType,
+    seasonType: SeasonType = SeasonType.REGULAR,
+    reload: boolean = false,
+  ): Promise<Array<PlayerStats>> {
+    const response = await this.#fetchIndexData('v1', [`players/stats/${id}`], {
+      type: seasonTypeToApiName(seasonType),
+      league: league.toString(),
+    });
+
+    if (!response.ok) {
+      logger.error(
+        `IndexClient: Failed to fetch player career stats: ${response.statusText} for player ID ${id}`,
+      );
+      return [];
+    }
+
+    const result: PlayerStats[] = await response.json();
+
+    const teamsByAbbr = (await this.getTeamInfo(undefined, reload)).reduce(
+      (acc, team) => {
+        acc[team.abbreviation] = team;
+        return acc;
+      },
+      {} as Record<string, IndexTeamInfo>,
+    );
+
+    return result.map((player) => ({
+      ...player,
+      seasonType,
+      teamId: teamsByAbbr[player.team]?.id ?? null, // Handle missing team IDs gracefully
+    }));
+  }
+
+  async getGoalieCareerStats(
+    id: number,
+    league: LeagueType,
+    seasonType: SeasonType = SeasonType.REGULAR,
+    reload: boolean = false,
+  ): Promise<Array<GoalieStats>> {
+    const response = await this.#fetchIndexData('v1', [`goalies/stats/${id}`], {
+      type: seasonTypeToApiName(seasonType),
+      league: league.toString(),
+    });
+
+    if (!response.ok) {
+      logger.error(
+        `IndexClient: Failed to fetch goalie career stats: ${response.statusText} for player ID ${id}`,
+      );
+      return [];
+    }
+
+    const result: GoalieStats[] = await response.json();
+
+    const teamsByAbbr = (await this.getTeamInfo(undefined, reload)).reduce(
+      (acc, team) => {
+        acc[team.abbreviation] = team;
+        return acc;
+      },
+      {} as Record<string, IndexTeamInfo>,
+    );
+
+    return result.map((goalie) => ({
+      ...goalie,
+      seasonType,
+      teamId: teamsByAbbr[goalie.team]?.id ?? null, // Handle missing team IDs gracefully
+    }));
+  }
+
+  async getCareerStats<T extends boolean>(
+    id: number,
+    seasonType: SeasonType = SeasonType.REGULAR,
+    isGoalie: T = false as T,
+    reload: boolean = false,
+  ): Promise<T extends true ? Array<GoalieStats> : Array<PlayerStats>> {
+    return isGoalie
+      ? (this.getGoalieCareerStats(
+          id,
+          this.#leagueId,
+          seasonType,
+          reload,
+        ) as any)
+      : (this.getPlayerCareerStats(
+          id,
+          this.#leagueId,
+          seasonType,
+          reload,
+        ) as any);
+  }
+
   static getByTeam(teamInfo: TeamInfo) {
     return IndexApiClient.get(teamInfo.leagueType);
   }

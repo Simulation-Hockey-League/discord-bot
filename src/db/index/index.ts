@@ -197,7 +197,6 @@ export const getPlayerStatsByFuzzyName = async (
     SeasonType.POST,
     regular?.[0]?.season,
   );
-
   const playoffMatch = fuzzysort.go(name, playoffs, {
     key: 'name',
     limit: 1,
@@ -245,7 +244,6 @@ export const getGoalieStatsByFuzzyName = async (
     SeasonType.POST,
     regular?.[0]?.season,
   );
-
   const playoffMatch = fuzzysort.go(name, playoffs, {
     key: 'name',
     limit: 1,
@@ -256,7 +254,6 @@ export const getGoalieStatsByFuzzyName = async (
     limit: 1,
     threshold: -10000,
   });
-
   switch (seasonType) {
     case SeasonType.REGULAR:
       return regularMatch[0];
@@ -281,13 +278,18 @@ export const getPlayerStats = async (
   name: string,
   seasonType?: SeasonType,
   season?: number,
+  league?: LeagueType,
 ) => {
-  const candidates = await Promise.all([
-    getPlayerStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
-    getPlayerStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
-    getGoalieStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
-    getGoalieStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
-  ]);
-
+  const candidates = league
+    ? await Promise.all([
+        getPlayerStatsByFuzzyName(league, name, season, seasonType),
+        getGoalieStatsByFuzzyName(league, name, season, seasonType),
+      ])
+    : await Promise.all([
+        getPlayerStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
+        getPlayerStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
+        getGoalieStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
+        getGoalieStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
+      ]);
   return _.maxBy(candidates, (candidate) => candidate?.score ?? -1)?.obj;
 };
