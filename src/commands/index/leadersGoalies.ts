@@ -7,35 +7,26 @@ import {
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
-import { withLeaderStats } from 'src/lib/leadersSkaters';
+import { withLeaderStats } from 'src/lib/leadersGoalies';
 
 import { SlashCommand } from 'typings/command';
 
 export default {
   command: new SlashCommandBuilder()
-    .setName('leaders-skaters')
+    .setName('leaders-goalies')
     .addStringOption((option) =>
       option
         .setName('category')
         .setDescription('The leader in a set position')
         .setChoices(
-          { name: 'goals', value: 'goals' },
-          { name: 'assists', value: 'assists' },
-          { name: 'points', value: 'points' },
-          { name: 'plusMinus', value: 'plusMinus' },
-          { name: 'pim', value: 'pim' },
-          { name: 'shotsOnGoal', value: 'shotsOnGoal' },
-          { name: 'gwg', value: 'gwg' },
-          { name: 'faceoffs', value: 'faceoffs' },
-          { name: 'faceoffWins', value: 'faceoffWins' },
-          { name: 'giveaways', value: 'giveaways' },
-          { name: 'takeaways', value: 'takeaways' },
-          { name: 'shotsBlocked', value: 'shotsBlocked' },
-          { name: 'hits', value: 'hits' },
-          { name: 'shotsOnGoal', value: 'shotsOnGoal' },
-          { name: 'fights', value: 'fights' },
-          { name: 'fightWins', value: 'fightWins' },
-          { name: 'fightLosses', value: 'fightLosses' },
+          { name: 'gamesPlayed', value: 'gamesPlayed' },
+          { name: 'wins', value: 'wins' },
+          { name: 'losses', value: 'losses' },
+          { name: 'ot', value: 'ot' },
+          { name: 'shotsAgainst', value: 'shotsAgainst' },
+          { name: 'saves', value: 'saves' },
+          { name: 'goalsAgainst', value: 'goalsAgainst' },
+          { name: 'shutouts', value: 'shutouts' },
         )
         .setRequired(true),
     )
@@ -44,18 +35,6 @@ export default {
         .setName('season')
         .setDescription(
           'The season to get stats for. If not provided, will get current season.',
-        )
-        .setRequired(false),
-    )
-    .addStringOption((option) =>
-      option
-        .setName('position')
-        .setDescription(
-          'The position of the leaders. If not provided, will use all players',
-        )
-        .setChoices(
-          { name: 'Forward', value: 'F' },
-          { name: 'Defenseman', value: 'D' },
         )
         .setRequired(false),
     )
@@ -95,35 +74,22 @@ export default {
     const seasonType = interaction.options.getString('type') as
       | SeasonType
       | undefined;
-    const position = interaction.options.getString('position') as
-      | 'F'
-      | 'D'
-      | undefined;
     const leader = interaction.options.getString('category') as
-      | 'goals'
-      | 'assists'
-      | 'points'
-      | 'plusMinus'
-      | 'pim'
-      | 'shotsOnGoal'
-      | 'gwg'
-      | 'faceoffs'
-      | 'faceoffWins'
-      | 'giveaways'
-      | 'takeaways'
-      | 'shotsBlocked'
-      | 'hits'
-      | 'shotsOnGoal'
-      | 'fights'
-      | 'fightWins'
-      | 'fightLosses';
+      | 'gamesPlayed'
+      | 'wins'
+      | 'losses'
+      | 'ot'
+      | 'shotsAgainst'
+      | 'saves'
+      | 'goalsAgainst'
+      | 'shutouts';
 
     let currentPage = 1;
 
     await interaction.deferReply();
 
     try {
-      const playerStats = await IndexApiClient.get(league).getPlayerStats(
+      const playerStats = await IndexApiClient.get(league).getGoalieStats(
         seasonType ?? SeasonType.REGULAR,
         season,
       );
@@ -133,7 +99,6 @@ export default {
         league,
         season,
         seasonType,
-        position,
         leader,
         currentPage,
       );
@@ -176,7 +141,6 @@ export default {
           league,
           season,
           seasonType,
-          position,
           leader,
           currentPage,
         );

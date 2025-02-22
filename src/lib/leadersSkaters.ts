@@ -22,7 +22,11 @@ export const withLeaderStats = async (
     | 'giveaways'
     | 'takeaways'
     | 'shotsBlocked'
-    | 'hits',
+    | 'hits'
+    | 'shotsOnGoal'
+    | 'fights'
+    | 'fightWins'
+    | 'fightLosses',
   page: number = 1,
 ): Promise<EmbedBuilder> => {
   // (F = C, LW, RW; D = LD, RD)
