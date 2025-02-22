@@ -31,7 +31,9 @@ export default {
     .addStringOption((option) =>
       option
         .setName('type')
-        .setDescription('The season type (i.e. regular, playoffs, etc.)')
+        .setDescription(
+          'The season type (i.e. regular, playoffs, etc.). Default to regular season.',
+        )
         .setChoices(
           { name: 'Regular', value: SeasonType.REGULAR },
           { name: 'Playoffs', value: SeasonType.POST },
@@ -58,7 +60,11 @@ export default {
     }
 
     await interaction.deferReply();
-    const playerStats = await getPlayerStats(name, seasonType, season);
+    const playerStats = await getPlayerStats(
+      name,
+      seasonType ?? SeasonType.REGULAR,
+      season,
+    );
 
     if (!playerStats) {
       await interaction.editReply({
