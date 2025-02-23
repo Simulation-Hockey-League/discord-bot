@@ -180,8 +180,8 @@ export default {
             },
             {
               name: 'Last 10 Games',
-              value: last10Games.map((game) => game.result).join(' | '),
-              inline: false, // This spans the entire row
+              value: last10Games.map((game) => game.result).join(''),
+              inline: false,
             },
           ),
       ],
@@ -204,16 +204,16 @@ const getLast10Games = async (teamInfo: TeamInfo, season?: number) => {
     .map((game) => {
       let result = '';
       if (game.overtime === 1 || game.shootout === 1) {
-        result = 'OTL';
+        result = '<:OTL:1343076600853299312>';
       } else if (
         (game.homeTeamInfo.name === teamInfo.fullName &&
           game.homeScore > game.awayScore) ||
         (game.awayTeamInfo.name === teamInfo.fullName &&
           game.awayScore > game.homeScore)
       ) {
-        result = 'W';
+        result = '<:Win:1343076655765389342>';
       } else {
-        result = 'L';
+        result = '<:Loss:1343076631128051772>';
       }
 
       return {
