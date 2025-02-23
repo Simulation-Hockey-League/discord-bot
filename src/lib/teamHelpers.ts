@@ -44,10 +44,14 @@ export const formatFutureGame = (game: GameInfo) => {
     month: 'short',
     day: 'numeric',
   });
-  return `${gameDate}: ${game.awayTeamInfo.abbreviation} @ ${game.homeTeamInfo.abbreviation}`;
+  return `${game.awayTeamInfo.abbreviation} @ ${game.homeTeamInfo.abbreviation}`;
 };
 
-export const getLast10Games = async (teamInfo: TeamInfo, season?: number) => {
+export const getLast10Games = async (
+  teamInfo: TeamInfo,
+  season?: number,
+  seasonType?: SeasonType,
+) => {
   const last10Results = (
     await IndexApiClient.get(teamInfo.leagueType).getSchedule(season)
   )
@@ -56,6 +60,10 @@ export const getLast10Games = async (teamInfo: TeamInfo, season?: number) => {
       (game) =>
         game.awayTeamInfo.name === teamInfo.fullName ||
         game.homeTeamInfo.name === teamInfo.fullName,
+    )
+    .filter(
+      (game) =>
+        gameTypeToSeasonType(game.type) === (seasonType ?? SeasonType.REGULAR),
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 10)

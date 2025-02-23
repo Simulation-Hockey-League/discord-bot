@@ -149,7 +149,7 @@ export async function createStatsEmbed(
     (100 * (detailedStats.shOpportunities - detailedStats.ppGoalsAgainst)) /
     (detailedStats.shOpportunities <= 0 ? 1 : detailedStats.shOpportunities);
 
-  const last10Games = await getLast10Games(teamInfo, season);
+  const last10Games = await getLast10Games(teamInfo, season, seasonType);
 
   return BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
