@@ -1,9 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { getTeamStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType, TEAM_CHOICES } from 'src/db/index/shared';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
-import { findTeamByName } from 'src/lib/teams';
+import { TeamInfo, findTeamByName } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
 
@@ -74,50 +75,151 @@ export default {
       });
       return;
     }
-    const teams = await IndexApiClient.get(teamInfo.leagueType).getTeamInfo(
-      season,
-    );
-    const team = teams.find((team) => team.name === teamInfo.fullName);
+    const teamStats = await getTeamStats(teamInfo, season);
 
-    // TODO get player stats for team
-    // TODO get team stats for team (and rankings)
-    // TODO get standing results for team (Div, Conf, league)
-    // TODO get last 10 games for team
+    // Extract necessary stats
+    const {
+      goalsPerGame,
+      goalsAgainstPerGame,
+      pimsRank,
+      ppRank,
+      pkRank,
+      leaguePosition,
+      conferencePosition,
+      divisionPosition,
+      detailedStats,
+      regularSeasonPlayerStats,
+    } = teamStats;
 
-    if (!team) {
-      await interaction.editReply({
-        content: `Could not find team with abbreviation ${abbr}.`,
-      });
-      return;
-    }
+    const PP = 100 * (detailedStats.ppGoalsFor / detailedStats.ppOpportunities);
+    const PK =
+      (100 * (detailedStats.shOpportunities - detailedStats.ppGoalsAgainst)) /
+      (detailedStats.shOpportunities <= 0 ? 1 : detailedStats.shOpportunities);
+
+    const last10Games = await getLast10Games(teamInfo, season);
 
     await interaction.editReply({
       embeds: [
         BaseEmbed(interaction, {
           logoUrl: teamInfo.logoUrl,
-          teamColor: team.colors.primary,
+          teamColor: teamStats.teamInfo.colors.primary,
         })
           .setTitle(`${teamInfo.fullName}`)
           .addFields(
-            { name: 'Abbreviation', value: team.abbreviation, inline: true },
-            { name: 'Location', value: team.location, inline: true },
             {
-              name: 'Conference',
-              value: team.conference.toString(),
+              name: 'Regular Season',
+              value: `${teamStats.wins}-${teamStats.losses}-${teamStats.OTL}`,
+              inline: true,
+            },
+            {
+              name: 'Home',
+              value: `${teamStats.home.wins}-${teamStats.home.losses}-${teamStats.home.OTL}`,
+              inline: true,
+            },
+            {
+              name: 'Away',
+              value: `${teamStats.away.wins}-${teamStats.away.losses}-${teamStats.away.OTL}`,
               inline: true,
             },
             {
               name: 'Division',
-              value: team.division?.toString() ?? 'N/A',
+              value: `#${divisionPosition}`,
               inline: true,
             },
             {
-              name: 'Colors',
-              value: `Primary: ${team.colors.primary}, Secondary: ${team.colors.secondary}`,
+              name: 'Conference',
+              value: `#${conferencePosition}`,
               inline: true,
+            },
+            {
+              name: 'League',
+              value: `#${leaguePosition}`,
+              inline: true,
+            },
+            {
+              name: 'GF',
+              value: `${goalsPerGame.toFixed(2)} (#${teamStats.goalsForRank})`,
+              inline: true,
+            },
+            {
+              name: 'GA',
+              value: `${goalsAgainstPerGame.toFixed(2)} (#${
+                teamStats.goalsAgainstRank
+              })`,
+              inline: true,
+            },
+            {
+              name: 'Shots',
+              value: `${teamStats.shotsPerGame} (#${teamStats.shotsForRank})`,
+              inline: true,
+            },
+            {
+              name: 'SA',
+              value: `${teamStats.shotsAgainstPerGame} (#${teamStats.shotsAgainstRank})`,
+              inline: true,
+            },
+            {
+              name: 'Diff',
+              value: `${teamStats.shotDiff} (#${teamStats.shotDiffRank})`,
+              inline: true,
+            },
+            {
+              name: 'PIM',
+              value: `${detailedStats.penaltyMinutesPerGame} (#${pimsRank})`,
+              inline: true,
+            },
+            {
+              name: 'PP',
+              value: `${PP.toFixed(2)} (#${ppRank})`,
+              inline: true,
+            },
+            {
+              name: 'PK',
+              value: `${PK.toFixed(2)} (#${pkRank})`,
+              inline: true,
+            },
+            {
+              name: 'Last 10 Games',
+              value: last10Games.map((game) => game.result).join(' | '),
+              inline: false, // This spans the entire row
             },
           ),
       ],
     });
   },
 } satisfies SlashCommand;
+
+const getLast10Games = async (teamInfo: TeamInfo, season?: number) => {
+  const last10Results = (
+    await IndexApiClient.get(teamInfo.leagueType).getSchedule(season)
+  )
+    .filter((game) => game.played === 1)
+    .filter(
+      (game) =>
+        game.awayTeamInfo.name === teamInfo.fullName ||
+        game.homeTeamInfo.name === teamInfo.fullName,
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 10)
+    .map((game) => {
+      let result = '';
+      if (game.overtime === 1 || game.shootout === 1) {
+        result = 'OTL';
+      } else if (
+        (game.homeTeamInfo.name === teamInfo.fullName &&
+          game.homeScore > game.awayScore) ||
+        (game.awayTeamInfo.name === teamInfo.fullName &&
+          game.awayScore > game.homeScore)
+      ) {
+        result = 'W';
+      } else {
+        result = 'L';
+      }
+
+      return {
+        result: result,
+      };
+    });
+
+  return last10Results;
+};

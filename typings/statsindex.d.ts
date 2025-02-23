@@ -70,6 +70,9 @@ export type HydratedTeamStats = TeamStats & {
   pkRank: number;
   goalsPerGame: number;
   goalsAgainstPerGame: number;
+  shotsPerGame: number;
+  shotsAgainstPerGame: number;
+  shotDiff: number;
   pdo: number;
   corsi: number;
 };

@@ -132,6 +132,15 @@ export const getTeamStats = async (
     goalsPerGame: detailedStats.goalsFor / (detailedStats.gamesPlayed || 1),
     goalsAgainstPerGame:
       detailedStats.goalsAgainst / (detailedStats.gamesPlayed || 1),
+    shotsPerGame: Number(
+      (detailedStats.shotsFor / detailedStats.gamesPlayed || 1).toFixed(2),
+    ),
+    shotsAgainstPerGame: Number(
+      (detailedStats.shotsAgainst / detailedStats.gamesPlayed || 1).toFixed(2),
+    ),
+    shotDiff: Number(
+      (detailedStats.shotsFor - detailedStats.shotsAgainst || 1).toFixed(2),
+    ),
     pdo: 0, // TODO
     pdoRank: 0, // TODO
     corsi: 0, // TODO
