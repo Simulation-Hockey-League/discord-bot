@@ -3,6 +3,7 @@ import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 
 import { SeasonType } from 'src/db/index/shared';
 
+import { PortalClient } from 'src/db/portal/PortalClient';
 import { IndexTeamInfo } from 'typings/statsindex';
 
 import { BaseEmbed } from './embed';
@@ -11,6 +12,7 @@ import {
   formatPastGame,
   gameTypeToSeasonType,
   getLast10Games,
+  leagueNametoType,
 } from './teamHelpers';
 import { TeamInfo } from './teams';
 
@@ -111,14 +113,112 @@ export async function createRosterEmbed(
   interaction: any,
   teamData: IndexTeamInfo,
   teamInfo: TeamInfo,
-  season?: number,
 ) {
-  // Implementation for roster view
+  const players = await PortalClient.getActivePlayers();
+  const rosterPlayers = players
+    .filter(
+      (player) =>
+        player.currentTeamID === teamData.id &&
+        player.currentLeague &&
+        leagueNametoType(player.currentLeague) === teamInfo.leagueType,
+    )
+    .sort((a, b) => b.totalTPE - a.totalTPE);
+
+  const prospects = players
+    .filter(
+      (player) =>
+        player.shlRightsTeamID === teamData.id &&
+        player.currentLeague &&
+        player.currentLeague === 'SMJHL',
+    )
+    .sort((a, b) => b.totalTPE - a.totalTPE);
+
+  const averageTPE =
+    rosterPlayers.reduce((acc, player) => acc + player.totalTPE, 0) /
+    rosterPlayers.length;
+  const averageForwards =
+    rosterPlayers
+      .filter(
+        (player) =>
+          player.position === 'Center' ||
+          player.position === 'Left Wing' ||
+          player.position === 'Right Wing',
+      )
+      .reduce((acc, player) => acc + player.totalTPE, 0) /
+    rosterPlayers.filter(
+      (player) =>
+        player.position === 'Center' ||
+        player.position === 'Left Wing' ||
+        player.position === 'Right Wing',
+    ).length;
+  const averageDefense =
+    rosterPlayers
+      .filter(
+        (player) =>
+          player.position === 'Left Defense' ||
+          player.position === 'Right Defense',
+      )
+      .reduce((acc, player) => acc + player.totalTPE, 0) /
+    rosterPlayers.filter(
+      (player) =>
+        player.position === 'Left Defense' ||
+        player.position === 'Right Defense',
+    ).length;
+
+  const goalies = rosterPlayers
+    .filter((player) => player.position === 'Goalie')
+    .sort((a, b) => b.totalTPE - a.totalTPE);
+
   const rosterEmbed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamData.colors.primary,
-  }).setTitle(`${teamInfo.fullName} Roster`);
-  // Add roster information here
+  })
+    .setTitle(`${teamInfo.fullName} Roster`)
+    .addFields({
+      name: 'Players',
+      value: rosterPlayers
+        .map(
+          (player) =>
+            `[S${player.draftSeason}] ${player.position} - ${player.name} (${player.totalTPE})`,
+        )
+        .join('\n'),
+      inline: false,
+    })
+    .addFields({
+      name: 'Average TPE',
+      value: `${averageTPE.toFixed(2)}`,
+      inline: true,
+    })
+    .addFields({
+      name: 'Forwards',
+      value: `${averageForwards.toFixed(2)}`,
+      inline: true,
+    })
+    .addFields({
+      name: 'Defense',
+      value: `${averageDefense.toFixed(2)}`,
+      inline: true,
+    })
+    .addFields({
+      name: 'Starting Goalie',
+      value: `${goalies[0].totalTPE || 0}`,
+      inline: false,
+    })
+    .addFields({
+      name: 'Backup Goalie',
+      value: `${goalies[1].totalTPE || 0}`,
+      inline: true,
+    })
+    .addFields({
+      name: 'Prospects',
+      value: prospects
+        .map(
+          (player) =>
+            `[S${player.draftSeason}] ${player.position} - ${player.name} (${player.totalTPE})`,
+        )
+        .join('\n'),
+      inline: false,
+    });
 
   return rosterEmbed;
 }

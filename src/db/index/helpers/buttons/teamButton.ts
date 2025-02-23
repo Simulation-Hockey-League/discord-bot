@@ -21,7 +21,7 @@ export function createActionRow(
       .setDisabled(view === 'overview'),
     new ButtonBuilder()
       .setCustomId(`roster_${abbr}_${season ?? 'current'}`)
-      .setLabel('Roster')
+      .setLabel('Current Roster')
       .setStyle(ButtonStyle.Primary)
       .setDisabled(view === 'roster'),
     new ButtonBuilder()
@@ -47,7 +47,7 @@ export async function createEmbed(
 ) {
   switch (view) {
     case 'roster':
-      return await createRosterEmbed(interaction, team, teamInfo, season);
+      return await createRosterEmbed(interaction, team, teamInfo);
     case 'schedule':
       return await createScheduleEmbed(
         interaction,

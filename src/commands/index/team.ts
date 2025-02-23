@@ -50,7 +50,7 @@ export default {
         .setDescription('Choose what information to view')
         .addChoices(
           { name: 'Overview', value: 'overview' },
-          { name: 'Roster', value: 'roster' },
+          { name: 'Current Roster', value: 'roster' },
           { name: 'Schedule', value: 'schedule' },
           { name: 'Team Leaders', value: 'leaders' },
         )

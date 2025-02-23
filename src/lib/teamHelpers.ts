@@ -1,5 +1,5 @@
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
-import { SeasonType } from 'src/db/index/shared';
+import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { TeamInfo } from 'src/lib/teams';
 import { GameInfo } from 'typings/statsindex';
 
@@ -19,6 +19,21 @@ export const gameTypeToSeasonType = (gameType: string): SeasonType => {
       return SeasonType.POST;
     default:
       return SeasonType.REGULAR;
+  }
+};
+
+export const leagueNametoType = (league: string): LeagueType => {
+  switch (league) {
+    case 'SHL':
+      return LeagueType.SHL;
+    case 'SMJHL':
+      return LeagueType.SMJHL;
+    case 'IIHF':
+      return LeagueType.IIHF;
+    case 'WJC':
+      return LeagueType.WJC;
+    default:
+      return LeagueType.SHL;
   }
 };
 
