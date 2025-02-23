@@ -12,4 +12,15 @@ export type UserInfo = {
 
 export const users = new Keyv<UserInfo>('sqlite://src/db/users/users.sqlite');
 
+export type PlayerInfo = {
+  playerID: number;
+  leagueID: number;
+  name: string;
+};
+
+export const players = new Keyv<PlayerInfo>(
+  'sqlite://src/db/index/players.sqlite',
+);
+
 users.on('error', (err) => logger.error('Keyv connection error:', err));
+players.on('error', (err) => logger.error('Keyv connection error:', err));
