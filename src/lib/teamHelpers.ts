@@ -40,10 +40,6 @@ export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
 };
 
 export const formatFutureGame = (game: GameInfo) => {
-  const gameDate = new Date(game.date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
   return `${game.awayTeamInfo.abbreviation} @ ${game.homeTeamInfo.abbreviation}`;
 };
 
