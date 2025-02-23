@@ -50,7 +50,11 @@ export const withLeaderStats = async (
     )
     .join('\n');
 
-  embed.setDescription(playerList);
+  if (playerList.length === 0) {
+    embed.setDescription('No players found for the selected category.');
+  } else {
+    embed.setDescription(playerList);
+  }
 
   return embed;
 };

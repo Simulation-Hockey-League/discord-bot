@@ -34,8 +34,11 @@ export const withLeaderStats = async (
         `${startIndex + index + 1}. ${player.name} - ${player[leader]}`,
     )
     .join('\n');
-
-  embed.setDescription(playerList);
+  if (playerList.length === 0) {
+    embed.setDescription('No players found for the selected category.');
+  } else {
+    embed.setDescription(playerList);
+  }
 
   return embed;
 };

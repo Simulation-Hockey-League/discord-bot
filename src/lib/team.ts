@@ -208,8 +208,9 @@ export async function createRosterEmbed(
       name: 'Backup Goalie',
       value: `${goalies[1].totalTPE || 0}`,
       inline: true,
-    })
-    .addFields({
+    });
+  if (teamInfo.leagueType === 0) {
+    rosterEmbed.addFields({
       name: 'Prospects',
       value: prospects
         .map(
@@ -219,6 +220,7 @@ export async function createRosterEmbed(
         .join('\n'),
       inline: false,
     });
+  }
 
   return rosterEmbed;
 }
