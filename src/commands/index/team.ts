@@ -50,7 +50,6 @@ export default {
     const seasonType = interaction.options.getString('type') as
       | SeasonType
       | undefined;
-
     if (!abbr) {
       await interaction.reply({
         content: 'No team abbreviation provided.',
@@ -76,7 +75,6 @@ export default {
       return;
     }
     const teamStats = await getTeamStats(teamInfo, season);
-
     // Extract necessary stats
     const {
       goalsPerGame,
@@ -88,7 +86,6 @@ export default {
       conferencePosition,
       divisionPosition,
       detailedStats,
-      regularSeasonPlayerStats,
     } = teamStats;
 
     const PP = 100 * (detailedStats.ppGoalsFor / detailedStats.ppOpportunities);

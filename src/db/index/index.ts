@@ -43,15 +43,13 @@ export const getTeamStats = async (
   );
 
   const teamId = await requireFhmTeamId(teamInfo);
-
-  if (!teamId) {
+  if (!teamId && teamId !== 0) {
     throw new Error(`Could not find team ID for ${teamInfo.fullName}`);
   }
 
   const result = allTeams.find((team) => team.id === teamId);
   const currentTeamInfo = teamInfosById[teamId];
   const detailedStats = detailedStatsById[teamId];
-
   if (!result || !currentTeamInfo || !detailedStats) {
     throw new Error(`Could not find stats for ${teamInfo.fullName}`);
   }
