@@ -6,7 +6,7 @@ import {
   ComponentType,
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
-import { LeagueType, SeasonType } from 'src/db/index/shared';
+import { LeagueType, SeasonType, SkaterCategory } from 'src/db/index/shared';
 import { withLeaderStats } from 'src/lib/leadersSkaters';
 
 import { SlashCommand } from 'typings/command';
@@ -99,24 +99,7 @@ export default {
       | 'F'
       | 'D'
       | undefined;
-    const leader = interaction.options.getString('category') as
-      | 'goals'
-      | 'assists'
-      | 'points'
-      | 'plusMinus'
-      | 'pim'
-      | 'shotsOnGoal'
-      | 'gwg'
-      | 'faceoffs'
-      | 'faceoffWins'
-      | 'giveaways'
-      | 'takeaways'
-      | 'shotsBlocked'
-      | 'hits'
-      | 'shotsOnGoal'
-      | 'fights'
-      | 'fightWins'
-      | 'fightLosses';
+    const leader = interaction.options.getString('category') as SkaterCategory;
 
     let currentPage = 1;
 

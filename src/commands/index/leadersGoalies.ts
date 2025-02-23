@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
+import { GoalieCategories } from 'src/db/index/shared';
 import { withLeaderStats } from 'src/lib/leadersGoalies';
 
 import { SlashCommand } from 'typings/command';
@@ -27,6 +28,7 @@ export default {
           { name: 'saves', value: 'saves' },
           { name: 'goalsAgainst', value: 'goalsAgainst' },
           { name: 'shutouts', value: 'shutouts' },
+          { name: 'savePct', value: 'savePct' },
         )
         .setRequired(true),
     )
@@ -74,16 +76,9 @@ export default {
     const seasonType = interaction.options.getString('type') as
       | SeasonType
       | undefined;
-    const leader = interaction.options.getString('category') as
-      | 'gamesPlayed'
-      | 'wins'
-      | 'losses'
-      | 'ot'
-      | 'shotsAgainst'
-      | 'saves'
-      | 'goalsAgainst'
-      | 'shutouts';
-
+    const leader = interaction.options.getString(
+      'category',
+    ) as GoalieCategories;
     let currentPage = 1;
 
     await interaction.deferReply();

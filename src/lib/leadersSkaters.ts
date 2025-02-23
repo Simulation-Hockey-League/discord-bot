@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
-import { LeagueType } from 'src/db/index/shared';
+import { LeagueType, SkaterCategory } from 'src/db/index/shared';
 import { PlayerStats, SeasonType } from 'typings/statsindex';
 
 export const withLeaderStats = async (
@@ -9,24 +9,7 @@ export const withLeaderStats = async (
   season: number | undefined,
   seasonType: SeasonType | undefined,
   position: 'F' | 'D' | undefined,
-  leader:
-    | 'goals'
-    | 'assists'
-    | 'points'
-    | 'plusMinus'
-    | 'pim'
-    | 'shotsOnGoal'
-    | 'gwg'
-    | 'faceoffs'
-    | 'faceoffWins'
-    | 'giveaways'
-    | 'takeaways'
-    | 'shotsBlocked'
-    | 'hits'
-    | 'shotsOnGoal'
-    | 'fights'
-    | 'fightWins'
-    | 'fightLosses',
+  leader: SkaterCategory,
   page: number = 1,
 ): Promise<EmbedBuilder> => {
   // (F = C, LW, RW; D = LD, RD)

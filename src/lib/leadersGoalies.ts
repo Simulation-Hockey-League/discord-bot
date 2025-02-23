@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
-import { LeagueType } from 'src/db/index/shared';
+import { GoalieCategories, LeagueType } from 'src/db/index/shared';
 import { GoalieStats, SeasonType } from 'typings/statsindex';
 
 export const withLeaderStats = async (
@@ -8,15 +8,7 @@ export const withLeaderStats = async (
   league: LeagueType | undefined,
   season: number | undefined,
   seasonType: SeasonType | undefined,
-  leader:
-    | 'gamesPlayed'
-    | 'wins'
-    | 'losses'
-    | 'ot'
-    | 'shotsAgainst'
-    | 'saves'
-    | 'goalsAgainst'
-    | 'shutouts',
+  leader: GoalieCategories,
   page: number = 1,
 ): Promise<EmbedBuilder> => {
   if (!leader) {
