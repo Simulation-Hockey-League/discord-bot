@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { set } from 'node_modules/@types/lodash';
 import { getPlayerStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
@@ -45,7 +46,7 @@ export default {
     )
     .setDescription('Get player career statistics.'),
   execute: async (interaction) => {
-    const league = interaction.options.getNumber('league') as
+    let league = interaction.options.getNumber('league') as
       | LeagueType
       | undefined;
     const targetName = interaction.options.getString('name');
@@ -68,7 +69,7 @@ export default {
     try {
       let playerID;
       let position;
-
+      let setLeague;
       if (currentUserInfo?.portalID && !targetName) {
         const player = await PortalClient.getPlayer(currentUserInfo.portalID);
         if (player) {
@@ -80,11 +81,12 @@ export default {
 
           if (indexRecord) {
             playerID = indexRecord.indexID;
+            setLeague = indexRecord.leagueID;
           }
         }
       }
       if (!playerID) {
-        const getPlayer = await getPlayerStats(name, seasonType, league);
+        const getPlayer = await getPlayerStats(name, seasonType);
         if (!getPlayer) {
           await interaction.editReply({
             content: `Could not find ${name}.`,
@@ -93,7 +95,9 @@ export default {
         }
         playerID = getPlayer.id;
         position = getPlayer.position;
+        setLeague = getPlayer.league;
       }
+      league = league ?? setLeague;
 
       const isGoalie = position === 'G' || position === 'Goalie';
       const careerStats = await IndexApiClient.get(league).getCareerStats(
@@ -118,8 +122,10 @@ export default {
 
       await interaction.editReply({});
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'unknown error';
       await interaction.editReply({
-        content: 'An error occurred while fetching career statistics.',
+        content: `An error occurred while fetching career stats: ${errorMessage}.`,
       });
     }
   },
