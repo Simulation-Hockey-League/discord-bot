@@ -26,7 +26,7 @@ export async function createScheduleEmbed(
   if (season && season <= 52) {
     await interaction.editReply({
       content: 'Cannot fetch schedule for seasons before Season 53.',
-      ephemeral: true,
+      ephemeral: false,
     });
     return;
   }
@@ -76,7 +76,7 @@ export async function createScheduleEmbed(
     logoUrl: teamInfo.logoUrl,
     teamColor: teamData.colors.primary,
   })
-    .setTitle(`${teamInfo.fullName} Schedule`)
+    .setTitle(`${teamInfo.fullName} Schedule S${season}`)
     .addFields(
       {
         name: 'Last 5 Games',
@@ -99,12 +99,10 @@ export async function createLeadersEmbed(
   teamInfo: TeamInfo,
   season?: number,
 ) {
-  // Implementation for team leaders view
   const leadersEmbed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamData.colors.primary,
-  }).setTitle(`${teamInfo.fullName} Team Leaders`);
-  // Add team leaders information here
+  }).setTitle(`${teamInfo.fullName} Team Leaders S${season}`);
 
   return leadersEmbed;
 }
@@ -245,7 +243,6 @@ export async function createStatsEmbed(
     divisionPosition,
     detailedStats,
   } = teamStats;
-
   const PP = 100 * (detailedStats.ppGoalsFor / detailedStats.ppOpportunities);
   const PK =
     (100 * (detailedStats.shOpportunities - detailedStats.ppGoalsAgainst)) /
@@ -253,11 +250,11 @@ export async function createStatsEmbed(
 
   const last10Games = await getLast10Games(teamInfo, season, seasonType);
 
-  return BaseEmbed(interaction, {
+  let embed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamStats.teamInfo.colors.primary,
   })
-    .setTitle(`${teamInfo.fullName}`)
+    .setTitle(`${teamInfo.fullName} S${season}`)
     .addFields(
       {
         name: 'Regular Season',
@@ -301,8 +298,13 @@ export async function createStatsEmbed(
         })`,
         inline: true,
       },
+    );
+
+  // Additional stats for FHM8 & 10 Era
+  if (season && season > 65) {
+    embed = embed.addFields(
       {
-        name: 'Shots',
+        name: 'SF',
         value: `${teamStats.shotsPerGame} (#${teamStats.shotsForRank})`,
         inline: true,
       },
@@ -331,12 +333,12 @@ export async function createStatsEmbed(
         value: `${PK.toFixed(2)} (#${pkRank})`,
         inline: true,
       },
-      {
-        name: 'Last 10 Games',
-        value: last10Games
-          .map((game: { result: string }) => game.result)
-          .join(''),
-        inline: false,
-      },
     );
+  }
+
+  return embed.addFields({
+    name: 'Last 10 Games',
+    value: last10Games.map((game: { result: string }) => game.result).join(''),
+    inline: false,
+  });
 }

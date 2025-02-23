@@ -76,7 +76,12 @@ export default {
       });
       return;
     }
-    if (abbr && !TEAM_CHOICES.some((team) => team.value === abbr)) {
+    if (
+      abbr &&
+      !TEAM_CHOICES.some(
+        (team) => team.value.toLowerCase() === abbr.toLowerCase(),
+      )
+    ) {
       await interaction.reply({
         content: `Invalid team abbreviation: ${abbr}.`,
         ephemeral: true,
@@ -103,7 +108,6 @@ export default {
         });
         return;
       }
-
       const row = createActionRow(abbr, season, view);
 
       const initialEmbed = await createEmbed(
@@ -116,9 +120,6 @@ export default {
       );
 
       if (!initialEmbed) {
-        await interaction.editReply({
-          content: 'Failed to create team embed.',
-        });
         return;
       }
 
@@ -141,9 +142,9 @@ export default {
           return;
         }
 
-        const [action, seasonValue] = i.customId.split('_');
+        const [action, abbr, seasonValue] = i.customId.split('_');
         const selectedSeason =
-          seasonValue === 'current' ? undefined : parseInt(seasonValue);
+          seasonValue === 'current' ? season : parseInt(seasonValue);
 
         await i.deferUpdate();
 

@@ -49,11 +49,30 @@ export const getTeamStats = async (
 
   const result = allTeams.find((team) => team.id === teamId);
   const currentTeamInfo = teamInfosById[teamId];
-  const detailedStats = detailedStatsById[teamId];
-  if (!result || !currentTeamInfo || !detailedStats) {
+  const detailedStats = detailedStatsById[teamId] ?? {
+    // If we are not in the FHM8/10 Era, return just 0's
+    gamesPlayed: result?.gp ?? 0,
+    goalsFor: result?.goalsFor ?? 0,
+    goalsAgainst: result?.goalsAgainst ?? 0,
+    shotsFor: 0,
+    shotsAgainst: 0,
+    penaltyMinutesPerGame: 0,
+    ppOpportunities: 0,
+    ppGoalsFor: 0,
+    ppGoalsAgainst: 0,
+    shOpportunities: 0,
+    shGoalsFor: 0,
+    shGoalsAgainst: 0,
+    faceoffPct: 0,
+    shotsBlocked: 0,
+    hits: 0,
+    takeaways: 0,
+    giveaways: 0,
+  };
+
+  if (!result || !currentTeamInfo) {
     throw new Error(`Could not find stats for ${teamInfo.fullName}`);
   }
-
   return {
     ...result,
     detailedStats,
