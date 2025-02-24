@@ -100,3 +100,13 @@ export type PortalPlayer = {
   indexRecords: IndexPlayerID[] | null;
   inactive: boolean;
 };
+
+export type InternalChecklist = {
+  userID: number;
+  playerUpdateID: number;
+  tid: number;
+  league: number;
+  subject: string;
+  complete: number;
+  dueDate: string;
+};

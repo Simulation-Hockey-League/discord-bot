@@ -1,11 +1,12 @@
 import { Config } from 'src/lib/config/config';
 import { logger } from 'src/lib/logger';
-import { PortalPlayer } from 'typings/portal';
+import { InternalChecklist, PortalPlayer } from 'typings/portal';
 
 class PortalApiClient {
   #userInfo: Array<{ userID: number; username: string }> = [];
   #activePlayers: Array<PortalPlayer> = [];
   #getPlayer: Array<PortalPlayer> = [];
+  #getChecklist: Array<InternalChecklist> = [];
 
   #loaded = false;
   #lastLoadTimestamp = 0;
@@ -57,6 +58,25 @@ class PortalApiClient {
     return this.#activePlayers;
   }
 
+  async getChecklist(
+    league: string,
+    userID: string,
+    reload: boolean = false,
+  ): Promise<Array<InternalChecklist>> {
+    return await this.#getData([], reload, ['landing-page/checklist'], {
+      league: league,
+      userID: userID,
+    });
+  }
+
+  async getChecklistByUser(
+    league: string,
+    userID: string,
+    reload: boolean = false,
+  ): Promise<Array<InternalChecklist>> {
+    return this.getChecklist(league, userID, reload);
+  }
+
   async getPlayer(
     portalID: string,
     reload: boolean = false,
@@ -73,6 +93,7 @@ class PortalApiClient {
     await Promise.all([
       await this.getUserInfo(true),
       await this.getActivePlayers(true),
+      await this.getChecklist('SHL', '1', true),
     ]);
 
     this.#lastLoadTimestamp = Date.now();

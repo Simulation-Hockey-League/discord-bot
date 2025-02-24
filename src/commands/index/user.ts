@@ -3,6 +3,7 @@ import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { getUserByFuzzy } from 'src/db/portal';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';
+import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { BaseEmbed } from 'src/lib/embed';
 import { SlashCommand } from 'typings/command';
 
@@ -20,6 +21,7 @@ export default {
     const target = interaction.options.getString('username', true);
     const currentUserInfo = await users.get(interaction.user.id);
     const name = target || currentUserInfo?.playerName;
+    const currentSeason = DynamicConfig.get('currentSeason');
 
     if (!name) {
       await interaction.reply({
@@ -42,6 +44,36 @@ export default {
     const players = await PortalClient.getActivePlayers();
     const player = players.find((p) => p.uid === user.userID);
 
+    let checklistLeague = 0;
+    if (player && player.draftSeason === currentSeason) {
+      checklistLeague - 1;
+    }
+    const checklist = await PortalClient.getChecklistByUser(
+      String(checklistLeague),
+      String(user.userID),
+    );
+
+    const incompleteTasks = checklist.filter((task) => task.complete === 0);
+    let checklistField;
+    if (incompleteTasks.length === 0) {
+      checklistField = {
+        name: '✅ CheckList',
+        value: 'Done All your Tasks This week!',
+        inline: false,
+      };
+    } else {
+      const taskList = incompleteTasks
+        .map(
+          (task) =>
+            `🔹 [${task.subject}](https://simulationhockey.com/showthread.php?${
+              task.tid
+            }) - **${task.dueDate.replace('Due: ', '')}**`,
+        )
+        .join('\n');
+
+      checklistField = { name: '📝 CheckList', value: taskList, inline: false };
+    }
+
     if (!player) {
       await interaction.reply({
         content: 'Could not find active player with that username.',
@@ -51,24 +83,37 @@ export default {
     }
     const teams = await IndexApiClient.get(player?.currentLeague).getTeamInfo();
     const team = teams.find((team) => team.id === player?.currentTeamID);
+    const formattedBankBalance = `$${player.bankBalance.toLocaleString(
+      'en-US',
+    )} USD`;
 
-    // Create an embed with player info
     const playerEmbed = BaseEmbed(interaction, {
       teamColor: team?.colors.primary,
     })
-      .setTitle(`${player.name} - ${player.position}`)
+      .setTitle(`${player.username}`)
+      .setURL(`https://portal.simulationhockey.com/player/${player.pid}`)
       .addFields(
-        { name: 'Username', value: user.username, inline: true },
-        { name: 'Player ID', value: player.pid.toString(), inline: true },
+        { name: 'TPE', value: `${player.totalTPE.toString()}`, inline: true },
         {
-          name: 'Team',
-          value: player.currentTeamID?.toString() ?? 'N/A',
+          name: 'Applied',
+          value: `${player.appliedTPE.toString()}`,
           inline: true,
         },
-        { name: 'TPE', value: player.totalTPE.toString(), inline: true },
         { name: 'Position', value: player.position, inline: true },
         { name: 'Draft Season', value: `S${player.draftSeason}`, inline: true },
+        { name: 'Bank', value: formattedBankBalance, inline: true },
+        {
+          name: 'Activity Check',
+          value: player.activityCheckComplete ? 'Yes' : 'No',
+          inline: true,
+        },
+        {
+          name: 'Training Purchased',
+          value: player.trainingPurchased ? 'Yes' : 'No',
+          inline: true,
+        },
       );
+    playerEmbed.addFields(checklistField);
 
     await interaction.reply({ embeds: [playerEmbed] });
   },
