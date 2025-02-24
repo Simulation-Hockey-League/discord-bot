@@ -14,15 +14,14 @@ export default {
       option
         .setName('username')
         .setDescription('The username of the player on the forum.')
-        .setRequired(true),
+        .setRequired(false),
     )
     .setDescription('Retrieve player info from the portal.'),
   execute: async (interaction) => {
-    const target = interaction.options.getString('username', true);
+    const target = interaction.options.getString('username');
     const currentUserInfo = await users.get(interaction.user.id);
-    const name = target || currentUserInfo?.playerName;
+    const name = target || currentUserInfo?.forumName;
     const currentSeason = DynamicConfig.get('currentSeason');
-
     if (!name) {
       await interaction.reply({
         content: 'No player name provided or stored.',
@@ -30,7 +29,7 @@ export default {
       });
       return;
     }
-    const user = await getUserByFuzzy(target);
+    const user = await getUserByFuzzy(name);
 
     if (!user) {
       await interaction.reply({
@@ -57,7 +56,7 @@ export default {
     let checklistField;
     if (incompleteTasks.length === 0) {
       checklistField = {
-        name: '✅ CheckList',
+        name: '✅ Checklist',
         value: 'Done All your Tasks This week!',
         inline: false,
       };
@@ -71,7 +70,7 @@ export default {
         )
         .join('\n');
 
-      checklistField = { name: '📝 CheckList', value: taskList, inline: false };
+      checklistField = { name: '📝 Checklist', value: taskList, inline: false };
     }
 
     if (!player) {
