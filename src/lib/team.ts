@@ -79,7 +79,7 @@ export async function createScheduleEmbed(
     .setTitle(`${teamInfo.fullName} Schedule S${season}`)
     .addFields(
       {
-        name: 'Last 5 Games',
+        name: 'Last 7 Games',
         value: pastGamesText,
         inline: false,
       },
@@ -225,11 +225,9 @@ export async function createRosterEmbed(
 
 export async function createStatsEmbed(
   interaction: any,
-  teamData: IndexTeamInfo,
   teamInfo: TeamInfo,
   season?: number,
   seasonType?: SeasonType,
-  view?: string,
 ) {
   const teamStats = await getTeamStats(teamInfo, season);
   const {

@@ -59,12 +59,6 @@ export async function createEmbed(
     case 'leaders':
       return await createLeadersEmbed(interaction, team, teamInfo, season);
     default:
-      return await createStatsEmbed(
-        interaction,
-        team,
-        teamInfo,
-        season,
-        seasonType,
-      );
+      return await createStatsEmbed(interaction, teamInfo, season, seasonType);
   }
 }

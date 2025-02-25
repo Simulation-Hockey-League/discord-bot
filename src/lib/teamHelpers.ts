@@ -1,4 +1,5 @@
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
+import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { TeamInfo } from 'src/lib/teams';
 import { GameInfo } from 'typings/statsindex';
@@ -38,6 +39,7 @@ export const leagueNametoType = (league: string): LeagueType => {
 };
 
 export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
+  const league = leagueTypeToString(teamInfo.leagueType).toLowerCase();
   let result = '';
   if (
     (game.homeTeamInfo.name === teamInfo.fullName &&
@@ -53,7 +55,7 @@ export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
       result = resultEmojis.loss;
     }
   }
-  return `[${result} ${game.awayTeamInfo.abbreviation} (${game.awayScore}) - ${game.homeTeamInfo.abbreviation} (${game.homeScore})](https://index.simulationhockey.com/shl/81/game/${game.slug})`;
+  return `[${result} ${game.awayTeamInfo.abbreviation} (${game.awayScore}) - ${game.homeTeamInfo.abbreviation} (${game.homeScore})](https://index.simulationhockey.com/${league}/${game.season}/game/${game.slug})`;
 };
 
 export const formatFutureGame = (game: GameInfo) => {
