@@ -81,24 +81,30 @@ export default {
           )
           .join('\n');
 
-      const playerData = await fetchPlayersData(name);
-      const swapData = await fetchSwapsData(name);
+      const playerData = await fetchPlayersData(user.username);
+      const swapData = await fetchSwapsData(user.username);
 
-      let playersSection = '';
-      playerData.forEach((player) => {
-        playersSection += `${player.player} - ${player.score}\n`;
-      });
-
-      let swapsSection = '';
+      let swapsDict: { [key: string]: string } = {};
       swapData.forEach((swap) => {
         if (swap.oldSkater !== 'None' && swap.newSkater !== 'None') {
-          const skaterScoreDifference = swap.nsc - swap.nsa;
-          swapsSection += `**${swap.oldSkater}** ${swap.osa} -> **${swap.newSkater}** - ${skaterScoreDifference}\n`;
+          swapsDict[swap.oldSkater] = `**${swap.oldSkater}** ${swap.osa} -> **${
+            swap.newSkater
+          }** - ${swap.nsc - swap.nsa}`;
         }
 
         if (swap.oldGoalie !== 'None' && swap.newGoalie !== 'None') {
-          const goalieScoreDifference = swap.nsc - swap.nsa;
-          swapsSection += `**${swap.oldGoalie}** ${swap.osa} -> **${swap.newGoalie}** - ${goalieScoreDifference}\n`;
+          swapsDict[swap.oldGoalie] = `**${swap.oldGoalie}** ${swap.osa} -> **${
+            swap.newGoalie
+          }** - ${swap.nsc - swap.nsa}`;
+        }
+      });
+
+      let playersSection = '';
+      playerData.forEach((player) => {
+        if (swapsDict[player.player]) {
+          playersSection += `${swapsDict[player.player]}\n`;
+        } else {
+          playersSection += `${player.player} - ${player.score}\n`;
         }
       });
 
@@ -113,16 +119,10 @@ export default {
           name: 'Players',
           value: playersSection,
         });
-      if (swapsSection !== '') {
-        embed.addFields({
-          name: 'Swaps',
-          value: swapsSection || 'No swaps made.',
-        });
-      }
       await interaction.reply({ embeds: [embed] });
     } catch (error) {
       await interaction.reply({
-        content: 'An error occurred while retrieving fantasy rankings.',
+        content: `An error occurred while retrieving fantasy rankings.`,
         ephemeral: true,
       });
     }
