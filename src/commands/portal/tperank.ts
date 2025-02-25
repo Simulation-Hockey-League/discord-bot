@@ -6,7 +6,6 @@ import {
   ComponentType,
 } from 'discord.js';
 import { PortalClient } from 'src/db/portal/PortalClient';
-import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
 import { SlashCommand } from 'typings/command';
 
