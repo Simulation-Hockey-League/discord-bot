@@ -70,13 +70,13 @@ export default {
         if (swap.oldSkater !== 'None' && swap.newSkater !== 'None') {
           swapsDict[swap.oldSkater] = `**${swap.oldSkater}** ${swap.osa} -> **${
             swap.newSkater
-          }** - ${swap.nsc - swap.nsa}`;
+          }** - ${(swap.nsc - swap.nsa).toFixed(2)}`;
         }
 
         if (swap.oldGoalie !== 'None' && swap.newGoalie !== 'None') {
           swapsDict[swap.oldGoalie] = `**${swap.oldGoalie}** ${swap.osa} -> **${
             swap.newGoalie
-          }** - ${swap.nsc - swap.nsa}`;
+          }** - ${(swap.nsc - swap.nsa).toFixed(2)}`;
         }
       });
 
