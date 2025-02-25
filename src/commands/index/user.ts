@@ -18,6 +18,7 @@ export default {
     )
     .setDescription('Retrieve player info from the portal.'),
   execute: async (interaction) => {
+    await interaction.deferReply({ ephemeral: false });
     const target = interaction.options.getString('username');
     const currentUserInfo = await users.get(interaction.user.id);
     const name = target || currentUserInfo?.forumName;
@@ -39,81 +40,99 @@ export default {
       });
       return;
     }
+    try {
+      const players = await PortalClient.getActivePlayers();
+      const player = players.find((p) => p.uid === user.userID);
 
-    const players = await PortalClient.getActivePlayers();
-    const player = players.find((p) => p.uid === user.userID);
+      let checklistLeague = 0;
+      if (player && player.draftSeason === currentSeason) {
+        checklistLeague - 1;
+      }
+      const checklist = await PortalClient.getChecklistByUser(
+        String(checklistLeague),
+        String(user.userID),
+      );
 
-    let checklistLeague = 0;
-    if (player && player.draftSeason === currentSeason) {
-      checklistLeague - 1;
-    }
-    const checklist = await PortalClient.getChecklistByUser(
-      String(checklistLeague),
-      String(user.userID),
-    );
+      const incompleteTasks = checklist.filter((task) => task.complete === 0);
+      let checklistField;
+      if (incompleteTasks.length === 0) {
+        checklistField = {
+          name: '✅ Checklist',
+          value: 'Done All your Tasks This week!',
+          inline: false,
+        };
+      } else {
+        const taskList = incompleteTasks
+          .map(
+            (task) =>
+              `🔹 [${
+                task.subject
+              }](https://simulationhockey.com/showthread.php?${
+                task.tid
+              }) - **${task.dueDate.replace('Due: ', '')}**`,
+          )
+          .join('\n');
 
-    const incompleteTasks = checklist.filter((task) => task.complete === 0);
-    let checklistField;
-    if (incompleteTasks.length === 0) {
-      checklistField = {
-        name: '✅ Checklist',
-        value: 'Done All your Tasks This week!',
-        inline: false,
-      };
-    } else {
-      const taskList = incompleteTasks
-        .map(
-          (task) =>
-            `🔹 [${task.subject}](https://simulationhockey.com/showthread.php?${
-              task.tid
-            }) - **${task.dueDate.replace('Due: ', '')}**`,
-        )
-        .join('\n');
+        checklistField = {
+          name: '📝 Checklist',
+          value: taskList,
+          inline: false,
+        };
+      }
 
-      checklistField = { name: '📝 Checklist', value: taskList, inline: false };
-    }
+      if (!player) {
+        await interaction.reply({
+          content: 'Could not find active player with that username.',
+          ephemeral: true,
+        });
+        return;
+      }
+      const teams = await IndexApiClient.get(
+        player?.currentLeague,
+      ).getTeamInfo();
+      const team = teams.find((team) => team.id === player?.currentTeamID);
+      const formattedBankBalance = `$${player.bankBalance.toLocaleString(
+        'en-US',
+      )} USD`;
 
-    if (!player) {
-      await interaction.reply({
-        content: 'Could not find active player with that username.',
-        ephemeral: true,
+      const playerEmbed = BaseEmbed(interaction, {
+        teamColor: team?.colors.primary,
+      })
+        .setTitle(`${player.username}`)
+        .setURL(`https://portal.simulationhockey.com/player/${player.pid}`)
+        .addFields(
+          { name: 'TPE', value: `${player.totalTPE.toString()}`, inline: true },
+          {
+            name: 'Applied',
+            value: `${player.appliedTPE.toString()}`,
+            inline: true,
+          },
+          { name: 'Position', value: player.position, inline: true },
+          {
+            name: 'Draft Season',
+            value: `S${player.draftSeason}`,
+            inline: true,
+          },
+          { name: 'Bank', value: formattedBankBalance, inline: true },
+          {
+            name: 'Activity Check',
+            value: player.activityCheckComplete ? 'Yes' : 'No',
+            inline: true,
+          },
+          {
+            name: 'Training Purchased',
+            value: player.trainingPurchased ? 'Yes' : 'No',
+            inline: true,
+          },
+        );
+      playerEmbed.addFields(checklistField);
+
+      await interaction.editReply({ embeds: [playerEmbed] });
+    } catch (error) {
+      await interaction.editReply({
+        content: `An error occurred while retrieving player info.`,
       });
       return;
     }
-    const teams = await IndexApiClient.get(player?.currentLeague).getTeamInfo();
-    const team = teams.find((team) => team.id === player?.currentTeamID);
-    const formattedBankBalance = `$${player.bankBalance.toLocaleString(
-      'en-US',
-    )} USD`;
-
-    const playerEmbed = BaseEmbed(interaction, {
-      teamColor: team?.colors.primary,
-    })
-      .setTitle(`${player.username}`)
-      .setURL(`https://portal.simulationhockey.com/player/${player.pid}`)
-      .addFields(
-        { name: 'TPE', value: `${player.totalTPE.toString()}`, inline: true },
-        {
-          name: 'Applied',
-          value: `${player.appliedTPE.toString()}`,
-          inline: true,
-        },
-        { name: 'Position', value: player.position, inline: true },
-        { name: 'Draft Season', value: `S${player.draftSeason}`, inline: true },
-        { name: 'Bank', value: formattedBankBalance, inline: true },
-        {
-          name: 'Activity Check',
-          value: player.activityCheckComplete ? 'Yes' : 'No',
-          inline: true,
-        },
-        {
-          name: 'Training Purchased',
-          value: player.trainingPurchased ? 'Yes' : 'No',
-          inline: true,
-        },
-      );
-    playerEmbed.addFields(checklistField);
-
-    await interaction.reply({ embeds: [playerEmbed] });
   },
 } satisfies SlashCommand;

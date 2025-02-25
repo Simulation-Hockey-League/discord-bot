@@ -26,42 +26,50 @@ export default {
         )
         .setRequired(false),
     )
-		.addBooleanOption((option) =>
-			option
-				.setName('playoffs')
-				.setDescription(
-					'Select regular season or playoffs. If not provided, will get regular season.'
-				)
-				.setRequired(false),
-		)
+    .addBooleanOption((option) =>
+      option
+        .setName('playoffs')
+        .setDescription(
+          'Select regular season or playoffs. If not provided, will get regular season.',
+        )
+        .setRequired(false),
+    )
     .setDescription('Get season rankings.'),
   execute: async (interaction) => {
-		const league = toLeagueType(interaction.options.getString('league'))
-		const playoffs = interaction.options.getBoolean('playoffs') ?? false;
-
-		const currentSeason = DynamicConfig.get('currentSeason');
-		const season = interaction.options.getNumber('season') ?? currentSeason;
-
     await interaction.deferReply();
-    const seasonStats = await getStandings(league, season);
+    const league = toLeagueType(interaction.options.getString('league'));
+    const playoffs = interaction.options.getBoolean('playoffs') ?? false;
 
-    if (!seasonStats || seasonStats?.length <= 0) {
+    const currentSeason = DynamicConfig.get('currentSeason');
+    const season = interaction.options.getNumber('season') ?? currentSeason;
+    try {
+      const seasonStats = await getStandings(league, season);
+
+      if (!seasonStats || seasonStats?.length <= 0) {
+        await interaction.editReply({
+          content: `Could not find${playoffs ? ` playoff` : ''} standings for ${
+            LeagueType[league]
+          }${season ? ` in season ${season}` : ''}.`,
+        });
+        return;
+      }
       await interaction.editReply({
-        content: `Could not find${playoffs ? ` playoff` : ''} standings for ${LeagueType[league]}${
-          season ? ` in season ${season}` : ''
-        }.`,
+        embeds: [
+          withStandingsStats(
+            BaseEmbed(interaction, {}).setTitle(
+              `Season ${season}${
+                playoffs ? ` Playoff ` : ` Regular Season `
+              }Standings`,
+            ),
+            seasonStats,
+          ),
+        ],
+      });
+    } catch (error) {
+      await interaction.editReply({
+        content: `An error occurred while retrieving standings.`,
       });
       return;
     }
-
-    await interaction.editReply({
-      embeds: [
-				withStandingsStats(
-					BaseEmbed(interaction, {})
-						.setTitle(`Season ${season}${playoffs ? ` Playoff ` : ` Regular Season `}Standings`),
-					seasonStats,
-				)
-      ],
-    });
   },
 } satisfies SlashCommand;

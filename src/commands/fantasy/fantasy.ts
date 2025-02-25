@@ -23,6 +23,7 @@ export default {
     .setDescription('Retrieve fantasy rankings for a specified player.'),
 
   execute: async (interaction) => {
+    await interaction.deferReply({ ephemeral: false });
     const target = interaction.options.getString('username');
 
     const currentUserInfo = await users.get(interaction.user.id);
@@ -100,11 +101,10 @@ export default {
           name: 'Players',
           value: playersSection,
         });
-      await interaction.reply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
     } catch (error) {
-      await interaction.reply({
+      await interaction.editReply({
         content: `An error occurred while retrieving fantasy rankings.`,
-        ephemeral: true,
       });
     }
   },
