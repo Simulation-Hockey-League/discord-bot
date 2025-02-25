@@ -58,6 +58,8 @@ export default {
           tpe: player.totalTPE,
           league: player.currentLeague,
           draftSeason: player.draftSeason,
+          position: player.position,
+          name: player.name,
         }))
         .sort((a, b) => b.tpe - a.tpe)
         .filter((player) => {
@@ -72,8 +74,8 @@ export default {
         });
 
       const getRankingEmbed = (page: number) => {
-        const startIdx = (page - 1) * 25;
-        const endIdx = page * 25;
+        const startIdx = (page - 1) * 15;
+        const endIdx = page * 15;
 
         const pageRankings = tpeRankings.slice(startIdx, endIdx);
 
@@ -90,9 +92,9 @@ export default {
             value: pageRankings
               .map(
                 (player, index) =>
-                  `${startIdx + index + 1}. S${player.draftSeason}. ${
-                    player.username
-                  } - ${player.tpe}`,
+                  `${startIdx + index + 1}.  ${player.username} |  ${
+                    player.name
+                  } | ${player.tpe} TPE`,
               )
               .join('\n'),
             inline: false,
