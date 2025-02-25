@@ -90,37 +90,44 @@ export default {
       });
 
       collector.on('collect', async (btnInteraction) => {
-        if (btnInteraction.user.id !== interaction.user.id) {
-          return btnInteraction.reply({
-            content: 'You cannot interact with these buttons.',
+        try {
+          if (btnInteraction.user.id !== interaction.user.id) {
+            return btnInteraction.reply({
+              content: 'You cannot interact with these buttons.',
+              ephemeral: true,
+            });
+          }
+
+          if (btnInteraction.customId === 'next') {
+            currentPage++;
+          } else if (btnInteraction.customId === 'prev' && currentPage > 1) {
+            currentPage--;
+          }
+
+          let newEmbed;
+          switch (type) {
+            case 'global':
+              newEmbed = await createGlobalRank(interaction, currentPage);
+              break;
+            case 'player':
+              newEmbed = await createGlobalPlayerRank(
+                interaction,
+                position,
+                currentPage,
+              );
+              break;
+          }
+
+          await btnInteraction.update({
+            embeds: [newEmbed],
+            components: [row],
+          });
+        } catch (error) {
+          await btnInteraction.reply({
+            content: 'An error occurred while fetching fantasy rankings.',
             ephemeral: true,
           });
         }
-
-        if (btnInteraction.customId === 'next') {
-          currentPage++;
-        } else if (btnInteraction.customId === 'prev' && currentPage > 1) {
-          currentPage--;
-        }
-
-        let newEmbed;
-        switch (type) {
-          case 'global':
-            newEmbed = await createGlobalRank(interaction, currentPage);
-            break;
-          case 'player':
-            newEmbed = await createGlobalPlayerRank(
-              interaction,
-              position,
-              currentPage,
-            );
-            break;
-        }
-
-        await btnInteraction.update({
-          embeds: [newEmbed],
-          components: [row],
-        });
       });
 
       collector.on('end', () => {

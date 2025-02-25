@@ -2,7 +2,6 @@ import axios from 'axios';
 import { parse } from 'csv-parse/sync';
 import fuzzysort from 'fuzzysort';
 
-const SHEET_ID = '1nBaMmwLlzY6lywBZa4RgXGEsRdYHSM2hA2pRPnVYC3g';
 const TAB_GID = '1974887086';
 const GROUP_TO_PLAYERS = '1820127588';
 const SWAP_SHEET_GID = '1633490752';
@@ -73,7 +72,8 @@ export type playersOnlyRecords = {
 };
 
 export async function fetchGlobalSheetData() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${TAB_GID}`;
+  const url = `https://docs.google.com/spreadsheets/d/${process.env
+    .SHEET_ID!}/export?format=csv&gid=${TAB_GID}`;
   const { data } = await axios.get(url);
   const records: GlobalCSVData[] = parse(data, {
     columns: true,
@@ -90,7 +90,8 @@ export async function fetchGlobalSheetData() {
 }
 
 export async function fetchPlayersData(username: string) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GROUP_TO_PLAYERS}`;
+  const url = `https://docs.google.com/spreadsheets/d/${process.env
+    .SHEET_ID!}/export?format=csv&gid=${GROUP_TO_PLAYERS}`;
   const { data } = await axios.get(url);
   const records: PlayersCSVData[] = parse(data, {
     columns: true,
@@ -106,7 +107,8 @@ export async function fetchPlayersData(username: string) {
 }
 
 export async function fetchSwapsData(username: string) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SWAP_SHEET_GID}`;
+  const url = `https://docs.google.com/spreadsheets/d/${process.env
+    .SHEET_ID!}/export?format=csv&gid=${SWAP_SHEET_GID}`;
   const { data } = await axios.get(url);
   const records: SwapsCSVData[] = parse(data, {
     columns: true,
@@ -129,7 +131,8 @@ export async function fetchSwapsData(username: string) {
 }
 
 export async function fetchPlayersOnlyData(position?: string | null) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${PLAYERS_ONLY}`;
+  const url = `https://docs.google.com/spreadsheets/d/${process.env
+    .SHEET_ID!}/export?format=csv&gid=${PLAYERS_ONLY}`;
   const { data } = await axios.get(url);
   const records: PlayersOnlyCSVData[] = parse(data, {
     columns: true,

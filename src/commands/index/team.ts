@@ -10,6 +10,7 @@ import {
 } from 'src/db/index/helpers/buttons/teamButton';
 import { SeasonType, TEAM_CHOICES } from 'src/db/index/shared';
 import { users } from 'src/db/users';
+import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { findTeamByName } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
@@ -58,7 +59,9 @@ export default {
     )
     .setDescription('Get team information.'),
   execute: async (interaction) => {
-    const season = interaction.options.getNumber('season') ?? undefined;
+    const currentSeason = DynamicConfig.currentSeason.get();
+
+    const season = interaction.options.getNumber('season') ?? currentSeason;
     const userTeam = await users.get(interaction.user.id);
     const abbr =
       interaction.options.getString('abbr') ??

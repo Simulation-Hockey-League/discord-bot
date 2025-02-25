@@ -39,9 +39,7 @@ export const leagueNametoType = (league: string): LeagueType => {
 
 export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
   let result = '';
-  if (game.overtime === 1 || game.shootout === 1) {
-    result = resultEmojis.otl;
-  } else if (
+  if (
     (game.homeTeamInfo.name === teamInfo.fullName &&
       game.homeScore > game.awayScore) ||
     (game.awayTeamInfo.name === teamInfo.fullName &&
@@ -49,7 +47,11 @@ export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
   ) {
     result = resultEmojis.win;
   } else {
-    result = resultEmojis.loss;
+    if (game.overtime === 1 || game.shootout === 1) {
+      result = resultEmojis.otl;
+    } else {
+      result = resultEmojis.loss;
+    }
   }
   return `[${result} ${game.awayTeamInfo.abbreviation} (${game.awayScore}) - ${game.homeTeamInfo.abbreviation} (${game.homeScore})](https://index.simulationhockey.com/shl/81/game/${game.slug})`;
 };
