@@ -1,5 +1,4 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { set } from 'node_modules/@types/lodash';
 import { getPlayerStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
@@ -46,6 +45,7 @@ export default {
     )
     .setDescription('Get player career statistics.'),
   execute: async (interaction) => {
+    await interaction.deferReply({ ephemeral: false });
     let league = interaction.options.getNumber('league') as
       | LeagueType
       | undefined;
@@ -63,8 +63,6 @@ export default {
       });
       return;
     }
-
-    await interaction.deferReply();
 
     try {
       let playerID;

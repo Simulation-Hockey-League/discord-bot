@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
+import { getUserByFuzzy } from 'src/db/portal';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { UserInfo, users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
@@ -19,9 +20,7 @@ export default {
     const target = interaction.options.getString('username', true);
 
     const isOverwritingStoredInfo = await users.has(interaction.user.id);
-
-    const allUsers = await PortalClient.getUserInfo();
-    const user = allUsers.find((u) => u.username === target);
+    const user = await getUserByFuzzy(target);
 
     if (!user) {
       await interaction.reply({
@@ -58,7 +57,7 @@ export default {
               : `Stored user info for ${interaction.user.toString()}.`,
           )
           .addFields(
-            { name: 'User', value: target },
+            { name: 'User', value: user.username },
             { name: 'Team', value: userInfo.teamName ?? '-' },
             { name: 'Player', value: userInfo.playerName ?? '-' },
           ),
