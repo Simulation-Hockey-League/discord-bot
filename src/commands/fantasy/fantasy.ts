@@ -7,6 +7,7 @@ import {
   fetchGlobalSheetData,
   fetchPlayersData,
   fetchSwapsData,
+  generateLeaderboard,
   getUserByFuzzy,
 } from '../../lib/fantasyHelpers';
 
@@ -59,27 +60,7 @@ export default {
         .filter((p) => p.group === groupNumber)
         .sort((a, b) => a.groupRank - b.groupRank);
 
-      const leaderboard =
-        groupPlayers
-          .map(
-            (p, index) =>
-              `${index + 1}.  ${
-                p.username === user.username ? `**${p.username}**` : p.username
-              } - ${p.score}`,
-          )
-          .slice(0, 4)
-          .join('\n') +
-        '\n' +
-        '------\n' +
-        groupPlayers
-          .slice(4, 8)
-          .map(
-            (p, index) =>
-              `${index + 5}. ${
-                p.username === user.username ? `**${p.username}**` : p.username
-              } - ${p.score}`,
-          )
-          .join('\n');
+      const leaderboard = generateLeaderboard(groupPlayers, user.username);
 
       const playerData = await fetchPlayersData(user.username);
       const swapData = await fetchSwapsData(user.username);
@@ -112,7 +93,7 @@ export default {
         .setTitle(`Fantasy Group ${groupNumber}`)
         .setDescription(leaderboard)
         .addFields({
-          name: '🌍 Global Rank & TPE Reward',
+          name: '🌍 Global Rank',
           value: `${user.username} - **${user.score}** (Rank: ${user.globalRank})`,
         })
         .addFields({
