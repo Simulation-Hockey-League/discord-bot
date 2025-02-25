@@ -16,10 +16,10 @@ export async function fetchGlobalSheetData() {
 
   return records.map((row: Record<string, string>) => ({
     username: row['All Players'],
-    score: parseInt(row['Score'], 10) || 0,
-    group: parseInt(row['Group Number'], 10) || 0,
-    groupRank: parseInt(row['Group Rank'], 10) || 0,
-    globalRank: parseInt(row['Global Rank'], 10) || 0,
+    score: parseFloat(row['Score']) || 0,
+    group: parseFloat(row['Group Number']) || 0,
+    groupRank: parseFloat(row['Group Rank']) || 0,
+    globalRank: parseFloat(row['Global Rank']) || 0,
   }));
 }
 
@@ -52,11 +52,11 @@ export async function fetchSwapsData(username: string) {
       newSkater: row['New (Skater)'],
       oldGoalie: row['Old (Goalie)'],
       newGoalie: row['New (Goalie)'],
-      osa: parseInt(row['OSA'], 10) || 0,
-      nsa: parseInt(row['NSA'], 10) || 0,
-      osc: parseInt(row['OSC'], 10) || 0,
-      nsc: parseInt(row['NSC'], 10) || 0,
-      difference: parseInt(row['Difference'], 10) || 0,
+      osa: parseFloat(row['OSA']) || 0,
+      nsa: parseFloat(row['NSA']) || 0,
+      osc: parseFloat(row['OSC']) || 0,
+      nsc: parseFloat(row['NSC']) || 0,
+      difference: parseFloat(row['Difference']) || 0,
     }));
 }
 
