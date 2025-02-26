@@ -3,6 +3,7 @@ import { SeasonType } from 'src/db/index/shared';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 import { DynamicConfig } from './config/dynamicConfig';
+import { getSkaterFantasyPoints } from './fantasyHelpers';
 
 export const toToi = (minutes: number, games: number): string => {
   const avg = minutes / (games || 0) / 60;
@@ -16,6 +17,7 @@ export const withPlayerStats = (
   embed: EmbedBuilder,
   playerStats: PlayerStats | GoalieStats,
 ): EmbedBuilder => {
+  const fantasyPoints = getSkaterFantasyPoints(playerStats);
   const currentSeason = DynamicConfig.get('currentSeason');
   const seasonInfo = `Season: ${playerStats.season}${
     playerStats.seasonType === SeasonType.POST ? ' | Playoffs' : ''
@@ -105,7 +107,11 @@ export const withPlayerStats = (
           ].join('\n'),
           inline: true,
         },
-        // TODO(fantasy): if can show fantasy value show here
+        {
+          name: '\u200B',
+          value: [`Fantasy: ${fantasyPoints}`].join('\n'),
+          inline: true,
+        },
         {
           name: '\u200B',
           value: '\u200B',
@@ -128,6 +134,7 @@ export const withPlayerStats = (
           playerStats.shotsAgainst / (playerStats.gamesPlayed || 1)
         ).toFixed(2)}`,
         `Game rating: ${playerStats.gameRating}`,
+        `Fantasy: ${fantasyPoints}`,
       ].join('\n'),
       inline: true,
     });

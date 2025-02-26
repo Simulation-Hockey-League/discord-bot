@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { parse } from 'csv-parse/sync';
 import fuzzysort from 'fuzzysort';
+import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 const TAB_GID = '1974887086';
 const GROUP_TO_PLAYERS = '1820127588';
@@ -71,6 +72,34 @@ export type playersOnlyRecords = {
   score: number;
 };
 
+export function getSkaterFantasyPoints(playerStats: PlayerStats | GoalieStats) {
+  let fantasyPoints = 0;
+  if (playerStats.position !== 'Goalie') {
+    const skaterStats = playerStats as PlayerStats;
+    fantasyPoints += skaterStats.goals * 3.7;
+    fantasyPoints += skaterStats.assists * 2.7;
+    fantasyPoints += skaterStats.shotsOnGoal * 0.2;
+    fantasyPoints += skaterStats.hits * 0.4;
+    if (
+      playerStats.position === 'C' ||
+      playerStats.position === 'LW' ||
+      playerStats.position === 'RW'
+    ) {
+      fantasyPoints += skaterStats.shotsBlocked * 0.3;
+    } else {
+      fantasyPoints += skaterStats.shotsBlocked * 1;
+    }
+  } else {
+    const goalieStats = playerStats as unknown as GoalieStats;
+    fantasyPoints += goalieStats.wins * 5;
+    fantasyPoints += goalieStats.shutouts * 5;
+    fantasyPoints +=
+      (goalieStats.shotsAgainst - goalieStats.goalsAgainst) * 0.1;
+  }
+
+  return fantasyPoints;
+}
+
 export async function fetchGlobalSheetData() {
   const url = `https://docs.google.com/spreadsheets/d/${process.env
     .SHEET_ID!}/export?format=csv&gid=${TAB_GID}`;
@@ -102,7 +131,7 @@ export async function fetchPlayersData(username: string) {
     .filter((row) => row['username'] === username)
     .map((row) => ({
       player: row['player'],
-      score: parseInt(row['player score'], 10) || 0,
+      score: parseFloat(row['player score']) || 0,
     }));
 }
 
