@@ -1,5 +1,6 @@
 import fuzzysort from 'fuzzysort';
 import _ from 'lodash';
+import sqlite3 from 'sqlite3';
 import { TeamInfo } from 'src/lib/teams';
 import {
   DetailedTeamStats,
@@ -330,4 +331,30 @@ export const getPlayerStats = async (
         getGoalieStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
       ]);
   return _.maxBy(candidates, (candidate) => candidate?.score ?? -1)?.obj;
+};
+
+export const getAllPlayers = async (name: string, league: LeagueType) => {
+  const db = new sqlite3.Database('src/db/index/players.sqlite');
+
+  type Player = { playerID: number; name: string };
+  const players = await new Promise<Player[]>((resolve, reject) => {
+    db.all(
+      `SELECT playerID, name FROM players WHERE leagueID = ?`,
+      [league],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows as Player[]);
+        }
+      },
+    );
+  }).finally(() => db.close());
+
+  const playerMatch = fuzzysort.go(name, players, {
+    key: 'name',
+    limit: 1,
+    threshold: -10000,
+  });
+  return _.maxBy(playerMatch, (candidate) => candidate?.score ?? -1)?.obj;
 };

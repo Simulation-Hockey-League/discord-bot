@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { getPlayerStats } from 'src/db/index';
+import { getAllPlayers, getPlayerStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { PortalClient } from 'src/db/portal/PortalClient';
@@ -45,26 +45,26 @@ export default {
     )
     .setDescription('Get player career statistics.'),
   execute: async (interaction) => {
-    await interaction.deferReply({ ephemeral: false });
-    let league = interaction.options.getNumber('league') as
-      | LeagueType
-      | undefined;
-    const targetName = interaction.options.getString('name');
-    const seasonType = interaction.options.getString('type') as
-      | SeasonType
-      | undefined;
-    const currentUserInfo = await users.get(interaction.user.id);
-    const name = targetName || currentUserInfo?.playerName;
-
-    if (!name) {
-      await interaction.reply({
-        content: 'No player name provided or stored.',
-        ephemeral: true,
-      });
-      return;
-    }
-
     try {
+      await interaction.deferReply({ ephemeral: false });
+      let league = interaction.options.getNumber('league') as
+        | LeagueType
+        | undefined;
+      const targetName = interaction.options.getString('name');
+      const seasonType = interaction.options.getString('type') as
+        | SeasonType
+        | undefined;
+      const currentUserInfo = await users.get(interaction.user.id);
+      const name = targetName || currentUserInfo?.playerName;
+
+      if (!name) {
+        await interaction.reply({
+          content: 'No player name provided or stored.',
+          ephemeral: true,
+        });
+        return;
+      }
+
       let playerID;
       let position;
       let setLeague;
@@ -83,26 +83,51 @@ export default {
           }
         }
       }
+
       if (!playerID) {
-        const getPlayer = await getPlayerStats(name, seasonType);
-        if (!getPlayer) {
+        const playerStats = await getPlayerStats(name, seasonType);
+        if (playerStats) {
+          playerID = playerStats.id;
+          position = playerStats.position;
+          setLeague = playerStats.league;
+        }
+      }
+      if (!playerID) {
+        const playerRecord = await getAllPlayers(
+          name,
+          league ?? LeagueType.SHL,
+        );
+        if (!playerRecord) {
           await interaction.editReply({
             content: `Could not find ${name}.`,
           });
           return;
         }
-        playerID = getPlayer.id;
-        position = getPlayer.position;
-        setLeague = getPlayer.league;
+        playerID = playerRecord.playerID;
+        setLeague = league;
       }
+
       league = league ?? setLeague;
 
-      const isGoalie = position === 'G' || position === 'Goalie';
-      const careerStats = await IndexApiClient.get(league).getCareerStats(
+      let isGoalie = position === 'G' || position === 'Goalie';
+      let careerStats = await IndexApiClient.get(league).getCareerStats(
         playerID,
         seasonType,
         isGoalie,
       );
+
+      if (
+        !position &&
+        (!careerStats || careerStats.length === 0) &&
+        !isGoalie
+      ) {
+        isGoalie = true;
+        careerStats = await IndexApiClient.get(league).getCareerStats(
+          playerID,
+          seasonType,
+          isGoalie,
+        );
+      }
 
       if (isGoalie) {
         await displayGoalieCareer(
