@@ -202,6 +202,7 @@ export type GoalieStats = {
   savePct: string;
   gameRating: number;
   seasonType: SeasonType;
+  GSAA?: number;
 };
 
 export type GameInfo = {

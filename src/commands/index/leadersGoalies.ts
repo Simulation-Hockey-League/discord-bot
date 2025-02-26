@@ -29,6 +29,7 @@ export default {
           { name: 'goalsAgainst', value: 'goalsAgainst' },
           { name: 'shutouts', value: 'shutouts' },
           { name: 'savePct', value: 'savePct' },
+          { name: 'GSAA', value: 'GSAA' },
         )
         .setRequired(true),
     )

@@ -27,6 +27,7 @@ export const GOALIE_LEADER_CATEGORIES = [
   'goalsAgainst',
   'shutouts',
   'savePct',
+  'GSAA',
 ] as const;
 
 export const TEAM_CHOICES = [

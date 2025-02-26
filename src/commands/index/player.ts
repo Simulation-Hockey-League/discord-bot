@@ -81,13 +81,15 @@ export default {
 
     await interaction.editReply({
       embeds: [
-        withPlayerStats(
-          BaseEmbed(interaction, {
-            logoUrl: teamInfo?.logoUrl,
-            teamColor: team?.colors.primary,
-          }).setTitle(`${playerStats.name} - ${playerStats.position}`),
-          playerStats,
-        ),
+        (
+          await withPlayerStats(
+            BaseEmbed(interaction, {
+              logoUrl: teamInfo?.logoUrl,
+              teamColor: team?.colors.primary,
+            }).setTitle(`${playerStats.name} - ${playerStats.position}`),
+            playerStats,
+          )
+        ).data,
       ],
     });
   },
