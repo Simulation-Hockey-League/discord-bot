@@ -23,24 +23,24 @@ export default {
     const currentUserInfo = await users.get(interaction.user.id);
     const name = target || currentUserInfo?.forumName;
     const currentSeason = DynamicConfig.get('currentSeason');
-    if (!name) {
-      await interaction.reply({
-        content: 'No player name provided or stored.',
-        ephemeral: true,
-      });
-      return;
-    }
-    const user = await getUserByFuzzy(name);
-
-    if (!user) {
-      await interaction.reply({
-        content:
-          'Could not find user with that username. Please check your spelling and try again.',
-        ephemeral: true,
-      });
-      return;
-    }
     try {
+      if (!name) {
+        await interaction.reply({
+          content: 'No player name provided or stored.',
+          ephemeral: true,
+        });
+        return;
+      }
+      const user = await getUserByFuzzy(name);
+
+      if (!user) {
+        await interaction.reply({
+          content:
+            'Could not find user with that username. Please check your spelling and try again.',
+          ephemeral: true,
+        });
+        return;
+      }
       const players = await PortalClient.getActivePlayers();
       const player = players.find((p) => p.uid === user.userID);
 
