@@ -24,6 +24,7 @@ export const getTeamInfo = (league: LeagueInput, season?: number) =>
 
 export const getTeamStats = async (
   teamInfo: TeamInfo,
+  seasonType: SeasonType = SeasonType.REGULAR,
   season?: number,
 ): Promise<HydratedTeamStats> => {
   const allTeams = await getStandings(teamInfo.leagueType, season);
@@ -69,6 +70,14 @@ export const getTeamStats = async (
     takeaways: 0,
     giveaways: 0,
   };
+
+  const players = await IndexApiClient.get(teamInfo.leagueType).getPlayerStats(
+    seasonType,
+    season,
+  );
+  const teamPlayers = players.filter(
+    (player) => player.teamId === currentTeamInfo.id,
+  );
 
   if (!result || !currentTeamInfo) {
     throw new Error(`Could not find stats for ${teamInfo.fullName}`);
@@ -165,7 +174,7 @@ export const getTeamStats = async (
     pdoRank: 0, // TODO
     corsi: 0, // TODO
     corsiRank: 0, // TODO
-    regularSeasonPlayerStats: [], // TODO
+    regularSeasonPlayerStats: teamPlayers,
   };
 };
 

@@ -98,11 +98,106 @@ export async function createLeadersEmbed(
   teamData: IndexTeamInfo,
   teamInfo: TeamInfo,
   season?: number,
+  seasonType?: SeasonType,
 ) {
+  const players = await getTeamStats(
+    teamInfo,
+    seasonType ?? SeasonType.REGULAR,
+    season,
+  );
+
+  const { regularSeasonPlayerStats } = players;
+
+  const getTopThree = <K extends keyof (typeof regularSeasonPlayerStats)[0]>(
+    stat: K,
+  ) => {
+    return [...regularSeasonPlayerStats]
+      .sort((a, b) => Number(b[stat]) - Number(a[stat]))
+      .slice(0, 3)
+      .map((player) => `${player.name} (${player[stat]})`);
+  };
+
+  const topGoals = getTopThree('goals');
+  const topAssists = getTopThree('assists');
+  const topPoints = getTopThree('points');
+  const topHits = getTopThree('hits');
+  const topShotsBlocked = getTopThree('shotsBlocked');
+  const topShotsOnGoal = getTopThree('shotsOnGoal');
+  const topPlusMinus = [...regularSeasonPlayerStats]
+    .sort((a, b) => a.plusMinus - b.plusMinus)
+    .reverse()
+    .slice(0, 3)
+    .map(
+      (player) =>
+        `${player.name} (${player.plusMinus > 0 ? '+' : ''}${
+          player.plusMinus
+        })`,
+    );
+
+  const topTakeaways = getTopThree('takeaways');
+  const topFightsWon = [...regularSeasonPlayerStats]
+    .filter((player) => player.fights > 0)
+    .sort((a, b) => b.fightWins - a.fightWins)
+    .slice(0, 3)
+    .map((player) => `${player.name} (${player.fightWins})`);
+
+  const formatOutput = (leaders: string[]) => {
+    if (leaders.length === 0) return 'None';
+    return leaders.map((player, index) => `${index + 1}. ${player}`).join('\n');
+  };
+
   const leadersEmbed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamData.colors.primary,
-  }).setTitle(`${teamInfo.fullName} Team Leaders S${season}`);
+  })
+    .setTitle(`${teamInfo.fullName} Team Leaders S${season}`)
+    .addFields(
+      {
+        name: 'Goals',
+        value: formatOutput(topGoals),
+        inline: true,
+      },
+      {
+        name: 'Assists',
+        value: formatOutput(topAssists),
+        inline: true,
+      },
+      {
+        name: 'Points',
+        value: formatOutput(topPoints),
+        inline: true,
+      },
+      {
+        name: 'Hits',
+        value: formatOutput(topHits),
+        inline: true,
+      },
+      {
+        name: 'Blocks',
+        value: formatOutput(topShotsBlocked),
+        inline: true,
+      },
+      {
+        name: 'Shots',
+        value: formatOutput(topShotsOnGoal),
+        inline: true,
+      },
+      {
+        name: 'Plus/Minus',
+        value: formatOutput(topPlusMinus),
+        inline: true,
+      },
+      {
+        name: 'Takeaways',
+        value: formatOutput(topTakeaways),
+        inline: true,
+      },
+      {
+        name: 'Fights Won',
+        value: formatOutput(topFightsWon),
+        inline: true,
+      },
+    );
 
   return leadersEmbed;
 }
@@ -229,7 +324,7 @@ export async function createStatsEmbed(
   season?: number,
   seasonType?: SeasonType,
 ) {
-  const teamStats = await getTeamStats(teamInfo, season);
+  const teamStats = await getTeamStats(teamInfo, seasonType, season);
   const {
     goalsPerGame,
     goalsAgainstPerGame,
