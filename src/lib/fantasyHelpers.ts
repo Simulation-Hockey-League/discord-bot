@@ -74,7 +74,7 @@ export type playersOnlyRecords = {
 
 export function getSkaterFantasyPoints(playerStats: PlayerStats | GoalieStats) {
   let fantasyPoints = 0;
-  if (playerStats.position !== 'Goalie') {
+  if (playerStats.position !== 'G') {
     const skaterStats = playerStats as PlayerStats;
     fantasyPoints += skaterStats.goals * 3.7;
     fantasyPoints += skaterStats.assists * 2.7;
