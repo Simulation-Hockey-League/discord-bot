@@ -62,7 +62,7 @@ export const TEAM_CHOICES = [
   { name: 'Quebec City Citadelles', value: 'QCC' },
   { name: 'St. Louis Scarecrows', value: 'STL' },
   { name: 'Vancouver Whalers', value: 'VAN' },
-  { name: 'Regina Elk', value: 'REG' },
+  { name: 'Thunder Bay Walleye', value: 'TBW' },
   { name: 'Great Falls Grizzlies', value: 'GFG' },
   { name: 'San Diego Tidal', value: 'SDT' },
   { name: 'Ottawa Highlanders', value: 'OTT' },

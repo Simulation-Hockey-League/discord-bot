@@ -38,23 +38,24 @@ export const leagueNametoType = (league: string): LeagueType => {
   }
 };
 
-export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
-  const league = leagueTypeToString(teamInfo.leagueType).toLowerCase();
-  let result = '';
+export const getGameResult = (game: GameInfo, teamInfo: TeamInfo): string => {
   if (
     (game.homeTeamInfo.name === teamInfo.fullName &&
       game.homeScore > game.awayScore) ||
     (game.awayTeamInfo.name === teamInfo.fullName &&
       game.awayScore > game.homeScore)
   ) {
-    result = resultEmojis.win;
-  } else {
-    if (game.overtime === 1 || game.shootout === 1) {
-      result = resultEmojis.otl;
-    } else {
-      result = resultEmojis.loss;
-    }
+    return resultEmojis.win;
   }
+  if (game.overtime === 1 || game.shootout === 1) {
+    return resultEmojis.otl;
+  }
+  return resultEmojis.loss;
+};
+
+export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
+  const league = leagueTypeToString(teamInfo.leagueType).toLowerCase();
+  const result = getGameResult(game, teamInfo);
   return `[${result} ${game.awayTeamInfo.abbreviation} (${game.awayScore}) - ${game.homeTeamInfo.abbreviation} (${game.homeScore})](https://index.simulationhockey.com/${league}/${game.season}/game/${game.slug})`;
 };
 
@@ -82,25 +83,10 @@ export const getLast10Games = async (
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 10)
-    .map((game) => {
-      let result = '';
-      if (game.overtime === 1 || game.shootout === 1) {
-        result = resultEmojis.otl;
-      } else if (
-        (game.homeTeamInfo.name === teamInfo.fullName &&
-          game.homeScore > game.awayScore) ||
-        (game.awayTeamInfo.name === teamInfo.fullName &&
-          game.awayScore > game.homeScore)
-      ) {
-        result = resultEmojis.win;
-      } else {
-        result = resultEmojis.loss;
-      }
-
-      return {
-        result: result,
-      };
-    });
+    .reverse()
+    .map((game) => ({
+      result: getGameResult(game, teamInfo),
+    }));
 
   return last10Results;
 };
