@@ -100,3 +100,56 @@ export type PortalPlayer = {
   indexRecords: IndexPlayerID[] | null;
   inactive: boolean;
 };
+
+export type InternalChecklist = {
+  userID: number;
+  playerUpdateID: number;
+  tid: number;
+  league: number;
+  subject: string;
+  complete: number;
+  dueDate: string;
+};
+
+export type PlayerAchievement = {
+  playerUpdateID: number | null;
+  playerName: string;
+  userID: number | null;
+  fhmID: number;
+  leagueID: number;
+  seasonID: number;
+  teamID: number;
+  achievement: number;
+  achievementName: string;
+  achievementDescription: string;
+  isAward: boolean;
+  won: boolean;
+};
+
+export type TeamAchievement = {
+  teamID: number;
+  leagueID: number;
+  seasonID: number;
+  achievement: number;
+  achievementName: string;
+  achievementDescription: string;
+};
+
+export type UserAchievement = {
+  username: string;
+  userID: number;
+  leagueID: number;
+  seasonID: number;
+  teamID: number;
+  achievement: number;
+  achievementName: string;
+  achievementDescription: string;
+  isAward: boolean;
+  won: boolean;
+  GM: number;
+};
+
+export type BasicUserInfo = {
+  userID: number;
+  username: string;
+};

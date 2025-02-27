@@ -1,8 +1,10 @@
 import { EmbedBuilder } from 'discord.js';
+import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType } from 'src/db/index/shared';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 import { DynamicConfig } from './config/dynamicConfig';
+import { getSkaterFantasyPoints } from './fantasyHelpers';
 
 export const toToi = (minutes: number, games: number): string => {
   const avg = minutes / (games || 0) / 60;
@@ -11,11 +13,11 @@ export const toToi = (minutes: number, games: number): string => {
   return `${avgMinutes}:${avgSeconds.toString().padStart(2, '0')}`;
 };
 
-// Populate the embed with player stats fields based on the playerStats response
-export const withPlayerStats = (
+export const withPlayerStats = async (
   embed: EmbedBuilder,
   playerStats: PlayerStats | GoalieStats,
-): EmbedBuilder => {
+): Promise<EmbedBuilder> => {
+  const fantasyPoints = getSkaterFantasyPoints(playerStats);
   const currentSeason = DynamicConfig.get('currentSeason');
   const seasonInfo = `Season: ${playerStats.season}${
     playerStats.seasonType === SeasonType.POST ? ' | Playoffs' : ''
@@ -105,7 +107,11 @@ export const withPlayerStats = (
           ].join('\n'),
           inline: true,
         },
-        // TODO(fantasy): if can show fantasy value show here
+        {
+          name: '\u200B',
+          value: [`Fantasy: ${fantasyPoints}`].join('\n'),
+          inline: true,
+        },
         {
           name: '\u200B',
           value: '\u200B',
@@ -113,6 +119,24 @@ export const withPlayerStats = (
         },
       );
   } else {
+    const allGoalies = await IndexApiClient.get(
+      playerStats.league,
+    ).getGoalieStats(playerStats.seasonType, playerStats.season);
+    const { totalSaves, totalShotsAgainst } = allGoalies.reduce(
+      (acc, g) => {
+        acc.totalSaves += g.saves;
+        acc.totalShotsAgainst += g.shotsAgainst;
+        return acc;
+      },
+      { totalSaves: 0, totalShotsAgainst: 0 },
+    );
+    const leagueAvgSavePct = totalShotsAgainst
+      ? totalSaves / totalShotsAgainst
+      : 0;
+
+    const gsaa =
+      playerStats.saves - leagueAvgSavePct * playerStats.shotsAgainst;
+
     if (playerStats.season !== currentSeason) {
       embed.setDescription(seasonInfo);
     }
@@ -128,6 +152,8 @@ export const withPlayerStats = (
           playerStats.shotsAgainst / (playerStats.gamesPlayed || 1)
         ).toFixed(2)}`,
         `Game rating: ${playerStats.gameRating}`,
+        `GSAA: ${gsaa.toFixed(2)}`,
+        `Fantasy: ${fantasyPoints}`,
       ].join('\n'),
       inline: true,
     });
