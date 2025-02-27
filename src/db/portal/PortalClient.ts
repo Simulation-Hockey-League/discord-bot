@@ -1,6 +1,7 @@
 import { Config } from 'src/lib/config/config';
 import { logger } from 'src/lib/logger';
 import {
+  BasicUserInfo,
   InternalChecklist,
   PlayerAchievement,
   PortalPlayer,
@@ -9,7 +10,7 @@ import {
 } from 'typings/portal';
 
 class PortalApiClient {
-  #userInfo: Array<{ userID: number; username: string }> = [];
+  #userInfo: Array<BasicUserInfo> = [];
   #activePlayers: Array<PortalPlayer> = [];
   #getPlayer: Array<PortalPlayer> = [];
   #getChecklist: Array<InternalChecklist> = [];
@@ -48,9 +49,7 @@ class PortalApiClient {
     return response.json();
   }
 
-  async getUserInfo(
-    reload: boolean = false,
-  ): Promise<Array<{ userID: number; username: string }>> {
+  async getUserInfo(reload: boolean = false): Promise<Array<BasicUserInfo>> {
     this.#userInfo = await this.#getData(this.#userInfo, reload, [`userinfo`]);
     return this.#userInfo;
   }
@@ -122,16 +121,16 @@ class PortalApiClient {
 
   async getUserAwards(
     uid: string,
-    leagueID: string,
+    leagueID?: string,
     reload: boolean = false,
   ): Promise<Array<UserAchievement>> {
     return await this.#getData(
       this.#getUserAwards,
       reload,
-      ['history/user-achievements'],
+      ['history/user-achievement'],
       {
         uid: uid,
-        leagueID: leagueID,
+        ...(leagueID && { leagueID }),
       },
     );
   }

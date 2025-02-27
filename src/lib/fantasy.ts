@@ -1,3 +1,5 @@
+import { CacheType, ChatInputCommandInteraction } from 'discord.js';
+
 import { BaseEmbed } from './embed';
 import {
   fetchGlobalSheetData,
@@ -37,7 +39,7 @@ const paginateGroupData = (data: groupRecords[], page: number) => {
 };
 
 export const createGlobalPlayerRank = async (
-  interaction: any,
+  interaction: ChatInputCommandInteraction<CacheType>,
   position?: string | null,
   page: number = 1,
 ) => {
@@ -71,7 +73,10 @@ export const createGlobalPlayerRank = async (
   return embed;
 };
 
-export const createGlobalRank = async (interaction: any, page: number = 1) => {
+export const createGlobalRank = async (
+  interaction: ChatInputCommandInteraction<CacheType>,
+  page: number = 1,
+) => {
   const fantasyData = await fetchGlobalSheetData();
   const { totalPages, currentPageData } = paginateGroupData(fantasyData, page);
 

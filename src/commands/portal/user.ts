@@ -1,10 +1,14 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+  ComponentType,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { getUserByFuzzy } from 'src/db/portal';
-import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import { BaseEmbed } from 'src/lib/embed';
+import { withUserAwards, withUserInfo } from 'src/lib/user';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -22,17 +26,17 @@ export default {
     const target = interaction.options.getString('username');
     const currentUserInfo = await users.get(interaction.user.id);
     const name = target || currentUserInfo?.forumName;
-    const currentSeason = DynamicConfig.get('currentSeason');
-    try {
-      if (!name) {
-        await interaction.reply({
-          content: 'No player name provided or stored.',
-          ephemeral: true,
-        });
-        return;
-      }
-      const user = await getUserByFuzzy(name);
 
+    if (!name) {
+      await interaction.reply({
+        content: 'No player name provided or stored.',
+        ephemeral: true,
+      });
+      return;
+    }
+
+    try {
+      const user = await getUserByFuzzy(name);
       if (!user) {
         await interaction.reply({
           content:
@@ -41,98 +45,60 @@ export default {
         });
         return;
       }
-      const players = await PortalClient.getActivePlayers();
-      const player = players.find((p) => p.uid === user.userID);
 
-      let checklistLeague = 0;
-      if (player && player.draftSeason === currentSeason) {
-        checklistLeague - 1;
-      }
-      const checklist = await PortalClient.getChecklistByUser(
-        String(checklistLeague),
-        String(user.userID),
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`profile_${user.userID}`)
+          .setLabel('Profile')
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setCustomId(`awards_${user.userID}`)
+          .setLabel('User Awards')
+          .setStyle(ButtonStyle.Secondary),
       );
 
-      const incompleteTasks = checklist.filter((task) => task.complete === 0);
-      let checklistField;
-      if (incompleteTasks.length === 0) {
-        checklistField = {
-          name: '✅ Checklist',
-          value: 'Done All your Tasks This week!',
-          inline: false,
-        };
-      } else {
-        const taskList = incompleteTasks
-          .map(
-            (task) =>
-              `🔹 [${
-                task.subject
-              }](https://simulationhockey.com/showthread.php?${
-                task.tid
-              }) - **${task.dueDate.replace('Due: ', '')}**`,
-          )
-          .join('\n');
+      await withUserInfo(interaction, user);
+      const response = await interaction.editReply({ components: [row] });
 
-        checklistField = {
-          name: '📝 Checklist',
-          value: taskList,
-          inline: false,
-        };
-      }
+      const collector = response.createMessageComponentCollector({
+        componentType: ComponentType.Button,
+        time: 60000,
+      });
 
-      if (!player) {
-        await interaction.reply({
-          content: 'Could not find active player with that username.',
-          ephemeral: true,
-        });
-        return;
-      }
-      const teams = await IndexApiClient.get(
-        player?.currentLeague,
-      ).getTeamInfo();
-      const team = teams.find((team) => team.id === player?.currentTeamID);
-      const formattedBankBalance = `$${player.bankBalance.toLocaleString(
-        'en-US',
-      )} USD`;
+      collector.on('collect', async (i: ButtonInteraction) => {
+        if (i.user.id !== interaction.user.id) {
+          await i.reply({
+            content: 'Only the command user can use these buttons.',
+            ephemeral: true,
+          });
+          return;
+        }
 
-      const playerEmbed = BaseEmbed(interaction, {
-        teamColor: team?.colors.primary,
-      })
-        .setTitle(`${player.username}`)
-        .setURL(`https://portal.simulationhockey.com/player/${player.pid}`)
-        .addFields(
-          { name: 'TPE', value: `${player.totalTPE.toString()}`, inline: true },
-          {
-            name: 'Applied',
-            value: `${player.appliedTPE.toString()}`,
-            inline: true,
-          },
-          { name: 'Position', value: player.position, inline: true },
-          {
-            name: 'Draft Season',
-            value: `S${player.draftSeason}`,
-            inline: true,
-          },
-          { name: 'Bank', value: formattedBankBalance, inline: true },
-          {
-            name: 'Activity Check',
-            value: player.activityCheckComplete ? 'Yes' : 'No',
-            inline: true,
-          },
-          {
-            name: 'Training Purchased',
-            value: player.trainingPurchased ? 'Yes' : 'No',
-            inline: true,
-          },
-        );
-      playerEmbed.addFields(checklistField);
+        await i.deferUpdate();
 
-      await interaction.editReply({ embeds: [playerEmbed] });
+        if (i.customId.startsWith('profile')) {
+          await withUserInfo(interaction, user);
+        } else if (i.customId.startsWith('awards')) {
+          await withUserAwards(interaction, user);
+        }
+
+        await i.editReply({ components: [row] });
+      });
+
+      collector.on('end', () => {
+        interaction
+          .editReply({ components: [] })
+          .catch(
+            async (error) =>
+              await interaction.editReply(
+                `An error occurred while updating: ${error.message}.`,
+              ),
+          );
+      });
     } catch (error) {
       await interaction.editReply({
-        content: `An error occurred while retrieving player info.`,
+        content: 'An error occurred while retrieving player info.',
       });
-      return;
     }
   },
 } satisfies SlashCommand;

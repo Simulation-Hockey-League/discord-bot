@@ -148,3 +148,8 @@ export type UserAchievement = {
   won: boolean;
   GM: number;
 };
+
+export type BasicUserInfo = {
+  userID: number;
+  username: string;
+};

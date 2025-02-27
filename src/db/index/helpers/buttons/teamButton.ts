@@ -1,4 +1,10 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  CacheType,
+  ChatInputCommandInteraction,
+} from 'discord.js';
 import {
   createLeadersEmbed,
   createRosterEmbed,
@@ -38,7 +44,7 @@ export function createActionRow(
 }
 
 export async function createEmbed(
-  interaction: any,
+  interaction: ChatInputCommandInteraction<CacheType>,
   team: IndexTeamInfo,
   teamInfo: TeamInfo,
   season?: number,

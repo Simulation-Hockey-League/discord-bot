@@ -1,3 +1,4 @@
+import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import { getTeamStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 
@@ -17,7 +18,7 @@ import {
 import { TeamInfo } from './teams';
 
 export async function createScheduleEmbed(
-  interaction: any,
+  interaction: ChatInputCommandInteraction<CacheType>,
   teamData: IndexTeamInfo,
   teamInfo: TeamInfo,
   seasonType?: SeasonType,
@@ -26,7 +27,6 @@ export async function createScheduleEmbed(
   if (season && season <= 52) {
     await interaction.editReply({
       content: 'Cannot fetch schedule for seasons before Season 53.',
-      ephemeral: false,
     });
     return;
   }
@@ -94,7 +94,7 @@ export async function createScheduleEmbed(
 }
 
 export async function createLeadersEmbed(
-  interaction: any,
+  interaction: ChatInputCommandInteraction<CacheType>,
   teamData: IndexTeamInfo,
   teamInfo: TeamInfo,
   season?: number,
@@ -203,7 +203,7 @@ export async function createLeadersEmbed(
 }
 
 export async function createRosterEmbed(
-  interaction: any,
+  interaction: ChatInputCommandInteraction<CacheType>,
   teamData: IndexTeamInfo,
   teamInfo: TeamInfo,
 ) {
@@ -319,7 +319,7 @@ export async function createRosterEmbed(
 }
 
 export async function createStatsEmbed(
-  interaction: any,
+  interaction: ChatInputCommandInteraction<CacheType>,
   teamInfo: TeamInfo,
   season?: number,
   seasonType?: SeasonType,
