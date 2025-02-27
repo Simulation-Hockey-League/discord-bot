@@ -59,40 +59,40 @@ export default {
     )
     .setDescription('Get team information.'),
   execute: async (interaction) => {
-    const currentSeason = DynamicConfig.currentSeason.get();
-
-    const season = interaction.options.getNumber('season') ?? currentSeason;
-    const userTeam = await users.get(interaction.user.id);
-    const abbr =
-      interaction.options.getString('abbr') ??
-      TEAM_CHOICES.find((team) => team.name === userTeam?.teamName)?.value ??
-      null;
-    const seasonType = interaction.options.getString('type') as
-      | SeasonType
-      | undefined;
-
-    const view = interaction.options.getString('view') ?? 'overview';
-    if (!abbr) {
-      await interaction.reply({
-        content: 'No team abbreviation provided.',
-        ephemeral: true,
-      });
-      return;
-    }
-    if (
-      abbr &&
-      !TEAM_CHOICES.some(
-        (team) => team.value.toLowerCase() === abbr.toLowerCase(),
-      )
-    ) {
-      await interaction.reply({
-        content: `Invalid team abbreviation: ${abbr}.`,
-        ephemeral: true,
-      });
-      return;
-    }
-
     try {
+      const currentSeason = DynamicConfig.currentSeason.get();
+
+      const season = interaction.options.getNumber('season') ?? currentSeason;
+      const userTeam = await users.get(interaction.user.id);
+      const abbr =
+        interaction.options.getString('abbr') ??
+        TEAM_CHOICES.find((team) => team.name === userTeam?.teamName)?.value ??
+        null;
+      const seasonType = interaction.options.getString('type') as
+        | SeasonType
+        | undefined;
+
+      const view = interaction.options.getString('view') ?? 'overview';
+      if (!abbr) {
+        await interaction.reply({
+          content: 'No team abbreviation provided.',
+          ephemeral: true,
+        });
+        return;
+      }
+      if (
+        abbr &&
+        !TEAM_CHOICES.some(
+          (team) => team.value.toLowerCase() === abbr.toLowerCase(),
+        )
+      ) {
+        await interaction.reply({
+          content: `Invalid team abbreviation: ${abbr}.`,
+          ephemeral: true,
+        });
+        return;
+      }
+
       await interaction.deferReply();
 
       const teamInfo = findTeamByName(abbr);

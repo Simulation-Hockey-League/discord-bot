@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getStandings } from 'src/db/index';
-import { LeagueType, toLeagueType } from 'src/db/index/shared';
+import { LeagueType } from 'src/db/index/shared';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { BaseEmbed } from 'src/lib/embed';
 import { withStandingsStats } from 'src/lib/standings';
@@ -10,11 +10,17 @@ import { SlashCommand } from 'typings/command';
 export default {
   command: new SlashCommandBuilder()
     .setName('standings')
-    .addStringOption((option) =>
+    .addNumberOption((option) =>
       option
         .setName('league')
         .setDescription(
           'The league of the standings to return. If not provided, will use SHL standings.',
+        )
+        .setChoices(
+          { name: 'SHL', value: LeagueType.SHL },
+          { name: 'SMJHL', value: LeagueType.SMJHL },
+          { name: 'IIHF', value: LeagueType.IIHF },
+          { name: 'WJC', value: LeagueType.WJC },
         )
         .setRequired(false),
     )
@@ -34,25 +40,26 @@ export default {
         )
         .setRequired(false),
     )
-    .setDescription('Get season rankings.'),
+    .setDescription('Get season rankings. Will default to SHL Standings'),
   execute: async (interaction) => {
-    await interaction.deferReply();
-    const league = toLeagueType(interaction.options.getString('league'));
-    const playoffs = interaction.options.getBoolean('playoffs') ?? false;
-
-    const currentSeason = DynamicConfig.get('currentSeason');
-    const season = interaction.options.getNumber('season') ?? currentSeason;
     try {
+      await interaction.deferReply();
+      let league = interaction.options.getNumber('league') as LeagueType;
+      const playoffs = interaction.options.getBoolean('playoffs') ?? false;
+
+      const currentSeason = DynamicConfig.get('currentSeason');
+      const season = interaction.options.getNumber('season') ?? currentSeason;
       const seasonStats = await getStandings(league, season);
 
       if (!seasonStats || seasonStats?.length <= 0) {
         await interaction.editReply({
-          content: `Could not find${playoffs ? ` playoff` : ''} standings for ${
-            LeagueType[league]
-          }${season ? ` in season ${season}` : ''}.`,
+          content: `Could not find${
+            playoffs ? ` playoff` : ''
+          } standings for ${league}${season ? ` in season ${season}` : ''}.`,
         });
         return;
       }
+      league = league ?? LeagueType.SHL; //default to SHL
       await interaction.editReply({
         embeds: [
           withStandingsStats(
@@ -62,6 +69,7 @@ export default {
               }Standings`,
             ),
             seasonStats,
+            league,
           ),
         ],
       });
