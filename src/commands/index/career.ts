@@ -1,16 +1,23 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import {
+  ButtonInteraction,
+  ComponentType,
+  SlashCommandBuilder,
+} from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { getAllPlayers, getPlayerStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';
-import { BaseEmbed } from 'src/lib/embed';
+import { displayPlayerAwards } from 'src/lib/career';
+import { displayGoalieCareer, displaySkaterCareer } from 'src/lib/career';
 import { SlashCommand } from 'typings/command';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 export default {
   command: new SlashCommandBuilder()
     .setName('career')
+    .setDescription('Get player career statistics.')
     .addStringOption((option) =>
       option
         .setName('name')
@@ -42,11 +49,12 @@ export default {
           { name: 'Playoffs', value: SeasonType.POST },
         )
         .setRequired(false),
-    )
-    .setDescription('Get player career statistics.'),
+    ),
+
   execute: async (interaction) => {
     try {
-      await interaction.deferReply({ ephemeral: false });
+      await interaction.deferReply();
+
       let league = interaction.options.getNumber('league') as
         | LeagueType
         | undefined;
@@ -64,7 +72,6 @@ export default {
         });
         return;
       }
-
       let playerID;
       let position;
       let setLeague;
@@ -85,14 +92,6 @@ export default {
       }
 
       if (!playerID) {
-        const playerStats = await getPlayerStats(name, seasonType);
-        if (playerStats) {
-          playerID = playerStats.id;
-          position = playerStats.position;
-          setLeague = playerStats.league;
-        }
-      }
-      if (!playerID) {
         const playerRecord = await getAllPlayers(
           name,
           league ?? LeagueType.SHL,
@@ -105,6 +104,14 @@ export default {
         }
         playerID = playerRecord.playerID;
         setLeague = league;
+      }
+      if (!playerID) {
+        const playerStats = await getPlayerStats(name, seasonType);
+        if (playerStats) {
+          playerID = playerStats.id;
+          position = playerStats.position;
+          setLeague = playerStats.league;
+        }
       }
 
       league = league ?? setLeague;
@@ -128,7 +135,6 @@ export default {
           isGoalie,
         );
       }
-
       if (isGoalie) {
         await displayGoalieCareer(
           interaction,
@@ -143,123 +149,81 @@ export default {
         );
       }
 
-      await interaction.editReply({});
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`career_${playerID}_${seasonType ?? 'regular'}`)
+          .setLabel('Career Stats')
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setCustomId(`awards_${playerID}_${seasonType ?? 'regular'}`)
+          .setLabel('Awards')
+          .setStyle(ButtonStyle.Secondary),
+      );
+
+      const response = await interaction.editReply({
+        components: [row],
+      });
+      const collector = response.createMessageComponentCollector({
+        componentType: ComponentType.Button,
+        time: 60000,
+      });
+
+      collector.on('collect', async (i: ButtonInteraction) => {
+        if (i.user.id !== interaction.user.id) {
+          await i.reply({
+            content: 'Only the command user can use these buttons.',
+            ephemeral: true,
+          });
+          return;
+        }
+
+        const [action, seasonValue] = i.customId.split('_');
+        const selectedSeason =
+          seasonValue === 'regular' ? SeasonType.REGULAR : SeasonType.POST;
+
+        await i.deferUpdate();
+
+        if (action === 'career') {
+          if (isGoalie) {
+            await displayGoalieCareer(
+              interaction,
+              careerStats as GoalieStats[],
+              selectedSeason,
+            );
+          } else {
+            await displaySkaterCareer(
+              interaction,
+              careerStats as PlayerStats[],
+              selectedSeason,
+            );
+          }
+        } else if (action === 'awards') {
+          await displayPlayerAwards(interaction, careerStats as PlayerStats[]);
+        }
+
+        await i.editReply({
+          components: [row],
+        });
+      });
+
+      collector.on('end', () => {
+        interaction
+          .editReply({
+            components: [],
+          })
+          .catch(
+            async (error) =>
+              await interaction.editReply(
+                `An error occurred while updating: ${error.message}.`,
+              ),
+          );
+      });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'unknown error';
       await interaction.editReply({
-        content: `An error occurred while fetching career stats: ${errorMessage}.`,
+        content: `An error occurred while fetching career stats: ${
+          error instanceof Error ? error.message : 'unknown error'
+        }.`,
       });
     }
   },
 } satisfies SlashCommand;
-
-const displaySkaterCareer = async (
-  interaction: ChatInputCommandInteraction,
-  careerStats: PlayerStats[],
-  seasonType: SeasonType,
-) => {
-  const sortedStats = [...careerStats].sort((a, b) => b.season - a.season);
-  const totals = {
-    gamesPlayed: sortedStats.reduce((sum, stat) => sum + stat.gamesPlayed, 0),
-    goals: sortedStats.reduce((sum, stat) => sum + stat.goals, 0),
-    assists: sortedStats.reduce((sum, stat) => sum + stat.assists, 0),
-    points: sortedStats.reduce((sum, stat) => sum + stat.points, 0),
-    plusMinus: sortedStats.reduce((sum, stat) => sum + stat.plusMinus, 0),
-    pim: sortedStats.reduce((sum, stat) => sum + stat.pim, 0),
-    shotsOnGoal: sortedStats.reduce((sum, stat) => sum + stat.shotsOnGoal, 0),
-  };
-  const shotPercentage = ((totals.goals / totals.shotsOnGoal) * 100).toFixed(1);
-
-  const seasonFields = sortedStats.map((season) => ({
-    name: `Season ${season.season}`,
-    value: `Team: ${season.team} | GP: ${season.gamesPlayed} | G: ${
-      season.goals
-    } | A: ${season.assists} | P: ${season.points} | +/-: ${
-      season.plusMinus
-    } | PIM: ${season.pim} | S%: ${(
-      (season.goals / season.shotsOnGoal) *
-      100
-    ).toFixed(1)}%`,
-    inline: false,
-  }));
-
-  seasonFields.push({
-    name: '\u200b',
-    value: '**Career Totals**',
-    inline: false,
-  });
-
-  seasonFields.push({
-    name: 'Career Statistics',
-    value: `GP: ${totals.gamesPlayed} | G: ${totals.goals} | A: ${totals.assists} | P: ${totals.points} | +/-: ${totals.plusMinus} | PIM: ${totals.pim} | S%: ${shotPercentage}%`,
-    inline: false,
-  });
-
-  const embed = BaseEmbed(interaction, {})
-    .setTitle(`${sortedStats[0].name} - Career Statistics`)
-    .addFields(seasonFields)
-    .setFooter({
-      text: `${
-        seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
-      } Statistics`,
-    });
-
-  await interaction.editReply({ embeds: [embed] });
-};
-
-const displayGoalieCareer = async (
-  interaction: ChatInputCommandInteraction,
-  careerStats: GoalieStats[],
-  seasonType: SeasonType,
-) => {
-  const sortedStats = [...careerStats].sort((a, b) => b.season - a.season);
-  const totals = {
-    gamesPlayed: sortedStats.reduce((sum, stat) => sum + stat.gamesPlayed, 0),
-    wins: sortedStats.reduce((sum, stat) => sum + stat.wins, 0),
-    losses: sortedStats.reduce((sum, stat) => sum + stat.losses, 0),
-    ot: sortedStats.reduce((sum, stat) => sum + stat.ot, 0),
-    saves: sortedStats.reduce((sum, stat) => sum + stat.saves, 0),
-    shotsAgainst: sortedStats.reduce((sum, stat) => sum + stat.shotsAgainst, 0),
-    goalsAgainst: sortedStats.reduce((sum, stat) => sum + stat.goalsAgainst, 0),
-    shutouts: sortedStats.reduce((sum, stat) => sum + stat.shutouts, 0),
-  };
-
-  const careerSavePercentage = (
-    (totals.saves / totals.shotsAgainst) *
-    100
-  ).toFixed(2);
-  const seasonFields = sortedStats.map((season) => ({
-    name: `Season ${season.season}`,
-    value: `Team: ${season.team} | GP: ${season.gamesPlayed} | W: ${
-      season.wins
-    } | L: ${season.losses} | OT: ${season.ot} | SV%: ${(
-      (season.saves / season.shotsAgainst) *
-      100
-    ).toFixed(2)}% | SO: ${season.shutouts}`,
-    inline: false,
-  }));
-
-  seasonFields.push({
-    name: '\u200b',
-    value: '**Career Totals**',
-    inline: false,
-  });
-
-  seasonFields.push({
-    name: 'Career Statistics',
-    value: `GP: ${totals.gamesPlayed} | W: ${totals.wins} | L: ${totals.losses} | OT: ${totals.ot} | SV%: ${careerSavePercentage}% | SO: ${totals.shutouts}`,
-    inline: false,
-  });
-
-  const embed = BaseEmbed(interaction, {})
-    .setTitle(`${sortedStats[0].name} - Career Statistics`)
-    .addFields(seasonFields)
-    .setFooter({
-      text: `${
-        seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
-      } Statistics`,
-    });
-
-  await interaction.editReply({ embeds: [embed] });
-};

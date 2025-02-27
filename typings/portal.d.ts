@@ -110,3 +110,41 @@ export type InternalChecklist = {
   complete: number;
   dueDate: string;
 };
+
+export type PlayerAchievement = {
+  playerUpdateID: number | null;
+  playerName: string;
+  userID: number | null;
+  fhmID: number;
+  leagueID: number;
+  seasonID: number;
+  teamID: number;
+  achievement: number;
+  achievementName: string;
+  achievementDescription: string;
+  isAward: boolean;
+  won: boolean;
+};
+
+export type TeamAchievement = {
+  teamID: number;
+  leagueID: number;
+  seasonID: number;
+  achievement: number;
+  achievementName: string;
+  achievementDescription: string;
+};
+
+export type UserAchievement = {
+  username: string;
+  userID: number;
+  leagueID: number;
+  seasonID: number;
+  teamID: number;
+  achievement: number;
+  achievementName: string;
+  achievementDescription: string;
+  isAward: boolean;
+  won: boolean;
+  GM: number;
+};

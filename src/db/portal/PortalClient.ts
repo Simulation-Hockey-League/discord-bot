@@ -1,12 +1,21 @@
 import { Config } from 'src/lib/config/config';
 import { logger } from 'src/lib/logger';
-import { InternalChecklist, PortalPlayer } from 'typings/portal';
+import {
+  InternalChecklist,
+  PlayerAchievement,
+  PortalPlayer,
+  TeamAchievement,
+  UserAchievement,
+} from 'typings/portal';
 
 class PortalApiClient {
   #userInfo: Array<{ userID: number; username: string }> = [];
   #activePlayers: Array<PortalPlayer> = [];
   #getPlayer: Array<PortalPlayer> = [];
   #getChecklist: Array<InternalChecklist> = [];
+  #getAwards: Array<PlayerAchievement> = [];
+  #getTeamAwards: Array<TeamAchievement> = [];
+  #getUserAwards: Array<UserAchievement> = [];
 
   #loaded = false;
   #lastLoadTimestamp = 0;
@@ -85,6 +94,46 @@ class PortalApiClient {
       pid: portalID,
     });
     return players[0];
+  }
+
+  async getPlayerAwards(
+    fhmID: string,
+    leagueID: string,
+    seasonID?: string,
+    reload: boolean = false,
+  ): Promise<Array<PlayerAchievement>> {
+    return await this.#getData(this.#getAwards, reload, ['history/player'], {
+      fhmID: fhmID,
+      leagueID: leagueID,
+      ...(seasonID && { seasonID }),
+    });
+  }
+
+  async getTeamAwards(
+    teamID: string,
+    leagueID: string,
+    reload: boolean = false,
+  ): Promise<Array<TeamAchievement>> {
+    return await this.#getData(this.#getTeamAwards, reload, ['history/team'], {
+      teamID: teamID,
+      leagueID: leagueID,
+    });
+  }
+
+  async getUserAwards(
+    uid: string,
+    leagueID: string,
+    reload: boolean = false,
+  ): Promise<Array<UserAchievement>> {
+    return await this.#getData(
+      this.#getUserAwards,
+      reload,
+      ['history/user-achievements'],
+      {
+        uid: uid,
+        leagueID: leagueID,
+      },
+    );
   }
 
   async reload(): Promise<void> {

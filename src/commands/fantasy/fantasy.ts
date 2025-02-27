@@ -23,21 +23,21 @@ export default {
     .setDescription('Retrieve fantasy rankings for a specified player.'),
 
   execute: async (interaction) => {
-    await interaction.deferReply({ ephemeral: false });
-    const target = interaction.options.getString('username');
-
-    const currentUserInfo = await users.get(interaction.user.id);
-    const name = target || currentUserInfo?.forumName;
-
-    if (!name) {
-      await interaction.reply({
-        content: 'No player name provided or stored.',
-        ephemeral: true,
-      });
-      return;
-    }
-
     try {
+      await interaction.deferReply({ ephemeral: false });
+      const target = interaction.options.getString('username');
+
+      const currentUserInfo = await users.get(interaction.user.id);
+      const name = target || currentUserInfo?.forumName;
+
+      if (!name) {
+        await interaction.reply({
+          content: 'No player name provided or stored.',
+          ephemeral: true,
+        });
+        return;
+      }
+
       const players = await fetchGlobalSheetData();
       if (!players.length) {
         await interaction.reply({

@@ -20,6 +20,9 @@ export default {
       );
 
       if (!command) return;
+      console.log(
+        `Executing command: ${interaction.commandName} from server: ${interaction.guild?.name} (${interaction.guildId})`,
+      );
 
       if (command.minRole && !checkRole(interaction.member, command.minRole)) {
         interaction.reply({
