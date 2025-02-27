@@ -40,7 +40,6 @@ export async function withUserInfo(
     String(checklistLeague),
     String(user.userID),
   );
-
   const incompleteTasks = checklist.filter((task) => task.complete === 0);
   let checklistField;
   if (incompleteTasks.length === 0) {
@@ -51,12 +50,27 @@ export async function withUserInfo(
     };
   } else {
     const taskList = incompleteTasks
-      .map(
-        (task) =>
-          `🔹 [${task.subject}](https://simulationhockey.com/showthread.php?${
-            task.tid
-          }) - **${task.dueDate.replace('Due: ', '')}**`,
-      )
+      .map((task, index) => {
+        const subject = task.subject || 'Unknown Subject';
+        const tid = task.tid || 'Unknown Task ID';
+        let taskLink = `https://simulationhockey.com/showthread.php?${tid}`;
+
+        if (subject.includes('Chirp')) {
+          taskLink = 'https://simulationhockey.com/forumdisplay.php?fid=758';
+        } else if (
+          subject === 'weeklyActivityCheck' ||
+          subject === 'weeklyTraining' ||
+          subject === 'seasonalCoaching'
+        ) {
+          taskLink = 'https://portal.simulationhockey.com/';
+        }
+
+        const dueDate = task.dueDate
+          ? task.dueDate.replace('Due: ', '')
+          : 'End of the week';
+
+        return `🔹 [${subject}](${taskLink}) - **${dueDate}**`;
+      })
       .join('\n');
 
     checklistField = {
@@ -71,7 +85,6 @@ export async function withUserInfo(
   const formattedBankBalance = `$${player.bankBalance.toLocaleString(
     'en-US',
   )} USD`;
-
   const playerEmbed = BaseEmbed(interaction, {
     teamColor: team?.colors.primary,
   })
