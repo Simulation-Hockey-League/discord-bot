@@ -5,6 +5,7 @@ import { botEmojis } from './config/config';
 export type TeamInfo = {
   teamID: number;
   fullName: string;
+  abbr: string;
   nameRegex: RegExp;
   logoUrl: string;
   emoji: string;
@@ -15,6 +16,7 @@ export const Teams = Object.freeze({
   ATLANTA: {
     teamID: 18,
     fullName: 'Atlanta Inferno',
+    abbr: 'ATL',
     nameRegex: /atlanta|atl|inferno/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280894495195136/atl.png',
@@ -24,6 +26,7 @@ export const Teams = Object.freeze({
   BALTIMORE: {
     teamID: 7,
     fullName: 'Baltimore Platoon',
+    abbr: 'BAP',
     nameRegex: /baltimore|bap|platoon/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280902799261736/bap.png',
@@ -33,6 +36,7 @@ export const Teams = Object.freeze({
   BUFFALO: {
     teamID: 0,
     fullName: 'Buffalo Stampede',
+    abbr: 'BUF',
     nameRegex: /buffalo|buf|stampede/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280906683973632/buf.png',
@@ -42,6 +46,7 @@ export const Teams = Object.freeze({
   CHICAGO: {
     teamID: 1,
     fullName: 'Chicago Syndicate',
+    abbr: 'CHI',
     nameRegex: /chicago|chi|syndicate/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280910928085002/chi.png',
@@ -51,6 +56,7 @@ export const Teams = Object.freeze({
   HAMILTON: {
     teamID: 2,
     fullName: 'Hamilton Steelhawks',
+    abbr: 'HAM',
     nameRegex: /hamilton|ham|steelhawks/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786290158977810552/ham.png',
@@ -60,6 +66,7 @@ export const Teams = Object.freeze({
   MANHATTAN: {
     teamID: 4,
     fullName: 'Manhattan Rage',
+    abbr: 'MAN',
     nameRegex: /manhattan|man|rage/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281401782763550/man.png',
@@ -69,6 +76,7 @@ export const Teams = Object.freeze({
   NEW_ENGLAND: {
     teamID: 5,
     fullName: 'New England Wolfpack',
+    abbr: 'NEW',
     nameRegex: /new|(new england)|wolfpack/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281422565408788/new.png',
@@ -78,6 +86,7 @@ export const Teams = Object.freeze({
   TAMPA: {
     teamID: 6,
     fullName: 'Tampa Bay Barracuda',
+    abbr: 'TBB',
     nameRegex: /tampa|tbb|barracuda/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/830574109934747669/tbb.png',
@@ -87,6 +96,7 @@ export const Teams = Object.freeze({
   TORONTO: {
     teamID: 3,
     fullName: 'Toronto North Stars',
+    abbr: 'TOR',
     nameRegex: /tor|toronto|stars/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281382753075200/tor.png',
@@ -96,6 +106,7 @@ export const Teams = Object.freeze({
   CALGARY: {
     teamID: 8,
     fullName: 'Calgary Dragons',
+    abbr: 'CGY',
     nameRegex: /calgary|cgy|dragons/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/804599067278704670/cgy.png',
@@ -105,6 +116,7 @@ export const Teams = Object.freeze({
   EDMONTON: {
     teamID: 9,
     fullName: 'Edmonton Blizzard',
+    abbr: 'EDM',
     nameRegex: /edmonton|edm|blizzard/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280915415334912/edm.png',
@@ -114,6 +126,7 @@ export const Teams = Object.freeze({
   LOS_ANGELES: {
     teamID: 13,
     fullName: 'Los Angeles Panthers',
+    abbr: 'LAP',
     nameRegex: /lap|(los angeles)|panthers/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/830574039567302727/lap.png',
@@ -123,6 +136,7 @@ export const Teams = Object.freeze({
   MINNESOTA: {
     teamID: 10,
     fullName: 'Minnesota Monarchs',
+    abbr: 'MIN',
     nameRegex: /minnesota|minny|min|monarchs/i,
     logoUrl:
       'https://media.discordapp.net/attachments/744955239114997801/1257738798792708278/Kv2hU7B.png',
@@ -132,6 +146,7 @@ export const Teams = Object.freeze({
   NEW_ORLEANS: {
     teamID: 14,
     fullName: 'New Orleans Specters',
+    abbr: 'NOLA',
     nameRegex: /nola|nol|(new orleans)|specters/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281429851308073/nola.png',
@@ -141,6 +156,7 @@ export const Teams = Object.freeze({
   SAN_FRANCISCO: {
     teamID: 12,
     fullName: 'San Francisco Pride',
+    abbr: 'SFP',
     nameRegex: /sfp|(san francisco)|pride/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281366853255208/sfp.png',
@@ -150,6 +166,7 @@ export const Teams = Object.freeze({
   SEATTLE: {
     teamID: 19,
     fullName: 'Seattle Argonauts',
+    abbr: 'SEA',
     nameRegex: /seattle|sea|argonauts/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281436604137482/sea.png',
@@ -159,6 +176,7 @@ export const Teams = Object.freeze({
   TEXAS: {
     teamID: 15,
     fullName: 'Texas Renegades',
+    abbr: 'TEX',
     nameRegex: /tex|texas|renegades/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281377850589184/tex.png',
@@ -168,6 +186,7 @@ export const Teams = Object.freeze({
   WINNIPEG: {
     teamID: 11,
     fullName: 'Winnipeg Aurora',
+    abbr: 'WPG',
     nameRegex: /winnipeg|wpg|aurora/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/992992181411401738/wpg.png',
@@ -177,6 +196,7 @@ export const Teams = Object.freeze({
   MONTREAL: {
     teamID: 20,
     fullName: 'Montreal Patriotes',
+    abbr: 'MTL',
     nameRegex: /mon|mtl|montreal|patriotes|patriots/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/992992505459126272/mtl.png',
@@ -186,6 +206,7 @@ export const Teams = Object.freeze({
   PHILADELPHIA: {
     teamID: 21,
     fullName: 'Philadelphia Forge',
+    abbr: 'PHI',
     nameRegex: /phi|philadelphia|philly|forge/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/744955239114997801/1257738649773146143/sonwiVV.png',
@@ -197,6 +218,7 @@ export const Teams = Object.freeze({
   YUKON: {
     teamID: 5,
     fullName: 'Yukon Malamutes',
+    abbr: 'YUM',
     nameRegex: /yukon|yum|yuk|malamutes/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/978053209199366194/Malamutes.png',
@@ -206,6 +228,7 @@ export const Teams = Object.freeze({
   ANCHORAGE: {
     teamID: 0,
     fullName: 'Anchorage Armada',
+    abbr: 'ANC',
     nameRegex: /anchorage|anc|armada/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786290342495256627/anc.png',
@@ -215,6 +238,7 @@ export const Teams = Object.freeze({
   CAROLINA: {
     teamID: 9,
     fullName: 'Carolina Kraken',
+    abbr: 'CAR',
     nameRegex: /carolina|car|kraken/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280907833212928/car.png',
@@ -224,6 +248,7 @@ export const Teams = Object.freeze({
   COLORADO: {
     teamID: 6,
     fullName: 'Colorado Raptors',
+    abbr: 'COL',
     nameRegex: /colorado|col|raptors/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/830573975423811614/col.png',
@@ -233,6 +258,7 @@ export const Teams = Object.freeze({
   DETROIT: {
     teamID: 7,
     fullName: 'Detroit Falcons',
+    abbr: 'DET',
     nameRegex: /detroit|det|falcons/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786280913746264094/det.png',
@@ -242,6 +268,7 @@ export const Teams = Object.freeze({
   KELOWNA: {
     teamID: 1,
     fullName: 'Kelowna Knights',
+    abbr: 'KEL',
     nameRegex: /kelowna|kel|knights/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281054293590046/kel.png',
@@ -251,6 +278,7 @@ export const Teams = Object.freeze({
   MAINE: {
     teamID: 2,
     fullName: 'Maine Timber',
+    abbr: 'MET',
     nameRegex: /maine|met|timber/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281402844053574/met.png',
@@ -260,6 +288,7 @@ export const Teams = Object.freeze({
   NEVADA: {
     teamID: 14,
     fullName: 'Nevada Battleborn',
+    abbr: 'NBB',
     nameRegex: /nevada|nbb|battleborn/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/859176692013334548/nbb.png',
@@ -269,6 +298,7 @@ export const Teams = Object.freeze({
   NEWFOUNDLAND: {
     teamID: 4,
     fullName: 'Newfoundland Berserkers',
+    abbr: 'NL',
     nameRegex: /newfoundland|nl|berserkers/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281425946017842/nl.png',
@@ -278,6 +308,7 @@ export const Teams = Object.freeze({
   QUEBEC: {
     teamID: 15,
     fullName: 'Quebec City Citadelles',
+    abbr: 'QCC',
     nameRegex: /quebec|qcc|citadelles/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281433132040202/qcc.png',
@@ -287,6 +318,7 @@ export const Teams = Object.freeze({
   ST_LOUIS: {
     teamID: 8,
     fullName: 'St. Louis Scarecrows',
+    abbr: 'STL',
     nameRegex: /(st louis)|stl|scarecrows/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786281370367688714/stl.png',
@@ -296,6 +328,7 @@ export const Teams = Object.freeze({
   VANCOUVER: {
     teamID: 3,
     fullName: 'Vancouver Whalers',
+    abbr: 'VAN',
     nameRegex: /vancouver|van|whalers/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786290849302315008/van.png',
@@ -305,6 +338,7 @@ export const Teams = Object.freeze({
   THUNDER_BAY: {
     teamID: 16,
     fullName: 'Thunder Bay Walleye',
+    abbr: 'TBW',
     nameRegex: /(thunder bay)|TBW|walleye/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/711007308846596100/1344388001412808906/Thunder_Bay_Walleye.png',
@@ -314,6 +348,7 @@ export const Teams = Object.freeze({
   GREAT_FALLS: {
     teamID: 17,
     fullName: 'Great Falls Grizzlies',
+    abbr: 'GFG',
     nameRegex: /(great falls)|gfg|grizzlies/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/880183060199534673/gfg.png',
@@ -323,6 +358,7 @@ export const Teams = Object.freeze({
   SAN_DIEGO: {
     teamID: 19,
     fullName: 'San Diego Tidal',
+    abbr: 'SDT',
     nameRegex: /(san diego)|sdt|tidal/i,
     logoUrl:
       'https://media.discordapp.net/attachments/1219423597492310126/1222236845719425074/SanDiegoTidal_finished.png',
@@ -332,6 +368,7 @@ export const Teams = Object.freeze({
   OTTAWA: {
     teamID: 18,
     fullName: 'Ottawa Highlanders',
+    abbr: 'OTT',
     nameRegex: /ottawa|ott|highlanders/i,
     logoUrl:
       'https://media.discordapp.net/attachments/1152983677685469204/1219793270650048714/HighlandersMascotLogo.png',
@@ -342,8 +379,9 @@ export const Teams = Object.freeze({
   // IIHF
   TEAM_CANADA: {
     teamID: 5,
-    fullName: 'Team Canada',
-    nameRegex: /team canada/i,
+    fullName: 'Canada',
+    abbr: 'CAN',
+    nameRegex: /canada/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/623122991504687104/786290158977810552/ham.png',
     leagueType: LeagueType.IIHF,
@@ -351,8 +389,9 @@ export const Teams = Object.freeze({
   },
   TEAM_USA: {
     teamID: 11,
-    fullName: 'Team USA',
-    nameRegex: /team usa/i,
+    fullName: 'United States',
+    abbr: 'USA',
+    nameRegex: /usa/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344825061168644156/USA.png',
     leagueType: LeagueType.IIHF,
@@ -360,8 +399,9 @@ export const Teams = Object.freeze({
   },
   TEAM_GB: {
     teamID: 1,
-    fullName: 'Team Great Britain',
-    nameRegex: /team great britain/i,
+    fullName: 'Great Britain',
+    abbr: 'GBR',
+    nameRegex: /great britain/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344825060837298176/United_Kingdom.png',
     leagueType: LeagueType.IIHF,
@@ -369,8 +409,9 @@ export const Teams = Object.freeze({
   },
   TEAM_SWITZERLAND: {
     teamID: 10,
-    fullName: 'Team Switzerland',
-    nameRegex: /team switzerland/i,
+    fullName: 'Switzerland',
+    abbr: 'SWI',
+    nameRegex: /switzerland/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344825060451549205/Switzerland.png',
     leagueType: LeagueType.IIHF,
@@ -378,8 +419,9 @@ export const Teams = Object.freeze({
   },
   TEAM_NORWAY: {
     teamID: 14,
-    fullName: 'Team Norway',
-    nameRegex: /team norway/i,
+    fullName: 'Norway',
+    abbr: 'NOR',
+    nameRegex: /norway/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344825059679801365/Norway.png',
     leagueType: LeagueType.IIHF,
@@ -387,8 +429,9 @@ export const Teams = Object.freeze({
   },
   TEAM_LATVIA: {
     teamID: 13,
-    fullName: 'Team Latvia',
-    nameRegex: /team latvia/i,
+    fullName: 'Latvia',
+    abbr: 'LAT',
+    nameRegex: /latvia/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344825059185004588/Latvia.png',
     leagueType: LeagueType.IIHF,
@@ -396,8 +439,9 @@ export const Teams = Object.freeze({
   },
   TEAM_JAPAN: {
     teamID: 12,
-    fullName: 'Team Japan',
-    nameRegex: /team japan/i,
+    fullName: 'Japan',
+    abbr: 'JPN',
+    nameRegex: /japan/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344825058782347336/Japan.png',
     leagueType: LeagueType.IIHF,
@@ -405,8 +449,9 @@ export const Teams = Object.freeze({
   },
   TEAM_IRELAND: {
     teamID: 2,
-    fullName: 'Team Ireland',
-    nameRegex: /team ireland/i,
+    fullName: 'Ireland',
+    abbr: 'IRL',
+    nameRegex: /ireland/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344824992285593610/Ireland.png',
     leagueType: LeagueType.IIHF,
@@ -414,8 +459,9 @@ export const Teams = Object.freeze({
   },
   TEAM_GERMANY: {
     teamID: 0,
-    fullName: 'Team Germany',
-    nameRegex: /team germany/i,
+    fullName: 'Germany',
+    abbr: 'GER',
+    nameRegex: /germany/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344824991899975700/Germany.png',
     leagueType: LeagueType.IIHF,
@@ -423,8 +469,9 @@ export const Teams = Object.freeze({
   },
   TEAM_FINLAND: {
     teamID: 7,
-    fullName: 'Team Finland',
-    nameRegex: /team finland/i,
+    fullName: 'Finland',
+    abbr: 'FIN',
+    nameRegex: /finland/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344824990859661343/Finland.png',
     leagueType: LeagueType.IIHF,
@@ -432,8 +479,9 @@ export const Teams = Object.freeze({
   },
   TEAM_CZECH: {
     teamID: 6,
-    fullName: 'Team Czech',
-    nameRegex: /team czech/i,
+    fullName: 'Czechia',
+    abbr: 'CZH',
+    nameRegex: /czech/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344824990603939840/Czechia.png',
     leagueType: LeagueType.IIHF,
@@ -441,8 +489,9 @@ export const Teams = Object.freeze({
   },
   TEAM_FRANCE: {
     teamID: 4,
-    fullName: 'Team France',
-    nameRegex: /team france/i,
+    fullName: 'France',
+    abbr: 'FRA',
+    nameRegex: /france/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1162742189470781523/1344828758443692092/fra_logo-Photoroom.png',
     leagueType: LeagueType.IIHF,
@@ -450,8 +499,9 @@ export const Teams = Object.freeze({
   },
   TEAM_QUEBEC: {
     teamID: 8,
-    fullName: 'Team Quebec',
-    nameRegex: /team quebec/i,
+    fullName: 'Quebec',
+    abbr: 'QCC',
+    nameRegex: /quebec/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1254464263553159268/1344830612883640333/QBC_Logo.png',
     leagueType: LeagueType.IIHF,
@@ -459,8 +509,9 @@ export const Teams = Object.freeze({
   },
   TEAM_SWEDEN: {
     teamID: 9,
-    fullName: 'Team Sweden',
-    nameRegex: /team sweden/i,
+    fullName: 'Sweden',
+    abbr: 'SWE',
+    nameRegex: /sweden/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1139522688805777469/1344840858847150112/IIHF_Sweden.png',
     leagueType: LeagueType.IIHF,
@@ -469,8 +520,9 @@ export const Teams = Object.freeze({
 
   WJC_BRITISH_ISLES: {
     teamID: 0,
-    fullName: 'Team British Isles',
-    nameRegex: /team british isles/i,
+    fullName: 'British Isles',
+    abbr: 'BRI',
+    nameRegex: /british isles/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344842458869268551/BritishIsles.png',
     leagueType: LeagueType.WJC,
@@ -478,8 +530,9 @@ export const Teams = Object.freeze({
   },
   WJC_USB: {
     teamID: 1,
-    fullName: 'Team United States Blue',
-    nameRegex: /team united states blue/i,
+    fullName: 'United States Blue',
+    abbr: 'USB',
+    nameRegex: /united states blue/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835405912080454/team_united_states_blue.png',
     leagueType: LeagueType.WJC,
@@ -487,8 +540,9 @@ export const Teams = Object.freeze({
   },
   WJC_RAT: {
     teamID: 2,
-    fullName: 'Team Ratvia',
-    nameRegex: /team ratvia/i,
+    fullName: 'Ratvia',
+    abbr: 'RAT',
+    nameRegex: /ratvia/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835403621859448/team_rativa.png_NEW.png',
     leagueType: LeagueType.WJC,
@@ -496,8 +550,9 @@ export const Teams = Object.freeze({
   },
   WJC_WORLD: {
     teamID: 4,
-    fullName: 'Team World',
-    nameRegex: /team world/i,
+    fullName: 'World',
+    abbr: 'WOR',
+    nameRegex: /world/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835407837401158/TeamWorld.png',
     leagueType: LeagueType.WJC,
@@ -505,8 +560,9 @@ export const Teams = Object.freeze({
   },
   WJC_CANADA_RED: {
     teamID: 5,
-    fullName: 'Team Canada Red',
-    nameRegex: /team canada red/i,
+    fullName: 'Canada Red',
+    abbr: 'CAR',
+    nameRegex: /canada red/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835369367240847/team_canada_red.png',
     leagueType: LeagueType.WJC,
@@ -514,8 +570,9 @@ export const Teams = Object.freeze({
   },
   WJC_FINLAND: {
     teamID: 6,
-    fullName: 'Team Finland',
-    nameRegex: /team finland/i,
+    fullName: 'Finland',
+    abbr: 'FIN',
+    nameRegex: /finland/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835370138730537/team_finland.png',
     leagueType: LeagueType.WJC,
@@ -523,8 +580,9 @@ export const Teams = Object.freeze({
   },
   WJC_USA_WHITE: {
     teamID: 7,
-    fullName: 'Team USA White',
-    nameRegex: /team usa white/i,
+    fullName: 'United States White',
+    abbr: 'USW',
+    nameRegex: /united states white/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835406230978600/team_united_states_white.png',
     leagueType: LeagueType.WJC,
@@ -532,8 +590,9 @@ export const Teams = Object.freeze({
   },
   WJC_RHINE: {
     teamID: 9,
-    fullName: 'Team Rhine',
-    nameRegex: /team rhine/i,
+    fullName: 'Rhine',
+    abbr: 'RHI',
+    nameRegex: /rhine/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835404406460549/team_rhine.png',
     leagueType: LeagueType.WJC,
@@ -541,8 +600,9 @@ export const Teams = Object.freeze({
   },
   WJC_CANADA_BLACK: {
     teamID: 12,
-    fullName: 'Team Canada Black',
-    nameRegex: /team canada black/i,
+    fullName: 'Canada Black',
+    abbr: 'CAB',
+    nameRegex: /canada black/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835369119780864/team_canada_black.png',
     leagueType: LeagueType.WJC,
@@ -550,8 +610,9 @@ export const Teams = Object.freeze({
   },
   WJC_SWEDEN: {
     teamID: 13,
-    fullName: 'Team Sweden',
-    nameRegex: /team sweden/i,
+    fullName: 'Sweden',
+    abbr: 'SWE',
+    nameRegex: /sweden/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835404800720947/team_sweden.png',
     leagueType: LeagueType.WJC,
@@ -559,8 +620,9 @@ export const Teams = Object.freeze({
   },
   WJC_NORWAY: {
     teamID: 14,
-    fullName: 'Team Norway',
-    nameRegex: /team norway/i,
+    fullName: 'Norway',
+    abbr: 'NOR',
+    nameRegex: /norway/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835371137241249/team_norway.png',
     leagueType: LeagueType.WJC,
@@ -568,8 +630,9 @@ export const Teams = Object.freeze({
   },
   WJC_CZECHIA: {
     teamID: 15,
-    fullName: 'Team Czechia',
-    nameRegex: /team czechia/i,
+    fullName: 'Czechia',
+    abbr: 'CZE',
+    nameRegex: /czechia/i,
     logoUrl:
       'https://cdn.discordapp.com/attachments/1344835291122499674/1344835369597665311/team_czechia.png',
     leagueType: LeagueType.WJC,
@@ -581,6 +644,14 @@ export const findTeamByName = (teamName: string): TeamInfo | undefined => {
   if (!teamName) return undefined;
   return Object.values(Teams).find((team) => team.nameRegex.test(teamName));
 };
+
+export const findTeamByAbbr = (teamAbbr: string): TeamInfo | undefined => {
+  if (!teamAbbr) return undefined;
+  return Object.values(Teams).find(
+    (team) => team.abbr.toLowerCase() === teamAbbr.toLowerCase(),
+  );
+};
+
 export const findTeamByID = (teamID: number, league: LeagueType) => {
   if (teamID === undefined || teamID === null) return undefined;
   return Object.values(Teams).find(

@@ -6,12 +6,12 @@ import {
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import {
   createActionRow,
-  createEmbed,
+  createTeamEmbed,
 } from 'src/db/index/helpers/buttons/teamButton';
-import { SeasonType, TEAM_CHOICES } from 'src/db/index/shared';
+import { SeasonType } from 'src/db/index/shared';
 import { users } from 'src/db/users';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import { findTeamByName } from 'src/lib/teams';
+import { Teams, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
 export default {
@@ -66,7 +66,9 @@ export default {
       const userTeam = await users.get(interaction.user.id);
       const abbr =
         interaction.options.getString('abbr') ??
-        TEAM_CHOICES.find((team) => team.name === userTeam?.teamName)?.value ??
+        Object.values(Teams).find(
+          (team) => team.fullName === userTeam?.teamName,
+        )?.abbr ??
         null;
       const seasonType = interaction.options.getString('type') as
         | SeasonType
@@ -80,40 +82,30 @@ export default {
         });
         return;
       }
-      if (
-        abbr &&
-        !TEAM_CHOICES.some(
-          (team) => team.value.toLowerCase() === abbr.toLowerCase(),
-        )
-      ) {
-        await interaction.reply({
-          content: `Invalid team abbreviation: ${abbr}.`,
-          ephemeral: true,
-        });
-        return;
-      }
 
       await interaction.deferReply();
 
-      const teamInfo = findTeamByName(abbr);
+      const teamInfo = findTeamByAbbr(abbr);
       if (!teamInfo) {
         await interaction.editReply({
           content: `Could not find team with abbreviation ${abbr}.`,
         });
         return;
       }
-      const teams = await IndexApiClient.get(teamInfo.leagueType).getTeamInfo();
-      const team = teams.find((team) => team.name === teamInfo.fullName);
+      const teams = await IndexApiClient.get(teamInfo.leagueType).getTeamInfo(
+        season,
+      );
+      const team = teams.find((team) => team.abbreviation === teamInfo.abbr);
 
       if (!team) {
         await interaction.editReply({
-          content: `Could not find team with abbreviation ${abbr}.`,
+          content: `Could not find team with abbreviation ${abbr} for season ${season}.`,
         });
         return;
       }
-      const row = createActionRow(abbr, season, view);
+      const row = createActionRow(abbr, season, view, teamInfo.leagueType);
 
-      const initialEmbed = await createEmbed(
+      const initialEmbed = await createTeamEmbed(
         interaction,
         team,
         teamInfo,
@@ -151,7 +143,7 @@ export default {
 
         await i.deferUpdate();
 
-        const newEmbed = await createEmbed(
+        const newEmbed = await createTeamEmbed(
           interaction,
           team,
           teamInfo,
@@ -160,7 +152,12 @@ export default {
           action,
         );
 
-        const updatedRow = createActionRow(abbr, selectedSeason, action);
+        const updatedRow = createActionRow(
+          abbr,
+          selectedSeason,
+          action,
+          teamInfo.leagueType,
+        );
 
         if (!newEmbed) return;
         await i.editReply({

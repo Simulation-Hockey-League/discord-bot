@@ -14,36 +14,50 @@ import {
 import { TeamInfo } from 'src/lib/teams';
 import { IndexTeamInfo, SeasonType } from 'typings/statsindex';
 
+import { LeagueType } from '../../shared';
+
 export function createActionRow(
   abbr: string,
   season: number | undefined,
   view: string,
+  league: LeagueType,
 ) {
-  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+  const actionRow = new ActionRowBuilder<ButtonBuilder>();
+  actionRow.addComponents(
     new ButtonBuilder()
       .setCustomId(`overview_${abbr}_${season ?? 'current'}`)
       .setLabel('Overview')
       .setStyle(ButtonStyle.Primary)
       .setDisabled(view === 'overview'),
-    new ButtonBuilder()
-      .setCustomId(`roster_${abbr}_${season ?? 'current'}`)
-      .setLabel('Current Roster')
-      .setStyle(ButtonStyle.Primary)
-      .setDisabled(view === 'roster'),
+  );
+  if (league !== LeagueType.IIHF && league !== LeagueType.WJC) {
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`roster_${abbr}_${season ?? 'current'}`)
+        .setLabel('Current Roster')
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(view === 'roster'),
+    );
+  }
+  actionRow.addComponents(
     new ButtonBuilder()
       .setCustomId(`schedule_${abbr}_${season ?? 'current'}`)
       .setLabel('Schedule')
       .setStyle(ButtonStyle.Primary)
       .setDisabled(view === 'schedule'),
+  );
+  actionRow.addComponents(
     new ButtonBuilder()
       .setCustomId(`leaders_${abbr}_${season ?? 'current'}`)
       .setLabel('Team Leaders')
       .setStyle(ButtonStyle.Primary)
       .setDisabled(view === 'leaders'),
   );
+
+  return actionRow;
 }
 
-export async function createEmbed(
+export async function createTeamEmbed(
   interaction: ChatInputCommandInteraction<CacheType>,
   team: IndexTeamInfo,
   teamInfo: TeamInfo,
@@ -53,7 +67,13 @@ export async function createEmbed(
 ) {
   switch (view) {
     case 'roster':
-      return await createRosterEmbed(interaction, team, teamInfo);
+      if (
+        teamInfo.leagueType === LeagueType.SHL ||
+        teamInfo.leagueType === LeagueType.SMJHL
+      ) {
+        return await createRosterEmbed(interaction, team, teamInfo);
+      }
+      return;
     case 'schedule':
       return await createScheduleEmbed(
         interaction,

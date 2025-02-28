@@ -44,11 +44,10 @@ export const getTeamStats = async (
     {} as Record<number, IndexTeamInfo>,
   );
 
-  const teamId = await requireFhmTeamId(teamInfo);
+  const teamId = teamInfo.teamID; //await requireFhmTeamId(teamInfo);
   if (!teamId && teamId !== 0) {
     throw new Error(`Could not find team ID for ${teamInfo.fullName}`);
   }
-
   const result = allTeams.find((team) => team.id === teamId);
   const currentTeamInfo = teamInfosById[teamId];
   const detailedStats = detailedStatsById[teamId] ?? {
@@ -71,7 +70,6 @@ export const getTeamStats = async (
     takeaways: 0,
     giveaways: 0,
   };
-
   const players = await IndexApiClient.get(teamInfo.leagueType).getPlayerStats(
     seasonType,
     season,
@@ -79,7 +77,6 @@ export const getTeamStats = async (
   const teamPlayers = players.filter(
     (player) => player.teamId === currentTeamInfo.id,
   );
-
   if (!result || !currentTeamInfo) {
     throw new Error(`Could not find stats for ${teamInfo.fullName}`);
   }

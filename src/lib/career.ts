@@ -133,6 +133,7 @@ export const displayPlayerAwards = async (
     const leagueID = String(careerStats[0].league);
 
     const getAwards = await PortalClient.getPlayerAwards(
+      false,
       playerID,
       leagueID,
       season ? String(season) : undefined,

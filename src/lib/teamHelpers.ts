@@ -68,11 +68,23 @@ export const getLast10Games = async (
     await IndexApiClient.get(teamInfo.leagueType).getSchedule(season)
   )
     .filter((game) => game.played === 1)
-    .filter(
-      (game) =>
-        game.awayTeamInfo.name === teamInfo.fullName ||
-        game.homeTeamInfo.name === teamInfo.fullName,
-    )
+    .filter((game) => {
+      if (
+        teamInfo.leagueType === LeagueType.IIHF ||
+        teamInfo.leagueType === LeagueType.WJC
+      ) {
+        // Use location for IIHF or WJC league since it is Team <Location>
+        return (
+          game.awayTeamInfo.location === teamInfo.fullName ||
+          game.homeTeamInfo.location === teamInfo.fullName
+        );
+      } else {
+        return (
+          game.awayTeamInfo.name === teamInfo.fullName ||
+          game.homeTeamInfo.name === teamInfo.fullName
+        );
+      }
+    })
     .filter(
       (game) =>
         gameTypeToSeasonType(game.type) === (seasonType ?? SeasonType.REGULAR),

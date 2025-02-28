@@ -342,7 +342,6 @@ export async function createStatsEmbed(
     (detailedStats.shOpportunities <= 0 ? 1 : detailedStats.shOpportunities);
 
   const last10Games = await getLast10Games(teamInfo, season, seasonType);
-
   let embed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamStats.teamInfo.colors.primary,
@@ -392,7 +391,6 @@ export async function createStatsEmbed(
         inline: true,
       },
     );
-
   // Additional stats for FHM8 & 10 Era
   if (season && season > 65) {
     embed = embed.addFields(
@@ -428,7 +426,6 @@ export async function createStatsEmbed(
       },
     );
   }
-
   return embed.addFields({
     name: 'Last 10 Games',
     value: last10Games.map((game: { result: string }) => game.result).join(''),

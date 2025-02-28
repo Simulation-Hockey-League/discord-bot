@@ -37,6 +37,7 @@ export async function withUserInfo(
   }
 
   const checklist = await PortalClient.getChecklistByUser(
+    false,
     String(checklistLeague),
     String(user.userID),
   );
@@ -124,7 +125,10 @@ export async function withUserAwards(
   user: BasicUserInfo,
 ) {
   try {
-    const userAwards = await PortalClient.getUserAwards(String(user.userID));
+    const userAwards = await PortalClient.getUserAwards(
+      false,
+      String(user.userID),
+    );
 
     const sortedAwards = [...userAwards].sort(
       (a, b) => Number(b.seasonID) - Number(a.seasonID),
