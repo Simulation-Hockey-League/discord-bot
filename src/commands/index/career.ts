@@ -49,6 +49,12 @@ export default {
           { name: 'Playoffs', value: SeasonType.POST },
         )
         .setRequired(false),
+    )
+    .addBooleanOption((option) =>
+      option
+        .setName('mobile')
+        .setDescription('Option to display as mobile friendly')
+        .setRequired(false),
     ),
 
   execute: async (interaction) => {
@@ -62,6 +68,7 @@ export default {
       const seasonType = interaction.options.getString('type') as
         | SeasonType
         | undefined;
+      const mobileDisplay = interaction.options.getBoolean('mobile') as boolean;
       const currentUserInfo = await users.get(interaction.user.id);
       const name = targetName || currentUserInfo?.playerName;
 
@@ -140,12 +147,14 @@ export default {
           interaction,
           careerStats as GoalieStats[],
           seasonType ?? SeasonType.REGULAR,
+          mobileDisplay ?? false,
         );
       } else {
         await displaySkaterCareer(
           interaction,
           careerStats as PlayerStats[],
           seasonType ?? SeasonType.REGULAR,
+          mobileDisplay ?? false,
         );
       }
 
@@ -189,12 +198,14 @@ export default {
               interaction,
               careerStats as GoalieStats[],
               selectedSeason,
+              mobileDisplay ?? false,
             );
           } else {
             await displaySkaterCareer(
               interaction,
               careerStats as PlayerStats[],
               selectedSeason,
+              mobileDisplay ?? false,
             );
           }
         } else if (action === 'awards') {

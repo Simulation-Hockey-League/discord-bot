@@ -9,7 +9,6 @@ import {
 } from 'typings/statsindex';
 
 import { IndexApiClient } from './api/IndexApiClient';
-import { requireFhmTeamId } from './helpers/teamid';
 import { LeagueType, PositionFilter, SeasonType } from './shared';
 
 type LeagueInput = LeagueType | string | null | undefined;
@@ -44,7 +43,7 @@ export const getTeamStats = async (
     {} as Record<number, IndexTeamInfo>,
   );
 
-  const teamId = teamInfo.teamID; //await requireFhmTeamId(teamInfo);
+  const teamId = teamInfo.teamID ?? null; // dont need requireFhmTeamId due to previous checks for getTeamInfo
   if (!teamId && teamId !== 0) {
     throw new Error(`Could not find team ID for ${teamInfo.fullName}`);
   }

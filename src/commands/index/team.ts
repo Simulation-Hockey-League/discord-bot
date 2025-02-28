@@ -8,7 +8,7 @@ import {
   createActionRow,
   createTeamEmbed,
 } from 'src/db/index/helpers/buttons/teamButton';
-import { SeasonType } from 'src/db/index/shared';
+import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { users } from 'src/db/users';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { Teams, findTeamByAbbr } from 'src/lib/teams';
@@ -89,6 +89,16 @@ export default {
       if (!teamInfo) {
         await interaction.editReply({
           content: `Could not find team with abbreviation ${abbr}.`,
+        });
+        return;
+      }
+      if (
+        view === 'roster' &&
+        (teamInfo.leagueType === LeagueType.IIHF ||
+          teamInfo.leagueType === LeagueType.WJC)
+      ) {
+        await interaction.editReply({
+          content: `Roster view is not available for IIHF or WJC teams.`,
         });
         return;
       }

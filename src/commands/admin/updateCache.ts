@@ -1,7 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
 import {
+  IihfIndexApiClient,
   ShlIndexApiClient,
   SmjhlIndexApiClient,
+  WjcIndexApiClient,
 } from 'src/db/index/api/IndexApiClient';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { UserRole } from 'src/lib/config/config';
@@ -17,6 +19,8 @@ export default {
         .addChoices(
           { name: 'Shl', value: 'shl' },
           { name: 'Smjhl', value: 'smjhl' },
+          { name: 'IIHF', value: 'iihf' },
+          { name: 'WJC', value: 'wjc' },
           { name: 'Portal', value: 'portal' },
         )
         .setRequired(true),
@@ -41,6 +45,12 @@ export default {
           break;
         case 'smjhl':
           await SmjhlIndexApiClient.reload();
+          break;
+        case 'iihf':
+          await IihfIndexApiClient.reload();
+          break;
+        case 'wjc':
+          await WjcIndexApiClient.reload();
           break;
         case 'portal':
           await PortalClient.reload();

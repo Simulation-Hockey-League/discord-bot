@@ -36,9 +36,9 @@ export const leagueNametoType = (league: string): LeagueType => {
 
 export const getGameResult = (game: GameInfo, teamInfo: TeamInfo): string => {
   if (
-    (game.homeTeamInfo.name === teamInfo.fullName &&
+    (game.homeTeamInfo.id === teamInfo.teamID &&
       game.homeScore > game.awayScore) ||
-    (game.awayTeamInfo.name === teamInfo.fullName &&
+    (game.awayTeamInfo.id === teamInfo.teamID &&
       game.awayScore > game.homeScore)
   ) {
     return botEmojis.win;

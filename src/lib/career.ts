@@ -10,6 +10,7 @@ export const displaySkaterCareer = async (
   interaction: ChatInputCommandInteraction,
   careerStats: PlayerStats[],
   seasonType: SeasonType,
+  mobile: boolean = false,
 ) => {
   const sortedStats = [...careerStats].sort((a, b) => b.season - a.season);
   const totals = {
@@ -20,50 +21,106 @@ export const displaySkaterCareer = async (
     plusMinus: sortedStats.reduce((sum, stat) => sum + stat.plusMinus, 0),
     pim: sortedStats.reduce((sum, stat) => sum + stat.pim, 0),
     shotsOnGoal: sortedStats.reduce((sum, stat) => sum + stat.shotsOnGoal, 0),
+    hits: sortedStats.reduce((sum, stat) => sum + stat.hits, 0),
+    blocks: sortedStats.reduce((sum, stat) => sum + stat.shotsBlocked, 0),
   };
   const shotPercentage = ((totals.goals / totals.shotsOnGoal) * 100).toFixed(1);
+  if (mobile) {
+    // Mobile friendly format
+    const seasonFields = sortedStats.map((season) => ({
+      name: `Season ${season.season}`,
+      value: `Team: ${season.team} | GP: ${season.gamesPlayed} | G: ${
+        season.goals
+      } | A: ${season.assists} | P: ${season.points} | +/-: ${
+        season.plusMinus
+      } | PIM: ${season.pim} | S%: ${(
+        (season.goals / season.shotsOnGoal) *
+        100
+      ).toFixed(1)}%`,
+      inline: false,
+    }));
 
-  const seasonFields = sortedStats.map((season) => ({
-    name: `Season ${season.season}`,
-    value: `Team: ${season.team} | GP: ${season.gamesPlayed} | G: ${
-      season.goals
-    } | A: ${season.assists} | P: ${season.points} | +/-: ${
-      season.plusMinus
-    } | PIM: ${season.pim} | S%: ${(
-      (season.goals / season.shotsOnGoal) *
-      100
-    ).toFixed(1)}%`,
-    inline: false,
-  }));
-
-  seasonFields.push({
-    name: '\u200b',
-    value: '**Career Totals**',
-    inline: false,
-  });
-
-  seasonFields.push({
-    name: 'Career Statistics',
-    value: `GP: ${totals.gamesPlayed} | G: ${totals.goals} | A: ${totals.assists} | P: ${totals.points} | +/-: ${totals.plusMinus} | PIM: ${totals.pim} | S%: ${shotPercentage}%`,
-    inline: false,
-  });
-
-  const embed = BaseEmbed(interaction, {})
-    .setTitle(`${sortedStats[0].name} - Career Statistics`)
-    .addFields(seasonFields)
-    .setFooter({
-      text: `${
-        seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
-      } Statistics`,
+    seasonFields.push({
+      name: '\u200b',
+      value: '**Career Totals**',
+      inline: false,
     });
 
-  await interaction.editReply({ embeds: [embed] });
+    seasonFields.push({
+      name: 'Career Statistics',
+      value: `GP: ${totals.gamesPlayed} | G: ${totals.goals} | A: ${totals.assists} | P: ${totals.points} | +/-: ${totals.plusMinus} | PIM: ${totals.pim} | S%: ${shotPercentage}%`,
+      inline: false,
+    });
+
+    const embed = BaseEmbed(interaction, {})
+      .setTitle(`${sortedStats[0].name} - Career Statistics`)
+      .addFields(seasonFields)
+      .setFooter({
+        text: `${
+          seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
+        } Statistics`,
+      });
+
+    await interaction.editReply({ embeds: [embed] });
+    return;
+  }
+  const header = `\`\`\`
+${sortedStats[0].name} - Career Statistics (${
+    seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
+  })
+\n`;
+
+  const statsText = sortedStats
+    .map(
+      (season) =>
+        `S${season.season} ${season.team} | ${season.gamesPlayed}GP | ${
+          season.goals
+        }G | ${season.assists}A | ${season.points}P | ${season.plusMinus} | ${
+          season.pim
+        } pm | ${season.shotsOnGoal}sog | Hit: ${season.hits} | Blk: ${
+          season.shotsBlocked
+        } | S%: ${((season.goals / season.shotsOnGoal) * 100).toFixed(1)}%`,
+    )
+    .join('\n');
+
+  const totalsText = `
+--------------------------
+Totals:
+GP ${totals.gamesPlayed} | G ${totals.goals} | A ${totals.assists} | ${totals.points}P | ${totals.plusMinus} | ${totals.shotsOnGoal}sog | ${totals.hits} hits | ${totals.blocks} blks | ${totals.pim} pm | ${shotPercentage}%
+\`\`\``;
+
+  let fullMessage = header + statsText + totalsText;
+
+  // Get around the 2000 character limit
+  if (fullMessage.length <= 2000) {
+    await interaction.editReply({ content: fullMessage });
+  } else {
+    const chunks = [];
+    let currentChunk = header;
+
+    for (const line of statsText.split('\n')) {
+      if ((currentChunk + line).length > 1990) {
+        chunks.push(currentChunk + '```');
+        currentChunk = '```' + line + '\n';
+      } else {
+        currentChunk += line + '\n';
+      }
+    }
+
+    chunks.push(currentChunk + totalsText);
+
+    await interaction.editReply({ content: chunks.shift() });
+    for (const chunk of chunks) {
+      await interaction.followUp({ content: chunk });
+    }
+  }
 };
 
 export const displayGoalieCareer = async (
   interaction: ChatInputCommandInteraction,
   careerStats: GoalieStats[],
   seasonType: SeasonType,
+  mobile: boolean = false,
 ) => {
   const sortedStats = [...careerStats].sort((a, b) => b.season - a.season);
   const totals = {
@@ -81,39 +138,91 @@ export const displayGoalieCareer = async (
     (totals.saves / totals.shotsAgainst) *
     100
   ).toFixed(2);
-  const seasonFields = sortedStats.map((season) => ({
-    name: `Season ${season.season}`,
-    value: `Team: ${season.team} | GP: ${season.gamesPlayed} | W: ${
-      season.wins
-    } | L: ${season.losses} | OT: ${season.ot} | SV%: ${(
-      (season.saves / season.shotsAgainst) *
-      100
-    ).toFixed(2)}% | SO: ${season.shutouts}`,
-    inline: false,
-  }));
 
-  seasonFields.push({
-    name: '\u200b',
-    value: '**Career Totals**',
-    inline: false,
-  });
+  if (mobile) {
+    const seasonFields = sortedStats.map((season) => ({
+      name: `Season ${season.season}`,
+      value: `Team: ${season.team} | GP: ${season.gamesPlayed} | W: ${
+        season.wins
+      } | L: ${season.losses} | OT: ${season.ot} | SV%: ${(
+        (season.saves / season.shotsAgainst) *
+        100
+      ).toFixed(2)}% | SO: ${season.shutouts}`,
+      inline: false,
+    }));
 
-  seasonFields.push({
-    name: 'Career Statistics',
-    value: `GP: ${totals.gamesPlayed} | W: ${totals.wins} | L: ${totals.losses} | OT: ${totals.ot} | SV%: ${careerSavePercentage}% | SO: ${totals.shutouts}`,
-    inline: false,
-  });
-
-  const embed = BaseEmbed(interaction, {})
-    .setTitle(`${sortedStats[0].name} - Career Statistics`)
-    .addFields(seasonFields)
-    .setFooter({
-      text: `${
-        seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
-      } Statistics`,
+    seasonFields.push({
+      name: '\u200b',
+      value: '**Career Totals**',
+      inline: false,
     });
 
-  await interaction.editReply({ embeds: [embed] });
+    seasonFields.push({
+      name: 'Career Statistics',
+      value: `GP: ${totals.gamesPlayed} | W: ${totals.wins} | L: ${totals.losses} | OT: ${totals.ot} | SV%: ${careerSavePercentage}% | SO: ${totals.shutouts}`,
+      inline: false,
+    });
+
+    const embed = BaseEmbed(interaction, {})
+      .setTitle(`${sortedStats[0].name} - Career Statistics`)
+      .addFields(seasonFields)
+      .setFooter({
+        text: `${
+          seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
+        } Statistics`,
+      });
+
+    await interaction.editReply({ embeds: [embed] });
+    return;
+  }
+  const header = `\`\`\`
+${sortedStats[0].name} - Career Statistics (${
+    seasonType === SeasonType.POST ? 'Playoff' : 'Regular Season'
+  })
+\n`;
+
+  const statsText = sortedStats
+    .map(
+      (season) =>
+        `S${season.season} ${season.team} | ${season.gamesPlayed}GP | ${
+          season.wins
+        }W | ${season.losses}L | ${season.ot}OT | SV%: ${(
+          (season.saves / season.shotsAgainst) *
+          100
+        ).toFixed(2)}% | SO: ${season.shutouts}`,
+    )
+    .join('\n');
+
+  const totalsText = `
+--------------------------
+Totals:
+GP ${totals.gamesPlayed} | W ${totals.wins} | L ${totals.losses} | OT ${totals.ot} | SV% ${careerSavePercentage}% | SO ${totals.shutouts}
+\`\`\``;
+
+  let fullMessage = header + statsText + totalsText;
+
+  if (fullMessage.length <= 2000) {
+    await interaction.editReply({ content: fullMessage });
+  } else {
+    const chunks = [];
+    let currentChunk = header;
+
+    for (const line of statsText.split('\n')) {
+      if ((currentChunk + line).length > 1990) {
+        chunks.push(currentChunk + '```');
+        currentChunk = '```' + line + '\n';
+      } else {
+        currentChunk += line + '\n';
+      }
+    }
+
+    chunks.push(currentChunk + totalsText);
+
+    await interaction.editReply({ content: chunks.shift() });
+    for (const chunk of chunks) {
+      await interaction.followUp({ content: chunk });
+    }
+  }
 };
 
 export const displayPlayerAwards = async (
