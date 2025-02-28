@@ -9,7 +9,7 @@ import { BaseEmbed } from './embed';
 
 export async function withUserInfo(
   interaction: ChatInputCommandInteraction<CacheType>,
-  user: BasicUserInfo | undefined,
+  user: BasicUserInfo,
 ) {
   if (!user) {
     await interaction.reply({
@@ -50,7 +50,7 @@ export async function withUserInfo(
     };
   } else {
     const taskList = incompleteTasks
-      .map((task, index) => {
+      .map((task) => {
         const subject = task.subject || 'Unknown Subject';
         const tid = task.tid || 'Unknown Task ID';
         let taskLink = `https://simulationhockey.com/showthread.php?${tid}`;
@@ -82,9 +82,11 @@ export async function withUserInfo(
 
   const teams = await IndexApiClient.get(player.currentLeague).getTeamInfo();
   const team = teams.find((team) => team.id === player.currentTeamID);
-  const formattedBankBalance = `$${player.bankBalance.toLocaleString(
-    'en-US',
-  )} USD`;
+  const formattedBankBalance = `$${player.bankBalance.toLocaleString('en-US')}`;
+  let bankedTPE = (player.totalTPE - player.appliedTPE).toString();
+  if (user.userID === 3435) {
+    bankedTPE = 'Do Math James';
+  }
   const playerEmbed = BaseEmbed(interaction, {
     teamColor: team?.colors.primary,
   })
@@ -97,6 +99,7 @@ export async function withUserInfo(
         value: `${player.appliedTPE.toString()}`,
         inline: true,
       },
+      { name: 'Banked', value: bankedTPE, inline: true },
       { name: 'Position', value: player.position, inline: true },
       { name: 'Draft Season', value: `S${player.draftSeason}`, inline: true },
       { name: 'Bank', value: formattedBankBalance, inline: true },

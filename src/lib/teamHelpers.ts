@@ -4,11 +4,7 @@ import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { TeamInfo } from 'src/lib/teams';
 import { GameInfo } from 'typings/statsindex';
 
-const resultEmojis = {
-  win: '<:Win:1343076655765389342>',
-  loss: '<:Loss:1343076631128051772>',
-  otl: '<:OTL:1343076600853299312>',
-};
+import { botEmojis } from './config/config';
 
 export const gameTypeToSeasonType = (gameType: string): SeasonType => {
   switch (gameType) {
@@ -45,12 +41,12 @@ export const getGameResult = (game: GameInfo, teamInfo: TeamInfo): string => {
     (game.awayTeamInfo.name === teamInfo.fullName &&
       game.awayScore > game.homeScore)
   ) {
-    return resultEmojis.win;
+    return botEmojis.win;
   }
   if (game.overtime === 1 || game.shootout === 1) {
-    return resultEmojis.otl;
+    return botEmojis.otl;
   }
-  return resultEmojis.loss;
+  return botEmojis.loss;
 };
 
 export const formatPastGame = (game: GameInfo, teamInfo: TeamInfo): string => {
