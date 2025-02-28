@@ -368,7 +368,7 @@ export const Teams = Object.freeze({
     emoji: botEmojis.IIHF_GB,
   },
   TEAM_SWITZERLAND: {
-    teamID: 11,
+    teamID: 10,
     fullName: 'Team Switzerland',
     nameRegex: /team switzerland/i,
     logoUrl:
@@ -486,7 +486,7 @@ export const Teams = Object.freeze({
     emoji: botEmojis.WJC_USB,
   },
   WJC_RAT: {
-    teamID: 4,
+    teamID: 2,
     fullName: 'Team Ratvia',
     nameRegex: /team ratvia/i,
     logoUrl:
