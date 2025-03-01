@@ -70,5 +70,5 @@ export default {
       });
     }
   },
-  minRole: UserRole.BOT_OWNERS,
+  minRole: UserRole.SERVER_ADMIN,
 } satisfies SlashCommand;

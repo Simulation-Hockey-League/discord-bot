@@ -1,5 +1,5 @@
 import { Events, Interaction } from 'discord.js';
-import { Config } from 'src/lib/config/config';
+import { Config, UserRole } from 'src/lib/config/config';
 import { ErrorEmbed } from 'src/lib/embed';
 
 import { pluralize } from 'src/lib/format';
@@ -23,8 +23,10 @@ export default {
       console.log(
         `Executing command: ${interaction.commandName} from server: ${interaction.guild?.name} (${interaction.guildId})`,
       );
-
-      if (command.minRole && !checkRole(interaction.member, command.minRole)) {
+      if (
+        command.minRole &&
+        !(await checkRole(interaction.member, command.minRole))
+      ) {
         interaction.reply({
           content: 'You do not have permission to run this command.',
           ephemeral: true,

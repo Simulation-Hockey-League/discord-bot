@@ -18,6 +18,7 @@ export const Config = {
     '102175890393288704', // luke
     '176202363089059840', // teddy
     '225009798846873600', // lemonoppy
+    '187307011929538560', // JamesT (Discord Moderator)
   ],
   indexUpdateServerId: isDevelopment
     ? process.env.TEST_SERVER_ID

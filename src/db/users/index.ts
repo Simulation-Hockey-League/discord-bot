@@ -1,4 +1,5 @@
 import Keyv from 'keyv';
+import { UserRole } from 'src/lib/config/config';
 import { logger } from 'src/lib/logger';
 
 export type UserInfo = {
@@ -18,4 +19,14 @@ export type PlayerInfo = {
   name: string;
 };
 
+export type DiscordModInfo = {
+  discordID: string;
+  role: UserRole;
+};
+
+export const discordMods = new Keyv<DiscordModInfo>(
+  'sqlite://src/db/users/discordMods.sqlite',
+);
+
 users.on('error', (err) => logger.error('Keyv connection error:', err));
+discordMods.on('error', (err) => logger.error('Keyv connection error:', err));
