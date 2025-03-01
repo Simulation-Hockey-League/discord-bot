@@ -10,6 +10,8 @@ export const withLeaderStats = async (
   seasonType: SeasonType | undefined,
   position: 'F' | 'D' | undefined,
   leader: SkaterCategory,
+  viewRookie: boolean,
+  abbr: string | null,
   page: number = 1,
 ): Promise<EmbedBuilder> => {
   // (F = C, LW, RW; D = LD, RD)
@@ -28,18 +30,23 @@ export const withLeaderStats = async (
 
   filteredPlayers.sort((a, b) => (b[leader] as number) - (a[leader] as number));
 
-  let header = `${leagueTypeToString(league ?? 0)} Leaders`;
+  let headerParts = [`${leagueTypeToString(league ?? 0)} Leaders`];
 
-  if (position) {
-    header += ` (${position === 'F' ? 'Forward' : 'Defenseman'})`;
-  }
+  if (abbr) headerParts.push(`Team: ${abbr.toUpperCase()}`);
+  if (position)
+    headerParts.push(
+      `Position: ${position === 'F' ? 'Forward' : 'Defenseman'}`,
+    );
+  if (viewRookie) headerParts.push('Rookie Only');
+  if (seasonType) headerParts.push(`Type: ${seasonType}`);
 
-  header += `\nS${filteredPlayers[0].season} ${
-    leader.charAt(0).toUpperCase() + leader.slice(1)
-  } Leaders (Page ${page})`;
+  headerParts.push(
+    `S${season} ${
+      leader.charAt(0).toUpperCase() + leader.slice(1)
+    } Leaders (Page ${page})`,
+  );
 
-  const embed = new EmbedBuilder().setTitle(header);
-
+  const embed = new EmbedBuilder().setTitle(headerParts.join(' | '));
   const pageSize = 25;
   const startIndex = (page - 1) * pageSize;
   const topPlayers = filteredPlayers.slice(startIndex, startIndex + pageSize);

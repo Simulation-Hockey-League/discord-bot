@@ -151,7 +151,13 @@ export default {
           embeds: [initialEmbed],
           components: [row],
         })
-        .catch(logger.error);
+        .catch(async (error) => {
+          logger.error(error);
+          await interaction.editReply({
+            content: 'An error occurred while fetching team info.',
+          });
+          return;
+        });
 
       if (!response) {
         return;

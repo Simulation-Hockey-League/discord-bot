@@ -48,15 +48,6 @@ export function createActionRow(
         .setDisabled(view === 'schedule'),
     );
   }
-  if (season && season >= 53) {
-    actionRow.addComponents(
-      new ButtonBuilder()
-        .setCustomId(`leaders_${abbr}_${season ?? 'current'}`)
-        .setLabel('Team Leaders')
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(view === 'leaders'),
-    );
-  }
   actionRow.addComponents(
     new ButtonBuilder()
       .setCustomId(`leaders_${abbr}_${season ?? 'current'}`)

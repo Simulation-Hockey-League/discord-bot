@@ -11,6 +11,7 @@ import { GoalieCategories } from 'src/db/index/shared';
 import { goalieRookieCutoffs } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { withLeaderStats } from 'src/lib/leadersGoalies';
+import { TeamInfo, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
 import { GoalieStats } from 'typings/statsindex';
@@ -78,7 +79,15 @@ export default {
         )
         .setRequired(false),
     )
-    .setDescription('Get player statistics.'),
+    .addStringOption((option) =>
+      option
+        .setName('abbr')
+        .setDescription(
+          'The abbreviation of the team. If not provided will use team in /store. use /help for all abbr',
+        )
+        .setRequired(false),
+    )
+    .setDescription('Get Goalie Statistics.'),
 
   execute: async (interaction) => {
     const currentSeason = DynamicConfig.get('currentSeason');
@@ -93,6 +102,7 @@ export default {
       'category',
     ) as GoalieCategories;
     const viewRookie = interaction.options.getBoolean('rookie') ?? false;
+    const abbr = interaction.options.getString('abbr');
     let currentPage = 1;
 
     await interaction.deferReply();
@@ -120,6 +130,37 @@ export default {
         );
         playerStats = rookieStats;
       }
+      let teamInfo: TeamInfo | undefined;
+      if (abbr) {
+        teamInfo = findTeamByAbbr(abbr, league);
+        if (!teamInfo) {
+          await interaction.reply({
+            content: `Could not find team with abbreviation ${abbr}.`,
+            ephemeral: true,
+          });
+          return;
+        }
+        playerStats = playerStats.filter(
+          (player) => teamInfo && player.teamId === teamInfo.teamID,
+        );
+      }
+      if (!playerStats.length) {
+        const filters = [
+          abbr ? `Team: ${abbr.toUpperCase()}` : null,
+          season ? `Season: ${season}` : null,
+          seasonType ? `Type: ${seasonType}` : null,
+          leader ? `Category: ${leader}` : null,
+          viewRookie ? 'Rookie Only' : null,
+        ]
+          .filter(Boolean)
+          .join(' | ');
+
+        await interaction.reply({
+          content: `No player stats found${filters ? ` for ${filters}` : ''}.`,
+          ephemeral: true,
+        });
+        return;
+      }
 
       const embed = await withLeaderStats(
         playerStats,
@@ -127,6 +168,8 @@ export default {
         season,
         seasonType,
         leader,
+        viewRookie,
+        abbr,
         currentPage,
       );
       const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -169,6 +212,8 @@ export default {
           season,
           seasonType,
           leader,
+          viewRookie,
+          abbr,
           currentPage,
         );
         await btnInteraction.update({

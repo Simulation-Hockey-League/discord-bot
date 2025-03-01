@@ -9,6 +9,8 @@ export const withLeaderStats = async (
   season: number | undefined,
   seasonType: SeasonType | undefined,
   leader: GoalieCategories,
+  viewRookie: boolean,
+  abbr: string | null,
   page: number = 1,
 ): Promise<EmbedBuilder> => {
   if (!leader) {
@@ -46,12 +48,18 @@ export const withLeaderStats = async (
     return (b[leader] as number) - (a[leader] as number);
   });
 
-  let header = `${leagueTypeToString(league ?? 0)} Leaders`;
-  header += `\nS${playerStats[0].season} ${
-    leader.charAt(0).toUpperCase() + leader.slice(1)
-  } Leaders (Page ${page})`;
+  let headerParts = [`${leagueTypeToString(league ?? 0)} Leaders`];
 
-  const embed = new EmbedBuilder().setTitle(header);
+  if (abbr) headerParts.push(`Team: ${abbr.toUpperCase()}`);
+  if (seasonType) headerParts.push(`Type: ${seasonType}`);
+  if (viewRookie) headerParts.push('Rookie Only');
+
+  headerParts.push(
+    `S${season} ${
+      leader.charAt(0).toUpperCase() + leader.slice(1)
+    } Leaders (Page ${page})`,
+  );
+  const embed = new EmbedBuilder().setTitle(headerParts.join(' | '));
 
   const pageSize = 25;
   const startIndex = (page - 1) * pageSize;

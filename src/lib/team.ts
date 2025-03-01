@@ -346,6 +346,7 @@ export async function createStatsEmbed(
     (detailedStats.shOpportunities <= 0 ? 1 : detailedStats.shOpportunities);
 
   const last10Games = await getLast10Games(teamInfo, season, seasonType);
+
   let embed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamStats.teamInfo.colors.primary,
