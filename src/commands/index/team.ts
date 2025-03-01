@@ -28,6 +28,20 @@ export default {
     )
     .addNumberOption((option) =>
       option
+        .setName('league')
+        .setDescription(
+          'The league you want to search. If not provided, will use SHL or IIHF teams',
+        )
+        .setChoices(
+          { name: 'SHL', value: LeagueType.SHL },
+          { name: 'SMJHL', value: LeagueType.SMJHL },
+          { name: 'IIHF', value: LeagueType.IIHF },
+          { name: 'WJC', value: LeagueType.WJC },
+        )
+        .setRequired(false),
+    )
+    .addNumberOption((option) =>
+      option
         .setName('season')
         .setDescription(
           'The season to get stats for. If not provided, will get current season.',
@@ -65,6 +79,9 @@ export default {
 
       const season = interaction.options.getNumber('season') ?? currentSeason;
       const userTeam = await users.get(interaction.user.id);
+      const league = interaction.options.getNumber('league') as
+        | LeagueType
+        | undefined;
       const abbr =
         interaction.options.getString('abbr') ??
         Object.values(Teams).find(
@@ -86,7 +103,7 @@ export default {
 
       await interaction.deferReply();
 
-      const teamInfo = findTeamByAbbr(abbr);
+      const teamInfo = findTeamByAbbr(abbr, league);
       if (!teamInfo) {
         await interaction.editReply({
           content: `Could not find team with abbreviation ${abbr}.`,

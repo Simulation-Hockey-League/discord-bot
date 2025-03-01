@@ -645,9 +645,22 @@ export const findTeamByName = (teamName: string): TeamInfo | undefined => {
   return Object.values(Teams).find((team) => team.nameRegex.test(teamName));
 };
 
-export const findTeamByAbbr = (teamAbbr: string): TeamInfo | undefined => {
+export const findTeamByAbbr = (
+  teamAbbr: string,
+  league?: LeagueType,
+): TeamInfo | undefined => {
   if (!teamAbbr) return undefined;
-  return Object.values(Teams).find(
+
+  const teams = Object.values(Teams);
+
+  if (league) {
+    return teams.find(
+      (team) =>
+        team.leagueType === league &&
+        team.abbr.toLowerCase() === teamAbbr.toLowerCase(),
+    );
+  }
+  return teams.find(
     (team) => team.abbr.toLowerCase() === teamAbbr.toLowerCase(),
   );
 };
