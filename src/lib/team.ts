@@ -294,12 +294,12 @@ export async function createRosterEmbed(
     })
     .addFields({
       name: 'Starting Goalie',
-      value: `${goalies[0].totalTPE || 0}`,
+      value: `${goalies[0]?.totalTPE || 0}`,
       inline: false,
     })
     .addFields({
       name: 'Backup Goalie',
-      value: `${goalies[1].totalTPE || 0}`,
+      value: `${goalies[1]?.totalTPE || 0}`,
       inline: true,
     });
   if (teamInfo.leagueType === 0) {

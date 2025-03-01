@@ -85,9 +85,6 @@ export async function withUserInfo(
   const team = teams.find((team) => team.id === player.currentTeamID);
   const formattedBankBalance = `$${player.bankBalance.toLocaleString('en-US')}`;
   let bankedTPE = (player.totalTPE - player.appliedTPE).toString();
-  if (user.userID === 3435) {
-    bankedTPE = 'Do Math James';
-  }
   const playerEmbed = BaseEmbed(interaction, {
     teamColor: team?.colors.primary,
   })
