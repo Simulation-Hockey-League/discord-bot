@@ -102,7 +102,9 @@ export default {
           name: 'Players',
           value: playersSection,
         });
-      await interaction.editReply({ embeds: [embed] }).catch(logger.error);
+      await interaction.editReply({ embeds: [embed] }).catch((error) => {
+        logger.error(error);
+      });
     } catch (error) {
       await interaction.editReply({
         content: `An error occurred while retrieving fantasy rankings.`,

@@ -39,13 +39,24 @@ export function createActionRow(
         .setDisabled(view === 'roster'),
     );
   }
-  actionRow.addComponents(
-    new ButtonBuilder()
-      .setCustomId(`schedule_${abbr}_${season ?? 'current'}`)
-      .setLabel('Schedule')
-      .setStyle(ButtonStyle.Primary)
-      .setDisabled(view === 'schedule'),
-  );
+  if (season && season >= 53) {
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`schedule_${abbr}_${season ?? 'current'}`)
+        .setLabel('Schedule')
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(view === 'schedule'),
+    );
+  }
+  if (season && season >= 53) {
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`leaders_${abbr}_${season ?? 'current'}`)
+        .setLabel('Team Leaders')
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(view === 'leaders'),
+    );
+  }
   actionRow.addComponents(
     new ButtonBuilder()
       .setCustomId(`leaders_${abbr}_${season ?? 'current'}`)
@@ -75,13 +86,17 @@ export async function createTeamEmbed(
       }
       return;
     case 'schedule':
-      return await createScheduleEmbed(
-        interaction,
-        team,
-        teamInfo,
-        seasonType,
-        season,
-      );
+      if (season && season >= 53) {
+        return await createScheduleEmbed(
+          interaction,
+          team,
+          teamInfo,
+          seasonType,
+          season,
+        );
+      }
+      return;
+
     case 'leaders':
       return await createLeadersEmbed(
         interaction,

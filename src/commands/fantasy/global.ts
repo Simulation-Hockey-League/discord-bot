@@ -6,6 +6,7 @@ import {
   ComponentType,
 } from 'discord.js';
 import { createGlobalPlayerRank, createGlobalRank } from 'src/lib/fantasy';
+import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -132,7 +133,9 @@ export default {
 
       collector.on('end', () => {
         row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] });
+        message.edit({ components: [row] }).catch((error) => {
+          logger.error(error);
+        });
       });
     } catch (error) {
       await interaction.editReply({

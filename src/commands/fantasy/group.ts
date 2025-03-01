@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { BaseEmbed } from 'src/lib/embed';
+import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 
 import {
@@ -49,7 +50,9 @@ export default {
         .setTitle(`Fantasy Group ${groupNumber} Rankings`)
         .setDescription(leaderboard);
 
-      await interaction.reply({ embeds: [embed] });
+      await interaction.reply({ embeds: [embed] }).catch((error) => {
+        logger.error(error);
+      });
     } catch (error) {
       await interaction.reply({
         content: 'An error occurred while retrieving fantasy rankings.',

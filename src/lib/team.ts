@@ -345,7 +345,11 @@ export async function createStatsEmbed(
     (100 * (detailedStats.shOpportunities - detailedStats.ppGoalsAgainst)) /
     (detailedStats.shOpportunities <= 0 ? 1 : detailedStats.shOpportunities);
 
-  const last10Games = await getLast10Games(teamInfo, season, seasonType);
+  let last10Games = await getLast10Games(teamInfo, season, seasonType);
+  if (season && season >= 53) {
+    last10Games = [];
+  }
+
   let embed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamStats.teamInfo.colors.primary,
@@ -440,9 +444,14 @@ export async function createStatsEmbed(
       },
     );
   }
-  return embed.addFields({
-    name: 'Last 10 Games',
-    value: last10Games.map((game: { result: string }) => game.result).join(''),
-    inline: false,
-  });
+  if (season && season >= 53) {
+    return embed.addFields({
+      name: 'Last 10 Games',
+      value: last10Games
+        .map((game: { result: string }) => game.result)
+        .join(''),
+      inline: false,
+    });
+  }
+  return embed;
 }
