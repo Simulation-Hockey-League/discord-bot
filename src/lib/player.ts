@@ -109,7 +109,7 @@ export const withPlayerStats = async (
         },
         {
           name: '\u200B',
-          value: [`Fantasy: ${fantasyPoints}`].join('\n'),
+          value: [`Fantasy: ${fantasyPoints.toFixed(2)}`].join('\n'),
           inline: true,
         },
         {
@@ -153,7 +153,7 @@ export const withPlayerStats = async (
         ).toFixed(2)}`,
         `Game rating: ${playerStats.gameRating}`,
         `GSAA: ${gsaa.toFixed(2)}`,
-        `Fantasy: ${fantasyPoints}`,
+        `Fantasy: ${fantasyPoints.toFixed(2)}`,
       ].join('\n'),
       inline: true,
     });

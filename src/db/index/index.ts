@@ -76,6 +76,33 @@ export const getTeamStats = async (
   const teamPlayers = players.filter(
     (player) => player.teamId === currentTeamInfo.id,
   );
+
+  // Calculate PDO and Corsi
+  const teamPDO =
+    (detailedStats.goalsFor / (detailedStats.shotsFor || 1) +
+      (1 - detailedStats.goalsAgainst / (detailedStats.shotsAgainst || 1))) *
+    100;
+  const teamCorsiPct =
+    (detailedStats.shotsFor /
+      (detailedStats.shotsFor + detailedStats.shotsAgainst || 1)) *
+    100;
+  const pdoRank =
+    _.orderBy(
+      allDetailedStats,
+      (team) =>
+        (team.goalsFor / (team.shotsFor || 1) +
+          (1 - team.goalsAgainst / (team.shotsAgainst || 1))) *
+        100,
+      'desc',
+    ).findIndex((team) => team.id === teamId) + 1;
+  const corsiRank =
+    _.orderBy(
+      allDetailedStats,
+      (team) =>
+        (team.shotsFor / (team.shotsFor + team.shotsAgainst || 1)) * 100,
+      'desc',
+    ).findIndex((team) => team.id === teamId) + 1;
+
   if (!result || !currentTeamInfo) {
     throw new Error(`Could not find stats for ${teamInfo.fullName}`);
   }
@@ -114,8 +141,8 @@ export const getTeamStats = async (
       _.orderBy(allTeams, (team) => team.goalsAgainst, 'asc').findIndex(
         (team) => team.id === teamId,
       ) + 1,
-    // pdo, pdo rank from player stats on roster
-    // corsi, corsi rank from player stats on roster
+    pdoRank: pdoRank,
+    corsiRank: corsiRank,
     shotsForRank:
       _.orderBy(allDetailedStats, (team) => team.shotsFor, 'desc').findIndex(
         (team) => team.id === teamId,
@@ -167,10 +194,8 @@ export const getTeamStats = async (
         (detailedStats.shotsAgainst / detailedStats.gamesPlayed || 1)
       ).toFixed(2),
     ),
-    pdo: 0, // TODO
-    pdoRank: 0, // TODO
-    corsi: 0, // TODO
-    corsiRank: 0, // TODO
+    pdo: Number(teamPDO.toFixed(2)),
+    corsi: Number(teamCorsiPct.toFixed(2)),
     regularSeasonPlayerStats: teamPlayers,
   };
 };

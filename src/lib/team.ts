@@ -335,6 +335,10 @@ export async function createStatsEmbed(
     conferencePosition,
     divisionPosition,
     detailedStats,
+    pdo,
+    corsi,
+    pdoRank,
+    corsiRank,
   } = teamStats;
   const PP = 100 * (detailedStats.ppGoalsFor / detailedStats.ppOpportunities);
   const PK =
@@ -422,6 +426,16 @@ export async function createStatsEmbed(
       {
         name: 'PK',
         value: `${PK.toFixed(2)} (#${pkRank})`,
+        inline: true,
+      },
+      {
+        name: 'PDO',
+        value: `${pdo} (#${pdoRank})`,
+        inline: true,
+      },
+      {
+        name: 'Corsi',
+        value: `${corsi} (#${corsiRank})`,
         inline: true,
       },
     );
