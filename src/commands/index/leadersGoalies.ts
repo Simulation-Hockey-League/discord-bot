@@ -8,7 +8,7 @@ import {
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { GoalieCategories } from 'src/db/index/shared';
-import { withLeaderStats } from 'src/lib/leadersGoalies';
+import { withLeaderStats } from 'src/lib/helpers/leadersGoalies';
 
 import { SlashCommand } from 'typings/command';
 

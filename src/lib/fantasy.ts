@@ -6,7 +6,7 @@ import {
   fetchPlayersOnlyData,
   groupRecords,
   playersOnlyRecords,
-} from './fantasyHelpers';
+} from './helpers/fantasyHelpers';
 
 const PAGE_SIZE = 25;
 

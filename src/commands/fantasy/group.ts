@@ -5,7 +5,7 @@ import { SlashCommand } from 'typings/command';
 import {
   fetchGlobalSheetData,
   generateLeaderboard,
-} from '../../lib/fantasyHelpers';
+} from '../../lib/helpers/fantasyHelpers';
 
 export default {
   command: new SlashCommandBuilder()

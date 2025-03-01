@@ -7,7 +7,7 @@ import {
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType, SkaterCategory } from 'src/db/index/shared';
-import { withLeaderStats } from 'src/lib/leadersSkaters';
+import { withLeaderStats } from 'src/lib/helpers/leadersSkaters';
 
 import { SlashCommand } from 'typings/command';
 

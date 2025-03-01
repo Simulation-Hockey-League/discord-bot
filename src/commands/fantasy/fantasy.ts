@@ -9,7 +9,7 @@ import {
   fetchSwapsData,
   generateLeaderboard,
   getUserByFuzzy,
-} from '../../lib/fantasyHelpers';
+} from '../../lib/helpers/fantasyHelpers';
 
 export default {
   command: new SlashCommandBuilder()

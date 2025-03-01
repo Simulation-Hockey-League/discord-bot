@@ -14,7 +14,7 @@ import {
 import { TeamInfo } from 'src/lib/teams';
 import { IndexTeamInfo, SeasonType } from 'typings/statsindex';
 
-import { LeagueType } from '../../shared';
+import { LeagueType } from '../../../db/index/shared';
 
 export function createActionRow(
   abbr: string,

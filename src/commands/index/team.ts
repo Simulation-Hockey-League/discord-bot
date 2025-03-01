@@ -4,13 +4,13 @@ import {
   SlashCommandBuilder,
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
-import {
-  createActionRow,
-  createTeamEmbed,
-} from 'src/db/index/helpers/buttons/teamButton';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { users } from 'src/db/users';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
+import {
+  createActionRow,
+  createTeamEmbed,
+} from 'src/lib/helpers/buttons/teamButton';
 import { Teams, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';

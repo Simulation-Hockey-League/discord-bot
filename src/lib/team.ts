@@ -14,7 +14,7 @@ import {
   gameTypeToSeasonType,
   getLast10Games,
   leagueNametoType,
-} from './teamHelpers';
+} from './helpers/teamHelpers';
 import { TeamInfo } from './teams';
 
 export async function createScheduleEmbed(

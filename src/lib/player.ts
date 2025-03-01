@@ -4,7 +4,7 @@ import { SeasonType } from 'src/db/index/shared';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 import { DynamicConfig } from './config/dynamicConfig';
-import { getSkaterFantasyPoints } from './fantasyHelpers';
+import { getSkaterFantasyPoints } from './helpers/fantasyHelpers';
 
 export const toToi = (minutes: number, games: number): string => {
   const avg = minutes / (games || 0) / 60;
