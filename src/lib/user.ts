@@ -55,22 +55,21 @@ export async function withUserInfo(
         const subject = task.subject || 'Unknown Subject';
         const tid = task.tid || 'Unknown Task ID';
         let taskLink = `https://simulationhockey.com/showthread.php?${tid}`;
+        let dueDate = task.dueDate;
 
         if (subject.includes('Chirp')) {
           taskLink = 'https://simulationhockey.com/forumdisplay.php?fid=758';
+          dueDate = 'End of the week';
         } else if (
           subject === 'weeklyActivityCheck' ||
-          subject === 'weeklyTraining' ||
-          subject === 'seasonalCoaching'
+          subject === 'weeklyTraining'
         ) {
           taskLink = 'https://portal.simulationhockey.com/';
-        } else if (subject === 'Deep Dive') {
+          dueDate = 'End of the week';
+        } else if (subject === 'Deep Dive' || subject === 'seasonalCoaching') {
           taskLink = 'https://simulationhockey.com/forumdisplay.php?fid=432';
+          dueDate = 'End of the Season';
         }
-
-        const dueDate = task.dueDate
-          ? task.dueDate.replace('Due: ', '')
-          : 'End of the week';
 
         return `🔹 [${subject}](${taskLink}) - **${dueDate}**`;
       })
