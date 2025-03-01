@@ -15,10 +15,12 @@ export const withStandingsStats = (
     .map((team: TeamStats) => {
       const teamInfo = findTeamByID(team.id, league);
       const emoji = teamInfo?.emoji;
+      const teamAbbr = teamInfo?.abbr;
+      const goalDiff = team.goalsFor - team.goalsAgainst;
 
-      return `${emoji ? emoji : ''} ${team.name} - **${team.points}** (${
+      return `${emoji ? emoji : ''} | ${teamAbbr} | **${team.points}P** | ${
         team.gp
-      }-${team.wins}-${team.losses}-${team.OTL})`;
+      }GP | ${team.wins}W | ${team.losses}L | ${team.OTL}OTL | ${goalDiff} GD`;
     })
     .join('\n');
 
