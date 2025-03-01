@@ -1,5 +1,5 @@
 import { Events, Interaction } from 'discord.js';
-import { Config, UserRole } from 'src/lib/config/config';
+import { Config } from 'src/lib/config/config';
 import { ErrorEmbed } from 'src/lib/embed';
 
 import { pluralize } from 'src/lib/format';
