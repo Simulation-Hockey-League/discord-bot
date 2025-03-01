@@ -7,9 +7,12 @@ import {
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType, SkaterCategory } from 'src/db/index/shared';
-import { withLeaderStats } from 'src/lib/helpers/leadersSkaters';
+import { skaterRookieCutoffs } from 'src/lib/config/config';
+import { DynamicConfig } from 'src/lib/config/dynamicConfig';
+import { withLeaderStats } from 'src/lib/leadersSkaters';
 
 import { SlashCommand } from 'typings/command';
+import { PlayerStats } from 'typings/statsindex';
 
 export default {
   command: new SlashCommandBuilder()
@@ -85,13 +88,22 @@ export default {
         )
         .setRequired(false),
     )
+    .addBooleanOption((option) =>
+      option
+        .setName('rookie')
+        .setDescription(
+          'If you want to look at only rookies or not. Default to no',
+        )
+        .setRequired(false),
+    )
     .setDescription('Get player statistics.'),
 
   execute: async (interaction) => {
-    const season = interaction.options.getNumber('season') ?? undefined;
+    const currentSeason = DynamicConfig.get('currentSeason');
+    const season = interaction.options.getNumber('season') ?? currentSeason;
     const league = interaction.options.getNumber('league') as
       | LeagueType
-      | undefined;
+      | LeagueType.SHL;
     const seasonType = interaction.options.getString('type') as
       | SeasonType
       | undefined;
@@ -100,16 +112,36 @@ export default {
       | 'D'
       | undefined;
     const leader = interaction.options.getString('category') as SkaterCategory;
+    const viewRookie = interaction.options.getBoolean('rookie') ?? false;
 
     let currentPage = 1;
 
     await interaction.deferReply();
 
     try {
-      const playerStats = await IndexApiClient.get(league).getPlayerStats(
+      let seasonBefore: PlayerStats[] = [];
+
+      let playerStats = await IndexApiClient.get(league).getPlayerStats(
         seasonType ?? SeasonType.REGULAR,
         season,
       );
+      if (viewRookie) {
+        seasonBefore = await IndexApiClient.get(league).getPlayerStats(
+          seasonType ?? SeasonType.REGULAR,
+          season - 1,
+        );
+        const previousSeasonIds = new Set(
+          seasonBefore.map((player) => player.id),
+        );
+        const cutoff =
+          skaterRookieCutoffs.find((cutoff) => cutoff.league === league)
+            ?.gamesPlayed ?? 15;
+        const rookieStats = playerStats.filter(
+          (player) =>
+            !previousSeasonIds.has(player.id) && player.gamesPlayed > cutoff,
+        );
+        playerStats = rookieStats;
+      }
 
       const embed = await withLeaderStats(
         playerStats,

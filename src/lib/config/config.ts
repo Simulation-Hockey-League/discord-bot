@@ -1,3 +1,5 @@
+import { LeagueType } from 'src/db/index/shared';
+
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const Config = {
@@ -53,6 +55,20 @@ export const Config = {
     },
   },
 };
+
+export const skaterRookieCutoffs = [
+  { league: LeagueType.SHL, gamesPlayed: 15 },
+  { league: LeagueType.SMJHL, gamesPlayed: 20 },
+  { league: LeagueType.IIHF, gamesPlayed: 1 },
+  { league: LeagueType.WJC, gamesPlayed: 1 },
+] as const;
+
+export const goalieRookieCutoffs = [
+  { league: LeagueType.SHL, gamesPlayed: 12 },
+  { league: LeagueType.SMJHL, gamesPlayed: 12 },
+  { league: LeagueType.IIHF, gamesPlayed: 1 },
+  { league: LeagueType.WJC, gamesPlayed: 1 },
+];
 
 export enum UserRole {
   REGULAR = 0,
