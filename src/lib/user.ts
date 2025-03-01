@@ -46,7 +46,7 @@ export async function withUserInfo(
   if (incompleteTasks.length === 0) {
     checklistField = {
       name: '✅ Checklist',
-      value: 'Done All your Tasks This week!',
+      value: 'Done All your Tasks This Week!',
       inline: false,
     };
   } else {
@@ -104,12 +104,12 @@ export async function withUserInfo(
       { name: 'Bank', value: formattedBankBalance, inline: true },
       {
         name: 'Activity Check',
-        value: player.activityCheckComplete ? 'Yes' : 'No',
+        value: player.activityCheckComplete ? '✅' : '❌',
         inline: true,
       },
       {
         name: 'Training Purchased',
-        value: player.trainingPurchased ? 'Yes' : 'No',
+        value: player.trainingPurchased ? '✅' : '❌',
         inline: true,
       },
     );
