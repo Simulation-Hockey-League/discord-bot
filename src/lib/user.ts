@@ -32,8 +32,8 @@ export async function withUserInfo(
   }
 
   let checklistLeague = 0;
-  if (player.draftSeason === currentSeason) {
-    checklistLeague -= 1;
+  if (player.draftSeason && player.draftSeason > currentSeason) {
+    checklistLeague = 1;
   }
 
   const checklist = await PortalClient.getChecklistByUser(
@@ -64,6 +64,8 @@ export async function withUserInfo(
           subject === 'seasonalCoaching'
         ) {
           taskLink = 'https://portal.simulationhockey.com/';
+        } else if (subject === 'Deep Dive') {
+          taskLink = 'https://simulationhockey.com/forumdisplay.php?fid=432';
         }
 
         const dueDate = task.dueDate
