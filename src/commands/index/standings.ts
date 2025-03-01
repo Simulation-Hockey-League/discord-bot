@@ -3,6 +3,7 @@ import { getStandings } from 'src/db/index';
 import { LeagueType } from 'src/db/index/shared';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { BaseEmbed } from 'src/lib/embed';
+import { logger } from 'src/lib/logger';
 import { withStandingsStats } from 'src/lib/standings';
 
 import { SlashCommand } from 'typings/command';
@@ -60,19 +61,21 @@ export default {
         return;
       }
       league = league ?? LeagueType.SHL; //default to SHL
-      await interaction.editReply({
-        embeds: [
-          withStandingsStats(
-            BaseEmbed(interaction, {}).setTitle(
-              `Season ${season}${
-                playoffs ? ` Playoff ` : ` Regular Season `
-              }Standings`,
+      await interaction
+        .editReply({
+          embeds: [
+            withStandingsStats(
+              BaseEmbed(interaction, {}).setTitle(
+                `Season ${season}${
+                  playoffs ? ` Playoff ` : ` Regular Season `
+                }Standings`,
+              ),
+              seasonStats,
+              league,
             ),
-            seasonStats,
-            league,
-          ),
-        ],
-      });
+          ],
+        })
+        .catch(logger.error);
     } catch (error) {
       await interaction.editReply({
         content: `An error occurred while retrieving standings.`,

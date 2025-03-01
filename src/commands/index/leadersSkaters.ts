@@ -10,6 +10,7 @@ import { LeagueType, SeasonType, SkaterCategory } from 'src/db/index/shared';
 import { skaterRookieCutoffs } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { withLeaderStats } from 'src/lib/leadersSkaters';
+import { logger } from 'src/lib/logger';
 
 import { SlashCommand } from 'typings/command';
 import { PlayerStats } from 'typings/statsindex';
@@ -203,7 +204,7 @@ export default {
 
       collector.on('end', () => {
         row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] });
+        message.edit({ components: [row] }).catch(logger.error);
       });
     } catch (error) {
       await interaction.editReply({

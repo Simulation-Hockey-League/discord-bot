@@ -4,6 +4,7 @@ import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType } from 'src/db/index/shared';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
+import { logger } from 'src/lib/logger';
 import { withPlayerStats } from 'src/lib/player';
 import { findTeamByName } from 'src/lib/teams';
 
@@ -79,18 +80,20 @@ export default {
     const teams = await IndexApiClient.get(playerStats.league).getTeamInfo();
     const team = teams.find((team) => team.id === playerStats?.teamId);
 
-    await interaction.editReply({
-      embeds: [
-        (
-          await withPlayerStats(
-            BaseEmbed(interaction, {
-              logoUrl: teamInfo?.logoUrl,
-              teamColor: team?.colors.primary,
-            }).setTitle(`${playerStats.name} - ${playerStats.position}`),
-            playerStats,
-          )
-        ).data,
-      ],
-    });
+    await interaction
+      .editReply({
+        embeds: [
+          (
+            await withPlayerStats(
+              BaseEmbed(interaction, {
+                logoUrl: teamInfo?.logoUrl,
+                teamColor: team?.colors.primary,
+              }).setTitle(`${playerStats.name} - ${playerStats.position}`),
+              playerStats,
+            )
+          ).data,
+        ],
+      })
+      .catch(logger.error);
   },
 } satisfies SlashCommand;

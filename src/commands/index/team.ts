@@ -11,6 +11,7 @@ import {
   createActionRow,
   createTeamEmbed,
 } from 'src/lib/helpers/buttons/teamButton';
+import { logger } from 'src/lib/logger';
 import { Teams, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
@@ -128,11 +129,16 @@ export default {
         return;
       }
 
-      const response = await interaction.editReply({
-        embeds: [initialEmbed],
-        components: [row],
-      });
+      const response = await interaction
+        .editReply({
+          embeds: [initialEmbed],
+          components: [row],
+        })
+        .catch(logger.error);
 
+      if (!response) {
+        return;
+      }
       const collector = response.createMessageComponentCollector({
         componentType: ComponentType.Button,
         time: 60000,
@@ -176,17 +182,14 @@ export default {
         });
       });
 
-      collector.on('end', () => {
-        interaction
-          .editReply({
+      collector.on('end', async () => {
+        try {
+          await interaction.editReply({
             components: [],
-          })
-          .catch(
-            async (error) =>
-              await interaction.editReply(
-                `An error while trying to fetch data ${error.message}.`,
-              ),
-          );
+          });
+        } catch (error) {
+          logger.error(error);
+        }
       });
     } catch (error) {
       await interaction.editReply({

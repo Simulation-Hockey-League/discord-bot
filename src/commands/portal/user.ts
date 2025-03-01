@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import { getUserByFuzzy } from 'src/db/portal';
 import { users } from 'src/db/users';
+import { logger } from 'src/lib/logger';
 import { withUserAwards, withUserInfo } from 'src/lib/user';
 import { SlashCommand } from 'typings/command';
 
@@ -28,10 +29,13 @@ export default {
     const name = target || currentUserInfo?.forumName;
 
     if (!name) {
-      await interaction.reply({
-        content: 'No player name provided or stored.',
-        ephemeral: true,
-      });
+      await interaction
+        .editReply({
+          content: 'No player name provided or stored.',
+        })
+        .catch((error) => {
+          logger.error(error);
+        });
       return;
     }
 
@@ -58,7 +62,15 @@ export default {
       );
 
       await withUserInfo(interaction, user);
-      const response = await interaction.editReply({ components: [row] });
+      const response = await interaction
+        .editReply({ components: [row] })
+        .catch((error) => {
+          logger.error(error);
+          return null;
+        });
+      if (!response) {
+        return;
+      }
 
       const collector = response.createMessageComponentCollector({
         componentType: ComponentType.Button,
@@ -74,7 +86,13 @@ export default {
           return;
         }
 
-        await i.deferUpdate();
+        await i.deferUpdate().catch((error) => {
+          logger.error('Failed to defer update:', error);
+          if (error.code === 10008) {
+            collector.stop();
+            return;
+          }
+        });
 
         if (i.customId.startsWith('profile')) {
           await withUserInfo(interaction, user);
@@ -86,14 +104,9 @@ export default {
       });
 
       collector.on('end', () => {
-        interaction
-          .editReply({ components: [] })
-          .catch(
-            async (error) =>
-              await interaction.editReply(
-                `An error occurred while updating: ${error.message}.`,
-              ),
-          );
+        interaction.editReply({ components: [] }).catch((error) => {
+          logger.error(error);
+        });
       });
     } catch (error) {
       await interaction.editReply({

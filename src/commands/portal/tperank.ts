@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { BaseEmbed } from 'src/lib/embed';
+import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -115,10 +116,18 @@ export default {
           .setDisabled(currentPage * 10 >= tpeRankings.length),
       );
 
-      const message = await interaction.editReply({
-        embeds: [embed],
-        components: [row],
-      });
+      const message = await interaction
+        .editReply({
+          embeds: [embed],
+          components: [row],
+        })
+        .catch((error) => {
+          logger.error(error);
+          return null;
+        });
+      if (!message) {
+        return;
+      }
 
       const collector = message.createMessageComponentCollector({
         componentType: ComponentType.Button,
@@ -161,7 +170,9 @@ export default {
 
       collector.on('end', () => {
         row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] });
+        message.edit({ components: [row] }).catch((error) => {
+          logger.error(error);
+        });
       });
     } catch (error) {
       await interaction.editReply({

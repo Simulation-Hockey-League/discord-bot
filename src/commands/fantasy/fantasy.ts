@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
+import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 
 import {
@@ -101,7 +102,7 @@ export default {
           name: 'Players',
           value: playersSection,
         });
-      await interaction.editReply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] }).catch(logger.error);
     } catch (error) {
       await interaction.editReply({
         content: `An error occurred while retrieving fantasy rankings.`,
