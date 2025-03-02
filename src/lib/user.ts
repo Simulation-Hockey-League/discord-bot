@@ -54,7 +54,7 @@ export async function withUserInfo(
       .map((task) => {
         const subject = task.subject || 'Unknown Subject';
         const tid = task.tid || 'Unknown Task ID';
-        let taskLink = `https://simulationhockey.com/showthread.php?${tid}`;
+        let taskLink = `https://simulationhockey.com/showthread.php?tid=${tid}`;
         let dueDate = task.dueDate;
 
         if (subject.includes('Chirp')) {

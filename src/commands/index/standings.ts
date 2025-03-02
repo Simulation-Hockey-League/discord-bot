@@ -1,10 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getStandings } from 'src/db/index';
+import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType } from 'src/db/index/shared';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
-import { withStandingsStats } from 'src/lib/standings';
+import { playoffStandings, regularSeasonStandings } from 'src/lib/standings';
 
 import { SlashCommand } from 'typings/command';
 
@@ -33,6 +34,19 @@ export default {
         )
         .setRequired(false),
     )
+    .addStringOption((option) =>
+      option
+        .setName('configuration')
+        .setDescription(
+          'What configuration to get standings for (League, Conference, Division). Default to League.',
+        )
+        .addChoices(
+          { name: 'League', value: 'league' },
+          { name: 'Conference', value: 'conference' },
+          { name: 'Division', value: 'division' },
+        )
+        .setRequired(false),
+    )
     .addBooleanOption((option) =>
       option
         .setName('playoffs')
@@ -45,12 +59,17 @@ export default {
   execute: async (interaction) => {
     try {
       await interaction.deferReply();
-      let league = interaction.options.getNumber('league') as LeagueType;
+      const league =
+        (interaction.options.getNumber('league') as LeagueType) ??
+        LeagueType.SHL;
       const playoffs = interaction.options.getBoolean('playoffs') ?? false;
 
       const currentSeason = DynamicConfig.get('currentSeason');
       const season = interaction.options.getNumber('season') ?? currentSeason;
       const seasonStats = await getStandings(league, season);
+      const teamInfo = await IndexApiClient.get(league).getTeamInfo();
+      const configuration =
+        interaction.options.getString('configuration') ?? 'league';
 
       if (!seasonStats || seasonStats?.length <= 0) {
         await interaction.editReply({
@@ -60,22 +79,49 @@ export default {
         });
         return;
       }
-      league = league ?? LeagueType.SHL; //default to SHL
+      const conferenceInfo = await IndexApiClient.get(league).getConferences();
+      const divisionInfo = await IndexApiClient.get(league).getDivisions();
+
+      if (playoffs) {
+        const playoffFormat = await IndexApiClient.get(league).getPlayoffs(
+          season,
+        );
+        await interaction
+          .editReply({
+            embeds: [
+              playoffStandings(
+                BaseEmbed(interaction, {}).setTitle(
+                  `Season ${season} Playoff Standings`,
+                ),
+                playoffFormat,
+              ),
+            ],
+          })
+          .catch((error) => {
+            logger.error(error);
+          });
+        return;
+      }
+
       await interaction
         .editReply({
           embeds: [
-            withStandingsStats(
+            regularSeasonStandings(
               BaseEmbed(interaction, {}).setTitle(
-                `Season ${season}${
-                  playoffs ? ` Playoff ` : ` Regular Season `
-                }Standings`,
+                `Season ${season} Regular Season Standings`,
               ),
               seasonStats,
+              teamInfo,
+              conferenceInfo,
+              divisionInfo,
               league,
+              configuration,
             ),
           ],
         })
-        .catch(logger.error);
+        .catch((error) => {
+          logger.error(error);
+        });
     } catch (error) {
       await interaction.editReply({
         content: `An error occurred while retrieving standings.`,
