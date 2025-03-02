@@ -108,22 +108,8 @@ export async function handleHelpButtons(interaction: ButtonInteraction) {
 
       const embed = createTeamListEmbed(leagueType);
 
-      const backRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('help_abbr')
-          .setLabel('Back to Leagues')
-          .setStyle(ButtonStyle.Secondary),
-      );
-      const nextRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('help_more_teams')
-          .setLabel('Next Page')
-          .setStyle(ButtonStyle.Primary),
-      );
-
       await interaction.update({
         embeds: [embed],
-        components: [backRow, nextRow],
       });
       return;
     }

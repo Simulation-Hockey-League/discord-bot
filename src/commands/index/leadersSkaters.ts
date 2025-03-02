@@ -256,7 +256,9 @@ export default {
 
       collector.on('end', () => {
         row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] }).catch(logger.error);
+        message.edit({ components: [row] }).catch((error) => {
+          logger.error(error);
+        });
       });
     } catch (error) {
       logger.error(error);

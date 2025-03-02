@@ -94,6 +94,8 @@ export default {
           ).data,
         ],
       })
-      .catch(logger.error);
+      .catch((error) => {
+        logger.error(error);
+      });
   },
 } satisfies SlashCommand;
