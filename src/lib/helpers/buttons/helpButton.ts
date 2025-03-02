@@ -7,7 +7,9 @@ import {
 } from 'discord.js';
 import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType } from 'src/db/index/shared';
+import { inviteLink } from 'src/lib/config/config';
 import { logger } from 'src/lib/logger';
+import { checkRole } from 'src/lib/role';
 import { Teams } from 'src/lib/teams';
 
 const getTeamsByLeague = (leagueType: LeagueType) => {
@@ -34,17 +36,51 @@ const createTeamListEmbed = (leagueType: LeagueType) => {
   return embed;
 };
 
+const createMainHelpEmbed = async (interaction: ButtonInteraction) => {
+  const client = interaction.client;
+
+  const helpEmbed = new EmbedBuilder()
+    .setTitle('Available Commands')
+    .setDescription('Here are the commands you can use:')
+    .setColor('#0099ff');
+
+  for (const [, command] of client.commands) {
+    const minRole = command.minRole || 0;
+
+    const hasPermission = await checkRole(interaction.member, minRole);
+    if (hasPermission) {
+      helpEmbed.addFields({
+        name: `/${command.command.name}`,
+        value: command.command.description || 'No description available.',
+        inline: false,
+      });
+    }
+  }
+
+  helpEmbed.addFields({
+    name: 'Invite the bot',
+    value: `[Click here to invite the bot to your server](${inviteLink})`,
+    inline: false,
+  });
+
+  return helpEmbed;
+};
+
 export async function handleHelpButtons(interaction: ButtonInteraction) {
   const customId = interaction.customId;
 
   try {
     if (customId === 'help_main') {
-      const helpEmbed = new EmbedBuilder()
-        .setTitle('Bot Help')
-        .setDescription('Here are the available commands:')
-        .setColor('#0099ff');
+      const helpEmbed = await createMainHelpEmbed(interaction);
 
-      await interaction.update({ embeds: [helpEmbed], components: [] });
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId('help_abbr')
+          .setLabel('Abbr Helper')
+          .setStyle(ButtonStyle.Primary),
+      );
+
+      await interaction.update({ embeds: [helpEmbed], components: [row] });
       return;
     }
     if (customId === 'help_abbr') {
@@ -108,8 +144,16 @@ export async function handleHelpButtons(interaction: ButtonInteraction) {
 
       const embed = createTeamListEmbed(leagueType);
 
+      const backRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId('help_abbr')
+          .setLabel('Back to Leagues')
+          .setStyle(ButtonStyle.Secondary),
+      );
+
       await interaction.update({
         embeds: [embed],
+        components: [backRow],
       });
       return;
     }
