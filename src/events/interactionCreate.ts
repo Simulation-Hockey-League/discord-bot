@@ -20,8 +20,10 @@ export default {
       );
 
       if (!command) return;
-
-      if (command.minRole && !checkRole(interaction.member, command.minRole)) {
+      if (
+        command.minRole &&
+        !(await checkRole(interaction.member, command.minRole))
+      ) {
         interaction.reply({
           content: 'You do not have permission to run this command.',
           ephemeral: true,

@@ -39,10 +39,21 @@ module.exports = (client: Client) => {
     });
   });
 
-  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN!);
+  let token;
+  let clientID;
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  if (isDevelopment) {
+    token = process.env.DEV_TOKEN;
+    clientID = process.env.DEV_CLIENT_ID;
+  } else {
+    token = process.env.TOKEN;
+    clientID = process.env.CLIENT_ID;
+  }
+
+  const rest = new REST({ version: '10' }).setToken(token!);
 
   rest
-    .put(Routes.applicationCommands(process.env.CLIENT_ID!), {
+    .put(Routes.applicationCommands(clientID!), {
       body: slashCommands.map((command) => command.toJSON()),
     })
     .then((data: any) => {

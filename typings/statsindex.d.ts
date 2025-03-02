@@ -70,6 +70,9 @@ export type HydratedTeamStats = TeamStats & {
   pkRank: number;
   goalsPerGame: number;
   goalsAgainstPerGame: number;
+  shotsPerGame: number;
+  shotsAgainstPerGame: number;
+  shotDiff: number;
   pdo: number;
   corsi: number;
 };
@@ -199,6 +202,7 @@ export type GoalieStats = {
   savePct: string;
   gameRating: number;
   seasonType: SeasonType;
+  GSAA?: number;
 };
 
 export type GameInfo = {

@@ -1,5 +1,6 @@
 import fuzzysort from 'fuzzysort';
 import _ from 'lodash';
+import sqlite3 from 'sqlite3';
 import { TeamInfo } from 'src/lib/teams';
 import {
   DetailedTeamStats,
@@ -8,7 +9,6 @@ import {
 } from 'typings/statsindex';
 
 import { IndexApiClient } from './api/IndexApiClient';
-import { requireFhmTeamId } from './helpers/teamid';
 import { LeagueType, PositionFilter, SeasonType } from './shared';
 
 type LeagueInput = LeagueType | string | null | undefined;
@@ -24,6 +24,7 @@ export const getTeamInfo = (league: LeagueInput, season?: number) =>
 
 export const getTeamStats = async (
   teamInfo: TeamInfo,
+  seasonType: SeasonType = SeasonType.REGULAR,
   season?: number,
 ): Promise<HydratedTeamStats> => {
   const allTeams = await getStandings(teamInfo.leagueType, season);
@@ -42,20 +43,69 @@ export const getTeamStats = async (
     {} as Record<number, IndexTeamInfo>,
   );
 
-  const teamId = await requireFhmTeamId(teamInfo);
-
-  if (!teamId) {
+  const teamId = teamInfo.teamID ?? null; // dont need requireFhmTeamId due to previous checks for getTeamInfo
+  if (!teamId && teamId !== 0) {
     throw new Error(`Could not find team ID for ${teamInfo.fullName}`);
   }
-
   const result = allTeams.find((team) => team.id === teamId);
   const currentTeamInfo = teamInfosById[teamId];
-  const detailedStats = detailedStatsById[teamId];
+  const detailedStats = detailedStatsById[teamId] ?? {
+    // If we are not in the FHM8/10 Era, return just 0's
+    gamesPlayed: result?.gp ?? 0,
+    goalsFor: result?.goalsFor ?? 0,
+    goalsAgainst: result?.goalsAgainst ?? 0,
+    shotsFor: 0,
+    shotsAgainst: 0,
+    penaltyMinutesPerGame: 0,
+    ppOpportunities: 0,
+    ppGoalsFor: 0,
+    ppGoalsAgainst: 0,
+    shOpportunities: 0,
+    shGoalsFor: 0,
+    shGoalsAgainst: 0,
+    faceoffPct: 0,
+    shotsBlocked: 0,
+    hits: 0,
+    takeaways: 0,
+    giveaways: 0,
+  };
+  const players = await IndexApiClient.get(teamInfo.leagueType).getPlayerStats(
+    seasonType,
+    season,
+  );
+  const teamPlayers = players.filter(
+    (player) => player.teamId === currentTeamInfo.id,
+  );
 
-  if (!result || !currentTeamInfo || !detailedStats) {
+  // Calculate PDO and Corsi
+  const teamPDO =
+    (detailedStats.goalsFor / (detailedStats.shotsFor || 1) +
+      (1 - detailedStats.goalsAgainst / (detailedStats.shotsAgainst || 1))) *
+    100;
+  const teamCorsiPct =
+    (detailedStats.shotsFor /
+      (detailedStats.shotsFor + detailedStats.shotsAgainst || 1)) *
+    100;
+  const pdoRank =
+    _.orderBy(
+      allDetailedStats,
+      (team) =>
+        (team.goalsFor / (team.shotsFor || 1) +
+          (1 - team.goalsAgainst / (team.shotsAgainst || 1))) *
+        100,
+      'desc',
+    ).findIndex((team) => team.id === teamId) + 1;
+  const corsiRank =
+    _.orderBy(
+      allDetailedStats,
+      (team) =>
+        (team.shotsFor / (team.shotsFor + team.shotsAgainst || 1)) * 100,
+      'desc',
+    ).findIndex((team) => team.id === teamId) + 1;
+
+  if (!result || !currentTeamInfo) {
     throw new Error(`Could not find stats for ${teamInfo.fullName}`);
   }
-
   return {
     ...result,
     detailedStats,
@@ -91,8 +141,8 @@ export const getTeamStats = async (
       _.orderBy(allTeams, (team) => team.goalsAgainst, 'asc').findIndex(
         (team) => team.id === teamId,
       ) + 1,
-    // pdo, pdo rank from player stats on roster
-    // corsi, corsi rank from player stats on roster
+    pdoRank: pdoRank,
+    corsiRank: corsiRank,
     shotsForRank:
       _.orderBy(allDetailedStats, (team) => team.shotsFor, 'desc').findIndex(
         (team) => team.id === teamId,
@@ -132,11 +182,21 @@ export const getTeamStats = async (
     goalsPerGame: detailedStats.goalsFor / (detailedStats.gamesPlayed || 1),
     goalsAgainstPerGame:
       detailedStats.goalsAgainst / (detailedStats.gamesPlayed || 1),
-    pdo: 0, // TODO
-    pdoRank: 0, // TODO
-    corsi: 0, // TODO
-    corsiRank: 0, // TODO
-    regularSeasonPlayerStats: [], // TODO
+    shotsPerGame: Number(
+      (detailedStats.shotsFor / detailedStats.gamesPlayed || 1).toFixed(2),
+    ),
+    shotsAgainstPerGame: Number(
+      (detailedStats.shotsAgainst / detailedStats.gamesPlayed || 1).toFixed(2),
+    ),
+    shotDiff: Number(
+      (
+        (detailedStats.shotsFor / detailedStats.gamesPlayed || 1) -
+        (detailedStats.shotsAgainst / detailedStats.gamesPlayed || 1)
+      ).toFixed(2),
+    ),
+    pdo: Number(teamPDO.toFixed(2)),
+    corsi: Number(teamCorsiPct.toFixed(2)),
+    regularSeasonPlayerStats: teamPlayers,
   };
 };
 
@@ -197,7 +257,6 @@ export const getPlayerStatsByFuzzyName = async (
     SeasonType.POST,
     regular?.[0]?.season,
   );
-
   const playoffMatch = fuzzysort.go(name, playoffs, {
     key: 'name',
     limit: 1,
@@ -245,7 +304,6 @@ export const getGoalieStatsByFuzzyName = async (
     SeasonType.POST,
     regular?.[0]?.season,
   );
-
   const playoffMatch = fuzzysort.go(name, playoffs, {
     key: 'name',
     limit: 1,
@@ -256,7 +314,6 @@ export const getGoalieStatsByFuzzyName = async (
     limit: 1,
     threshold: -10000,
   });
-
   switch (seasonType) {
     case SeasonType.REGULAR:
       return regularMatch[0];
@@ -281,13 +338,44 @@ export const getPlayerStats = async (
   name: string,
   seasonType?: SeasonType,
   season?: number,
+  league?: LeagueType,
 ) => {
-  const candidates = await Promise.all([
-    getPlayerStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
-    getPlayerStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
-    getGoalieStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
-    getGoalieStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
-  ]);
-
+  const candidates = league
+    ? await Promise.all([
+        getPlayerStatsByFuzzyName(league, name, season, seasonType),
+        getGoalieStatsByFuzzyName(league, name, season, seasonType),
+      ])
+    : await Promise.all([
+        getPlayerStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
+        getPlayerStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
+        getGoalieStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
+        getGoalieStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
+      ]);
   return _.maxBy(candidates, (candidate) => candidate?.score ?? -1)?.obj;
+};
+
+export const getAllPlayers = async (name: string, league: LeagueType) => {
+  const db = new sqlite3.Database('src/db/index/players.sqlite');
+
+  type Player = { playerID: number; name: string };
+  const players = await new Promise<Player[]>((resolve, reject) => {
+    db.all(
+      `SELECT playerID, name FROM players WHERE leagueID = ?`,
+      [league],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows as Player[]);
+        }
+      },
+    );
+  }).finally(() => db.close());
+
+  const playerMatch = fuzzysort.go(name, players, {
+    key: 'name',
+    limit: 1,
+    threshold: -10000,
+  });
+  return _.maxBy(playerMatch, (candidate) => candidate?.score ?? -1)?.obj;
 };

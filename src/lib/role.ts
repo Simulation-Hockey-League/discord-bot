@@ -1,23 +1,19 @@
-import {
-  APIInteractionGuildMember,
-  GuildMember,
-  PermissionsBitField,
-} from 'discord.js';
+import { APIInteractionGuildMember, GuildMember } from 'discord.js';
+
+import { discordMods } from 'src/db/users';
 
 import { Config, UserRole } from './config/config';
 
-export const checkRole = (
+export const checkRole = async (
   member: GuildMember | APIInteractionGuildMember | null,
   minRole: UserRole,
 ) => {
   if (!member) return false;
+  if (Config.devTeamIds.includes(member.user.id)) {
+    return minRole <= UserRole.BOT_OWNERS;
+  }
 
-  const memberRole = Config.devTeamIds.includes(member.user.id)
-    ? UserRole.BOT_OWNERS
-    : typeof member.permissions !== 'string' &&
-      member.permissions.has(PermissionsBitField.Flags.Administrator)
-    ? UserRole.SERVER_ADMIN
-    : UserRole.REGULAR;
-
-  return memberRole >= minRole;
+  const user = await discordMods.get(member.user.id);
+  const userRole = user ? user.role : UserRole.REGULAR;
+  return userRole >= minRole;
 };

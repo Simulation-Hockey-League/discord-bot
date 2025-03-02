@@ -17,6 +17,42 @@ export enum PositionFilter {
   G = 'G',
 }
 
+export const GOALIE_LEADER_CATEGORIES = [
+  'gamesPlayed',
+  'wins',
+  'losses',
+  'ot',
+  'shotsAgainst',
+  'saves',
+  'goalsAgainst',
+  'shutouts',
+  'savePct',
+  'GSAA',
+] as const;
+
+export type GoalieCategories = (typeof GOALIE_LEADER_CATEGORIES)[number];
+
+const SKATER_CATEGORIES = [
+  'goals',
+  'assists',
+  'points',
+  'plusMinus',
+  'pim',
+  'shotsOnGoal',
+  'gwg',
+  'faceoffs',
+  'faceoffWins',
+  'giveaways',
+  'takeaways',
+  'shotsBlocked',
+  'hits',
+  'fights',
+  'fightWins',
+  'fightLosses',
+] as const;
+
+export type SkaterCategory = (typeof SKATER_CATEGORIES)[number];
+
 export const toLeagueType = (league: string | null | undefined): LeagueType => {
   switch (league?.toUpperCase()) {
     case 'SHL':

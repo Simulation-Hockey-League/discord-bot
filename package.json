@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start:dev": "NODE_ENV=development nodemon -r tsconfig-paths/register --files src/index.ts | pino-pretty -i pid,hostname - t 'yyyy-mm-dd HH:MM:ss'",
+    "start:dev": "NODE_ENV=development & nodemon -r tsconfig-paths/register --files src/index.ts | pino-pretty -i pid,hostname - t 'yyyy-mm-dd HH:MM:ss'",
     "start:prod": "ts-node -r tsconfig-paths/register --files src/index.ts",
     "patch-package": "patch-package",
     "postinstall": "patch-package"
@@ -12,7 +12,9 @@
   "dependencies": {
     "@discordjs/rest": "^2.2.0",
     "@keyv/sqlite": "^3.6.7",
+    "axios": "^1.7.9",
     "cron": "^3.1.7",
+    "csv-parse": "^5.6.0",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "fuzzysort": "^3.0.2",
@@ -21,6 +23,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/csv-parse": "^1.2.5",
     "@types/lodash": "^4.17.0",
     "@types/node": "^20.10.2",
     "@typescript-eslint/eslint-plugin": "^6.13.1",

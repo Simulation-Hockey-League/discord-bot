@@ -4,6 +4,7 @@ import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType } from 'src/db/index/shared';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
+import { logger } from 'src/lib/logger';
 import { withPlayerStats } from 'src/lib/player';
 import { findTeamByName } from 'src/lib/teams';
 
@@ -31,7 +32,9 @@ export default {
     .addStringOption((option) =>
       option
         .setName('type')
-        .setDescription('The season type (i.e. regular, playoffs, etc.)')
+        .setDescription(
+          'The season type (i.e. regular, playoffs, etc.). Default to regular season.',
+        )
         .setChoices(
           { name: 'Regular', value: SeasonType.REGULAR },
           { name: 'Playoffs', value: SeasonType.POST },
@@ -58,7 +61,11 @@ export default {
     }
 
     await interaction.deferReply();
-    const playerStats = await getPlayerStats(name, seasonType, season);
+    const playerStats = await getPlayerStats(
+      name,
+      seasonType ?? SeasonType.REGULAR,
+      season,
+    );
 
     if (!playerStats) {
       await interaction.editReply({
@@ -73,16 +80,22 @@ export default {
     const teams = await IndexApiClient.get(playerStats.league).getTeamInfo();
     const team = teams.find((team) => team.id === playerStats?.teamId);
 
-    await interaction.editReply({
-      embeds: [
-        withPlayerStats(
-          BaseEmbed(interaction, {
-            logoUrl: teamInfo?.logoUrl,
-            teamColor: team?.colors.primary,
-          }).setTitle(`${playerStats.name} - ${playerStats.position}`),
-          playerStats,
-        ),
-      ],
-    });
+    await interaction
+      .editReply({
+        embeds: [
+          (
+            await withPlayerStats(
+              BaseEmbed(interaction, {
+                logoUrl: teamInfo?.logoUrl,
+                teamColor: team?.colors.primary,
+              }).setTitle(`${playerStats.name} - ${playerStats.position}`),
+              playerStats,
+            )
+          ).data,
+        ],
+      })
+      .catch((error) => {
+        logger.error(error);
+      });
   },
 } satisfies SlashCommand;

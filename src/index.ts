@@ -24,4 +24,11 @@ readdirSync(handlersDir).forEach((handler) => {
   require(`${handlersDir}/${handler}`)(client);
 });
 
-client.login(process.env.TOKEN);
+let token;
+const isDevelopment = process.env.NODE_ENV === 'development';
+if (isDevelopment) {
+  token = process.env.DEV_TOKEN;
+} else {
+  token = process.env.TOKEN;
+}
+client.login(token);
