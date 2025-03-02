@@ -4,12 +4,12 @@ import {
   ButtonInteraction,
   ButtonStyle,
   ComponentType,
-  EmbedBuilder,
+  InteractionEditReplyOptions,
+  MessagePayload,
   SlashCommandBuilder,
 } from 'discord.js';
 import { handleHelpButtons } from 'src/lib/helpers/buttons/helpButton';
 import { logger } from 'src/lib/logger';
-import { checkRole } from 'src/lib/role';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -18,32 +18,7 @@ export default {
     .setDescription('Display all available commands'),
 
   execute: async (interaction) => {
-    const helpEmbed = new EmbedBuilder()
-      .setTitle('Available Commands')
-      .setDescription('Here are the commands you can use:')
-      .setColor('#0099ff');
-
-    // Add available commands dynamically based on permissions
-    for (const [, command] of interaction.client.commands) {
-      const minRole = command.minRole || 0;
-      // Assuming `checkRole` is a function that checks if the user has the necessary role
-      const hasPermission = await checkRole(interaction.member, minRole);
-      if (hasPermission) {
-        helpEmbed.addFields({
-          name: `/${command.command.name}`,
-          value: command.command.description || 'No description available.',
-          inline: false,
-        });
-      }
-    }
-
-    helpEmbed.addFields({
-      name: 'Invite the bot',
-      value:
-        '[Click here to invite the bot to your server](https://discord.com/oauth2/authorize)',
-      inline: false,
-    });
-
+    // Create initial button row
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId('help_main')
@@ -56,10 +31,24 @@ export default {
     );
 
     const reply = await interaction.reply({
-      embeds: [helpEmbed],
+      content: 'Loading help information...',
       components: [row],
       fetchReply: true,
     });
+
+    const fakeButtonInteraction = {
+      customId: 'help_main',
+      client: interaction.client,
+      user: interaction.user,
+      member: interaction.member,
+      update: async (
+        data: string | MessagePayload | InteractionEditReplyOptions,
+      ) => {
+        return await interaction.editReply(data);
+      },
+    } as unknown as ButtonInteraction;
+
+    await handleHelpButtons(fakeButtonInteraction);
 
     const collector = reply.createMessageComponentCollector({
       componentType: ComponentType.Button,
@@ -68,10 +57,14 @@ export default {
 
     collector.on('collect', async (i: ButtonInteraction) => {
       if (i.user.id !== interaction.user.id) {
-        await i.reply({
-          content: 'Only the command user can use these buttons.',
-          ephemeral: true,
-        });
+        await i
+          .reply({
+            content: 'Only the command user can use these buttons.',
+            ephemeral: true,
+          })
+          .catch((error) => {
+            logger.error(error);
+          });
         return;
       }
       await handleHelpButtons(i);

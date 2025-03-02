@@ -4,6 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "build": "tsc && tsc-alias",
+    "start:built": "node -r tsconfig-paths/register build/index.js",
     "start:dev": "NODE_ENV=development & nodemon -r tsconfig-paths/register --files src/index.ts | pino-pretty -i pid,hostname - t 'yyyy-mm-dd HH:MM:ss'",
     "start:prod": "ts-node -r tsconfig-paths/register --files src/index.ts",
     "patch-package": "patch-package",
@@ -20,10 +22,10 @@
     "fuzzysort": "^3.0.2",
     "keyv": "^4.5.4",
     "keyv-file": "^0.3.1",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "tsc-alias": "^1.8.11"
   },
   "devDependencies": {
-    "@types/csv-parse": "^1.2.5",
     "@types/lodash": "^4.17.0",
     "@types/node": "^20.10.2",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
