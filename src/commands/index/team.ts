@@ -75,8 +75,9 @@ export default {
     .setDescription('Get team information.'),
   execute: async (interaction) => {
     try {
-      const currentSeason = DynamicConfig.currentSeason.get();
+      await interaction.deferReply();
 
+      const currentSeason = DynamicConfig.currentSeason.get();
       const season = interaction.options.getNumber('season') ?? currentSeason;
       const userTeam = await users.get(interaction.user.id);
       const league = interaction.options.getNumber('league') as
@@ -94,14 +95,11 @@ export default {
 
       const view = interaction.options.getString('view') ?? 'overview';
       if (!abbr) {
-        await interaction.reply({
+        await interaction.editReply({
           content: 'No team abbreviation provided.',
-          ephemeral: true,
         });
         return;
       }
-
-      await interaction.deferReply();
 
       const teamInfo = findTeamByAbbr(abbr, league);
       if (!teamInfo) {

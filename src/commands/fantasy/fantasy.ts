@@ -32,27 +32,24 @@ export default {
       const name = target || currentUserInfo?.forumName;
 
       if (!name) {
-        await interaction.reply({
+        await interaction.editReply({
           content: 'No player name provided or stored.',
-          ephemeral: true,
         });
         return;
       }
 
       const players = await fetchGlobalSheetData();
       if (!players.length) {
-        await interaction.reply({
+        await interaction.editReply({
           content: 'Failed to retrieve data from Google Sheets.',
-          ephemeral: true,
         });
         return;
       }
 
       const user = await getUserByFuzzy(name, players);
       if (!user) {
-        await interaction.reply({
+        await interaction.editReply({
           content: `Could not find user "${name}". Please check your spelling.`,
-          ephemeral: true,
         });
         return;
       }

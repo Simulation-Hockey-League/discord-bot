@@ -11,6 +11,7 @@ import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';
 import { displayPlayerAwards } from 'src/lib/career';
 import { displayGoalieCareer, displaySkaterCareer } from 'src/lib/career';
+import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
@@ -30,7 +31,7 @@ export default {
       option
         .setName('league')
         .setDescription(
-          'The league of the standings to return. If not provided, will use SHL standings.',
+          'The league you want to search the career for. Defaults to SHL',
         )
         .setChoices(
           { name: 'SHL', value: LeagueType.SHL },
@@ -73,9 +74,8 @@ export default {
       const name = targetName || currentUserInfo?.playerName;
 
       if (!name) {
-        await interaction.reply({
+        await interaction.editReply({
           content: 'No player name provided or stored.',
-          ephemeral: true,
         });
         return;
       }
@@ -169,9 +169,17 @@ export default {
           .setStyle(ButtonStyle.Secondary),
       );
 
-      const response = await interaction.editReply({
-        components: [row],
-      });
+      const response = await interaction
+        .editReply({
+          components: [row],
+        })
+        .catch((error) => {
+          logger.error(error);
+          return;
+        });
+      if (!response) {
+        return;
+      }
       const collector = response.createMessageComponentCollector({
         componentType: ComponentType.Button,
         time: 60000,

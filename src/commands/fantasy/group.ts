@@ -20,14 +20,14 @@ export default {
     .setDescription('Retrieve fantasy rankings for a specified group.'),
 
   execute: async (interaction) => {
+    await interaction.deferReply({ ephemeral: false });
     const groupNumber = interaction.options.getInteger('group');
 
     try {
       const players = await fetchGlobalSheetData();
       if (!players.length) {
-        await interaction.reply({
+        await interaction.editReply({
           content: 'Failed to retrieve data from Google Sheets.',
-          ephemeral: true,
         });
         return;
       }
@@ -37,9 +37,8 @@ export default {
         .sort((a, b) => a.groupRank - b.groupRank);
 
       if (groupPlayers.length === 0) {
-        await interaction.reply({
-          content: `Nno group #${groupNumber} found.`,
-          ephemeral: true,
+        await interaction.editReply({
+          content: `No group #${groupNumber} found.`,
         });
         return;
       }
@@ -50,13 +49,12 @@ export default {
         .setTitle(`Fantasy Group ${groupNumber} Rankings`)
         .setDescription(leaderboard);
 
-      await interaction.reply({ embeds: [embed] }).catch((error) => {
+      await interaction.editReply({ embeds: [embed] }).catch((error) => {
         logger.error(error);
       });
     } catch (error) {
-      await interaction.reply({
+      await interaction.editReply({
         content: 'An error occurred while retrieving fantasy rankings.',
-        ephemeral: true,
       });
     }
   },

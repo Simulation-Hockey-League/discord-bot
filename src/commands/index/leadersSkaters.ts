@@ -111,6 +111,7 @@ export default {
 
   execute: async (interaction) => {
     try {
+      await interaction.deferReply();
       const currentSeason = DynamicConfig.get('currentSeason');
       const season = interaction.options.getNumber('season') ?? currentSeason;
       const league = interaction.options.getNumber('league') as
@@ -130,8 +131,6 @@ export default {
       const abbr = interaction.options.getString('abbr');
 
       let currentPage = 1;
-
-      await interaction.deferReply();
 
       let seasonBefore: PlayerStats[] = [];
 
@@ -161,9 +160,8 @@ export default {
       if (abbr) {
         teamInfo = findTeamByAbbr(abbr, league);
         if (!teamInfo) {
-          await interaction.reply({
+          await interaction.editReply({
             content: `Could not find team with abbreviation ${abbr}.`,
-            ephemeral: true,
           });
           return;
         }
@@ -185,9 +183,8 @@ export default {
           .filter(Boolean)
           .join(' | ');
 
-        await interaction.reply({
+        await interaction.editReply({
           content: `No player stats found${filters ? ` for ${filters}` : ''}.`,
-          ephemeral: true,
         });
         return;
       }

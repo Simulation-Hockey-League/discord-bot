@@ -42,10 +42,9 @@ export default {
     try {
       const user = await getUserByFuzzy(name);
       if (!user) {
-        await interaction.reply({
+        await interaction.editReply({
           content:
             'Could not find user with that username. Please check your spelling and try again.',
-          ephemeral: true,
         });
         return;
       }
