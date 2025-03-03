@@ -69,7 +69,7 @@ export const Teams = Object.freeze({
     abbr: 'MAN',
     nameRegex: /manhattan|man|rage/i,
     logoUrl:
-      'https://cdn.discordapp.com/attachments/623122991504687104/786281401782763550/man.png',
+      'https://cdn.discordapp.com/attachments/1180873981503484066/1345951967788142642/lil7h4Y.png',
     leagueType: LeagueType.SHL,
     emoji: botEmojis.MAN,
   },
