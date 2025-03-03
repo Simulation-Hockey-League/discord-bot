@@ -91,30 +91,29 @@ export default {
     .setDescription('Get Goalie Statistics.'),
 
   execute: async (interaction) => {
-    await interaction.deferReply({ ephemeral: false });
-    const currentSeason = DynamicConfig.get('currentSeason');
-    const season = interaction.options.getNumber('season') ?? currentSeason;
-    const league = interaction.options.getNumber('league') as
-      | LeagueType
-      | undefined;
-    const seasonType = interaction.options.getString('type') as
-      | SeasonType
-      | undefined;
-    const leader = interaction.options.getString(
-      'category',
-    ) as GoalieCategories;
-    const viewRookie = interaction.options.getBoolean('rookie') ?? false;
-    const abbr = interaction.options.getString('abbr');
-    let currentPage = 1;
-
-    await interaction.deferReply();
-
     try {
+      await interaction.deferReply({ ephemeral: false });
+      const currentSeason = DynamicConfig.get('currentSeason');
+      const season = interaction.options.getNumber('season') ?? currentSeason;
+      const league = interaction.options.getNumber('league') as
+        | LeagueType
+        | undefined;
+      const seasonType = interaction.options.getString('type') as
+        | SeasonType
+        | undefined;
+      const leader = interaction.options.getString(
+        'category',
+      ) as GoalieCategories;
+      const viewRookie = interaction.options.getBoolean('rookie') ?? false;
+      const abbr = interaction.options.getString('abbr');
+      let currentPage = 1;
+
       let seasonBefore: GoalieStats[] = [];
       let playerStats = await IndexApiClient.get(league).getGoalieStats(
         seasonType ?? SeasonType.REGULAR,
         season,
       );
+
       if (viewRookie) {
         seasonBefore = await IndexApiClient.get(league).getGoalieStats(
           seasonType ?? SeasonType.REGULAR,
@@ -132,12 +131,13 @@ export default {
         );
         playerStats = rookieStats;
       }
+
       let teamInfo: TeamInfo | undefined;
       if (abbr) {
         teamInfo = findTeamByAbbr(abbr, league);
         if (!teamInfo) {
           await interaction.editReply({
-            content: `Could not find team with abbreviation ${abbr}.`,
+            content: `Could not find team with abbreviation ${abbr}. Please double-check the abbreviation.`,
           });
           return;
         }
@@ -145,6 +145,7 @@ export default {
           (player) => teamInfo && player.teamId === teamInfo.teamID,
         );
       }
+
       if (!playerStats.length) {
         const filters = [
           abbr ? `Team: ${abbr.toUpperCase()}` : null,
@@ -229,10 +230,11 @@ export default {
         });
       });
     } catch (error) {
+      logger.error('Error while executing /leaders-goalies command', error);
       await interaction.editReply({
-        content: 'An error occurred while fetching player stats.',
+        content:
+          'An error occurred while fetching player stats. Please try again later.',
       });
-      return;
     }
   },
 } satisfies SlashCommand;

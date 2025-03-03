@@ -4,7 +4,6 @@ import {
   SlashCommandBuilder,
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
-import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';

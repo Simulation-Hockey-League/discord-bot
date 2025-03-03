@@ -59,7 +59,7 @@ export const Teams = Object.freeze({
     abbr: 'HAM',
     nameRegex: /hamilton|ham|steelhawks/i,
     logoUrl:
-      'https://cdn.discordapp.com/attachments/623122991504687104/786290158977810552/ham.png',
+      'https://cdn.discordapp.com/attachments/875872872512507934/1345958211332866089/SteelHawksMainLogo2.png',
     leagueType: LeagueType.SHL,
     emoji: botEmojis.HAM,
   },
