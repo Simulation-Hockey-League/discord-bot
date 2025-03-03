@@ -1,4 +1,5 @@
 import { Events, Interaction } from 'discord.js';
+import { commandCountDB, userCountDB } from 'src/db/users';
 import { Config } from 'src/lib/config/config';
 import { ErrorEmbed } from 'src/lib/embed';
 
@@ -7,19 +8,18 @@ import { logger } from 'src/lib/logger';
 import { checkRole } from 'src/lib/role';
 import { BotEvent } from 'typings/event';
 
-/**
- * This file handles any incoming slash commands sent by users
- */
+// Initialize Keyv with SQLite
+
 export default {
   name: Events.InteractionCreate,
   execute: async (interaction: Interaction) => {
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);
-      const cooldown = interaction.client.cooldowns.get(
-        `${interaction.commandName}-${interaction.user.username}`,
-      );
+      const cooldownKey = `${interaction.commandName}-${interaction.user.username}`;
+      const cooldown = interaction.client.cooldowns.get(cooldownKey);
 
       if (!command) return;
+
       if (
         command.minRole &&
         !(await checkRole(interaction.member, command.minRole))
@@ -47,11 +47,20 @@ export default {
         }
       } else if (command.cooldown && !cooldown) {
         interaction.client.cooldowns.set(
-          `${interaction.commandName}-${interaction.user.username}`,
+          cooldownKey,
           Date.now() + command.cooldown * 1000,
         );
       }
+
       try {
+        const commandKey = `command:${interaction.commandName}`;
+        const commandUsage = (await commandCountDB.get(commandKey)) || 0;
+        await commandCountDB.set(commandKey, commandUsage + 1);
+
+        const userKey = `user:${interaction.user.username}`;
+        const userUsage = (await userCountDB.get(userKey)) || 0;
+        await userCountDB.set(userKey, userUsage + 1);
+
         await command.execute(interaction);
       } catch (e) {
         if (!interaction.replied && !interaction.deferred) {
@@ -71,41 +80,11 @@ export default {
           Config.botErrorChannelId,
         );
         if (channel?.isTextBased() && 'send' in channel) {
-          channel.send({
-            embeds: [ErrorEmbed(interaction, e)],
-          });
+          channel.send({ embeds: [ErrorEmbed(interaction, e)] });
         }
         logger.error(
-          'An Unhandled Error occured, check the Developer Discord for more information',
+          'An Unhandled Error occurred, check the Developer Discord for more information',
         );
-      }
-    } else if (interaction.isAutocomplete()) {
-      const command = interaction.client.commands.get(interaction.commandName);
-
-      if (!command) {
-        logger.error(
-          `No command matching ${interaction.commandName} was found.`,
-        );
-        return;
-      }
-
-      try {
-        command.autocomplete?.(interaction);
-      } catch (error) {
-        logger.error(error);
-      }
-    } else if (interaction.isModalSubmit()) {
-      const command = interaction.client.commands.get(interaction.customId);
-
-      if (!command) {
-        logger.error(`No command matching ${interaction.customId} was found.`);
-        return;
-      }
-
-      try {
-        command.modal?.(interaction);
-      } catch (error) {
-        logger.error(error);
       }
     }
   },
