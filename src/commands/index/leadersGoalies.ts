@@ -11,6 +11,7 @@ import { GoalieCategories } from 'src/db/index/shared';
 import { goalieRookieCutoffs } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { withLeaderStats } from 'src/lib/leadersGoalies';
+import { logger } from 'src/lib/logger';
 import { TeamInfo, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
@@ -90,6 +91,7 @@ export default {
     .setDescription('Get Goalie Statistics.'),
 
   execute: async (interaction) => {
+    await interaction.deferReply({ ephemeral: false });
     const currentSeason = DynamicConfig.get('currentSeason');
     const season = interaction.options.getNumber('season') ?? currentSeason;
     const league = interaction.options.getNumber('league') as
@@ -134,9 +136,8 @@ export default {
       if (abbr) {
         teamInfo = findTeamByAbbr(abbr, league);
         if (!teamInfo) {
-          await interaction.reply({
+          await interaction.editReply({
             content: `Could not find team with abbreviation ${abbr}.`,
-            ephemeral: true,
           });
           return;
         }
@@ -155,9 +156,8 @@ export default {
           .filter(Boolean)
           .join(' | ');
 
-        await interaction.reply({
+        await interaction.editReply({
           content: `No player stats found${filters ? ` for ${filters}` : ''}.`,
-          ephemeral: true,
         });
         return;
       }
@@ -224,7 +224,9 @@ export default {
 
       collector.on('end', () => {
         row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] });
+        message.edit({ components: [row] }).catch((error) => {
+          logger.error(error);
+        });
       });
     } catch (error) {
       await interaction.editReply({

@@ -42,9 +42,8 @@ export default {
     const players = await PortalClient.getActivePlayers();
 
     if (!players.length) {
-      await interaction.reply({
+      await interaction.editReply({
         content: 'Something went wrong. Please try again.',
-        ephemeral: true,
       });
       return;
     }
@@ -89,14 +88,16 @@ export default {
           )
           .addFields({
             name: 'TPE Rankings',
-            value: pageRankings
-              .map(
-                (player, index) =>
-                  `${startIdx + index + 1}.  ${player.username} |  ${
-                    player.name
-                  } | ${player.tpe} TPE`,
-              )
-              .join('\n'),
+            value: pageRankings.length
+              ? pageRankings
+                  .map(
+                    (player, index) =>
+                      `${startIdx + index + 1}.  ${player.username} |  ${
+                        player.name
+                      } | ${player.tpe} TPE`,
+                  )
+                  .join('\n')
+              : 'No players found.',
             inline: false,
           });
       };

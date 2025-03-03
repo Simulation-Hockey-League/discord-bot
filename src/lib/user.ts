@@ -11,10 +11,10 @@ export async function withUserInfo(
   interaction: ChatInputCommandInteraction<CacheType>,
   user: BasicUserInfo,
 ) {
+  await interaction.deferReply();
   if (!user) {
-    await interaction.reply({
+    await interaction.editReply({
       content: 'Could not find user with that username.',
-      ephemeral: true,
     });
     return;
   }
@@ -24,9 +24,8 @@ export async function withUserInfo(
   const player = players.find((p) => p.uid === user.userID);
 
   if (!player) {
-    await interaction.reply({
+    await interaction.editReply({
       content: 'Could not find active player with that username.',
-      ephemeral: true,
     });
     return;
   }
