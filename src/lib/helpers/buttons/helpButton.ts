@@ -5,65 +5,67 @@ import {
   ButtonStyle,
   EmbedBuilder,
 } from 'discord.js';
-import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType } from 'src/db/index/shared';
-import { inviteLink } from 'src/lib/config/config';
+import {
+  createAboutEmbed,
+  createMainHelpEmbed,
+  createTeamListEmbed,
+} from 'src/lib/help';
 import { logger } from 'src/lib/logger';
-import { checkRole } from 'src/lib/role';
-import { Teams } from 'src/lib/teams';
 
-const getTeamsByLeague = (leagueType: LeagueType) => {
-  return Object.values(Teams).filter((team) => team.leagueType === leagueType);
+export const getMainHelpButtons = () => {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId('help_main')
+      .setLabel('Help')
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId('help_abbr')
+      .setLabel('Abbr Helper')
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId('about')
+      .setLabel('About')
+      .setStyle(ButtonStyle.Primary),
+  );
 };
 
-const createTeamListEmbed = (leagueType: LeagueType) => {
-  const teams = getTeamsByLeague(leagueType);
-  const leagueName = leagueTypeToString(leagueType);
+const getAbbrHelpButtons = (leagueType?: string) => {
+  const leagues = ['SHL', 'SMJHL', 'IIHF', 'WJC'];
 
-  const embed = new EmbedBuilder()
-    .setTitle(`${leagueName} Teams`)
-    .setDescription('List of teams and their abbreviations')
-    .setColor('#0099ff');
+  const buttons = leagues.map((league) =>
+    new ButtonBuilder()
+      .setCustomId(`help_league_${league}`)
+      .setLabel(league)
+      .setStyle(ButtonStyle.Primary)
+      .setDisabled(leagueType === league),
+  );
 
-  teams.forEach((team) => {
-    embed.addFields({
-      name: team.fullName,
-      value: `Abbr: ${team.abbr}`,
-      inline: true,
-    });
-  });
-
-  return embed;
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
 };
 
-const createMainHelpEmbed = async (interaction: ButtonInteraction) => {
-  const client = interaction.client;
+const getBackToHelpButtons = (customId: string) => {
+  const buttons: ButtonBuilder[] = [];
 
-  const helpEmbed = new EmbedBuilder()
-    .setTitle('Available Commands')
-    .setDescription('Here are the commands you can use:')
-    .setColor('#0099ff');
-
-  for (const [, command] of client.commands) {
-    const minRole = command.minRole || 0;
-
-    const hasPermission = await checkRole(interaction.member, minRole);
-    if (hasPermission) {
-      helpEmbed.addFields({
-        name: `/${command.command.name}`,
-        value: command.command.description || 'No description available.',
-        inline: false,
-      });
-    }
+  if (customId !== 'help_main') {
+    buttons.push(
+      new ButtonBuilder()
+        .setCustomId('help_main')
+        .setLabel('Back to Help')
+        .setStyle(ButtonStyle.Secondary),
+    );
   }
 
-  helpEmbed.addFields({
-    name: 'Invite the bot',
-    value: `[Click here to invite the bot to your server](${inviteLink})`,
-    inline: false,
-  });
+  if (customId !== 'about') {
+    buttons.push(
+      new ButtonBuilder()
+        .setCustomId('about')
+        .setLabel('Back to About')
+        .setStyle(ButtonStyle.Secondary),
+    );
+  }
 
-  return helpEmbed;
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(buttons);
 };
 
 export async function handleHelpButtons(interaction: ButtonInteraction) {
@@ -73,42 +75,15 @@ export async function handleHelpButtons(interaction: ButtonInteraction) {
     if (customId === 'help_main') {
       const helpEmbed = await createMainHelpEmbed(interaction);
 
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('help_abbr')
-          .setLabel('Abbr Helper')
-          .setStyle(ButtonStyle.Primary),
-      );
+      const row = getMainHelpButtons();
 
       await interaction.update({ embeds: [helpEmbed], components: [row] });
       return;
     }
     if (customId === 'help_abbr') {
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('help_league_SHL')
-          .setLabel('SHL')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId('help_league_SMJHL')
-          .setLabel('SMJHL')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId('help_league_IIHF')
-          .setLabel('IIHF')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId('help_league_WJC')
-          .setLabel('WJC')
-          .setStyle(ButtonStyle.Primary),
-      );
+      const row = getAbbrHelpButtons();
 
-      const backRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('help_main')
-          .setLabel('Back to Help')
-          .setStyle(ButtonStyle.Secondary),
-      );
+      const backRow = getBackToHelpButtons(customId);
 
       const embed = new EmbedBuilder()
         .setTitle('Team Abbreviation Helper')
@@ -143,18 +118,22 @@ export async function handleHelpButtons(interaction: ButtonInteraction) {
       }
 
       const embed = createTeamListEmbed(leagueType);
+      const row = getAbbrHelpButtons(leagueString);
 
-      const backRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('help_abbr')
-          .setLabel('Back to Leagues')
-          .setStyle(ButtonStyle.Secondary),
-      );
+      const backRow = getBackToHelpButtons(customId);
 
       await interaction.update({
         embeds: [embed],
-        components: [backRow],
+        components: [row, backRow],
       });
+      return;
+    }
+    if (customId === 'about') {
+      const embed = await createAboutEmbed();
+
+      const backRow = getBackToHelpButtons(customId);
+
+      await interaction.update({ embeds: [embed], components: [backRow] });
       return;
     }
   } catch (error) {
