@@ -73,12 +73,12 @@ export async function sendLeaderboard(
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`leaderboard_prev_${type}_${page}`)
-      .setLabel('⬅️')
+      .setLabel('Previous')
       .setStyle(ButtonStyle.Primary)
       .setDisabled(page === 0),
     new ButtonBuilder()
       .setCustomId(`leaderboard_next_${type}_${page}`)
-      .setLabel('➡️')
+      .setLabel('Next')
       .setStyle(ButtonStyle.Primary)
       .setDisabled(page + 1 >= totalPages),
   );

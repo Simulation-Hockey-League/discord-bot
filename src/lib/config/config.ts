@@ -2,6 +2,12 @@ import { LeagueType } from 'src/db/index/shared';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+export const pageSizes = {
+  global: 25,
+  tpeRank: 15,
+  limited: 10,
+};
+
 export const inviteLink =
   'https://discord.com/oauth2/authorize?client_id=1344493590461808650&permissions=414464723008&integration_type=0&scope=bot+applications.commands';
 

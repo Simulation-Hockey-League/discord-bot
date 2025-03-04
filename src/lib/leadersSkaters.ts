@@ -3,6 +3,8 @@ import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType, SkaterCategory } from 'src/db/index/shared';
 import { PlayerStats, SeasonType } from 'typings/statsindex';
 
+import { pageSizes } from './config/config';
+
 export const withLeaderStats = async (
   playerStats: PlayerStats[],
   league: LeagueType | undefined,
@@ -12,8 +14,8 @@ export const withLeaderStats = async (
   leader: SkaterCategory,
   viewRookie: boolean,
   abbr: string | null,
-  page: number = 1,
-): Promise<EmbedBuilder> => {
+  page: number,
+): Promise<{ embed: EmbedBuilder; totalPages: number }> => {
   // (F = C, LW, RW; D = LD, RD)
   const filteredPlayers = playerStats.filter((player) => {
     if (position === 'F') {
@@ -45,11 +47,13 @@ export const withLeaderStats = async (
       leader.charAt(0).toUpperCase() + leader.slice(1)
     } Leaders (Page ${page})`,
   );
-
+  const totalPages = Math.ceil(filteredPlayers.length / pageSizes.global);
   const embed = new EmbedBuilder().setTitle(headerParts.join(' | '));
-  const pageSize = 25;
-  const startIndex = (page - 1) * pageSize;
-  const topPlayers = filteredPlayers.slice(startIndex, startIndex + pageSize);
+  const startIndex = (page - 1) * pageSizes.global;
+  const topPlayers = filteredPlayers.slice(
+    startIndex,
+    startIndex + pageSizes.global,
+  );
   const playerList = topPlayers
     .map(
       (player, index) =>
@@ -63,5 +67,5 @@ export const withLeaderStats = async (
     embed.setDescription(playerList);
   }
 
-  return embed;
+  return { embed, totalPages };
 };

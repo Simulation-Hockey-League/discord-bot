@@ -1,13 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ComponentType,
-} from 'discord.js';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { PortalClient } from 'src/db/portal/PortalClient';
-import { BaseEmbed } from 'src/lib/embed';
-import { logger } from 'src/lib/logger';
+import { pageSizes } from 'src/lib/config/config';
+import {
+  GetPageFn,
+  backForwardButtons,
+  createPaginator,
+} from 'src/lib/helpers/buttons/button';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -47,9 +45,6 @@ export default {
       });
       return;
     }
-
-    let currentPage = 1;
-
     try {
       const tpeRankings = players
         .map((player) => ({
@@ -72,109 +67,23 @@ export default {
           return matchesLeague && matchesSeason;
         });
 
-      const getRankingEmbed = (page: number) => {
-        const startIdx = (page - 1) * 15;
-        const endIdx = page * 15;
+      const getLeaderStatsPage: GetPageFn = async (page) => {
+        const { embed, totalPages } = await getRankingEmbed(
+          tpeRankings,
+          targetDraftSeason,
+          targetLeague,
+          page,
+        );
 
-        const pageRankings = tpeRankings.slice(startIdx, endIdx);
-
-        return BaseEmbed(interaction, {})
-          .setTitle(
-            targetDraftSeason || targetLeague
-              ? `TPE Rankings for S${targetDraftSeason || ''} ${
-                  targetLeague || ''
-                }`.trim()
-              : 'TPE Rankings',
-          )
-          .addFields({
-            name: 'TPE Rankings',
-            value: pageRankings.length
-              ? pageRankings
-                  .map(
-                    (player, index) =>
-                      `${startIdx + index + 1}.  ${player.username} |  ${
-                        player.name
-                      } | ${player.tpe} TPE`,
-                  )
-                  .join('\n')
-              : 'No players found.',
-            inline: false,
-          });
+        const buttons = backForwardButtons(page, totalPages);
+        return { embed, buttons, totalPages };
       };
 
-      const embed = getRankingEmbed(currentPage);
-
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('prev')
-          .setLabel('Previous')
-          .setStyle(ButtonStyle.Primary)
-          .setDisabled(currentPage === 1),
-        new ButtonBuilder()
-          .setCustomId('next')
-          .setLabel('Next')
-          .setStyle(ButtonStyle.Primary)
-          .setDisabled(currentPage * 10 >= tpeRankings.length),
-      );
-
-      const message = await interaction
-        .editReply({
-          embeds: [embed],
-          components: [row],
-        })
-        .catch((error) => {
-          logger.error(error);
-          return null;
-        });
-      if (!message) {
-        return;
-      }
-
-      const collector = message.createMessageComponentCollector({
-        componentType: ComponentType.Button,
-        time: 60000,
+      const message = await interaction.editReply({
+        embeds: [(await getLeaderStatsPage(1)).embed],
+        components: [(await getLeaderStatsPage(1)).buttons],
       });
-
-      collector.on('collect', async (btnInteraction) => {
-        if (btnInteraction.user.id !== interaction.user.id) {
-          return btnInteraction.reply({
-            content: 'You cannot interact with these buttons.',
-            ephemeral: true,
-          });
-        }
-
-        if (btnInteraction.customId === 'next') {
-          currentPage++;
-        } else if (btnInteraction.customId === 'prev' && currentPage > 1) {
-          currentPage--;
-        }
-
-        const newEmbed = getRankingEmbed(currentPage);
-        await btnInteraction.update({
-          embeds: [newEmbed],
-          components: [
-            new ActionRowBuilder<ButtonBuilder>().addComponents(
-              new ButtonBuilder()
-                .setCustomId('prev')
-                .setLabel('Previous')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(currentPage === 1),
-              new ButtonBuilder()
-                .setCustomId('next')
-                .setLabel('Next')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(currentPage * 10 >= tpeRankings.length),
-            ),
-          ],
-        });
-      });
-
-      collector.on('end', () => {
-        row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] }).catch((error) => {
-          logger.error(error);
-        });
-      });
+      await createPaginator(message, interaction.user.id, getLeaderStatsPage);
     } catch (error) {
       await interaction.editReply({
         content: `An error occurred while retrieving TPE rankings.`,
@@ -183,3 +92,41 @@ export default {
     }
   },
 } satisfies SlashCommand;
+
+const getRankingEmbed = (
+  tpeRankings: any[],
+  targetDraftSeason: number | null,
+  targetLeague: string | null,
+  page: number,
+) => {
+  const totalPages = Math.ceil(tpeRankings.length / pageSizes.tpeRank);
+  const startIdx = (page - 1) * pageSizes.tpeRank;
+  const endIdx = page * pageSizes.tpeRank;
+
+  const pageRankings = tpeRankings.slice(startIdx, endIdx);
+
+  const embed = new EmbedBuilder()
+    .setTitle(
+      targetDraftSeason || targetLeague
+        ? `TPE Rankings for S${targetDraftSeason || ''} ${
+            targetLeague || ''
+          }`.trim()
+        : 'TPE Rankings',
+    )
+    .addFields({
+      name: 'TPE Rankings',
+      value: pageRankings.length
+        ? pageRankings
+            .map(
+              (player, index) =>
+                `${startIdx + index + 1}.  ${player.username} |  ${
+                  player.name
+                } | ${player.tpe} TPE`,
+            )
+            .join('\n')
+        : 'No players found.',
+      inline: false,
+    });
+
+  return { embed, totalPages };
+};
