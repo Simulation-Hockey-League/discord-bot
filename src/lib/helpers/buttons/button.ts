@@ -7,6 +7,7 @@ import {
   Message,
   MessageComponentInteraction,
 } from 'discord.js';
+import { logger } from 'src/lib/logger';
 
 export const backForwardButtons = (page: number, totalPages: number) => {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -71,6 +72,8 @@ export async function createPaginator(
 
   collector.on('end', async () => {
     const disabledRow = disableButtons(buttons);
-    await message.edit({ components: [disabledRow] });
+    await message.edit({ components: [disabledRow] }).catch((error) => {
+      logger.error(error);
+    });
   });
 }
