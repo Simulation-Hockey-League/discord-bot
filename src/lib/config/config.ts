@@ -2,6 +2,12 @@ import { LeagueType } from 'src/db/index/shared';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+export const pageSizes = {
+  global: 25,
+  tpeRank: 15,
+  limited: 10,
+};
+
 export const inviteLink =
   'https://discord.com/oauth2/authorize?client_id=1344493590461808650&permissions=414464723008&integration_type=0&scope=bot+applications.commands';
 
@@ -169,10 +175,10 @@ export const botEmojis = isDevelopment
       CGY: '<:CGY:1344845881270210661>',
       CHI: '<:CHI:1344845888748523672>',
       EDM: '<:EDM:1344845896927674409>',
-      HAM: '<:HAM:1344845905031073813>',
+      HAM: '<:HAM_NEW:1345958872652972112>',
       LAP: '<:LAP:1344845913474203769>',
       MTL: '<:MTL:1344845938438438953>',
-      MAN: '<:MAN:1344845920591679571>',
+      MAN: '<:MAN_NEW:1345952102693732372>',
       MIN: '<:MIN:1344845928582086768>',
       NEW: '<:NEW:1344845944658727003>',
       NOLA: '<:NOLA:1344845950237151264>',

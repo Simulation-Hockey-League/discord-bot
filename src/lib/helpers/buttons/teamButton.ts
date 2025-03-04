@@ -12,6 +12,7 @@ import {
   createStatsEmbed,
 } from 'src/lib/team';
 import { TeamInfo } from 'src/lib/teams';
+import { ManagerInfo } from 'typings/portal';
 import { IndexTeamInfo, SeasonType } from 'typings/statsindex';
 
 import { LeagueType } from '../../../db/index/shared';
@@ -66,6 +67,7 @@ export async function createTeamEmbed(
   season?: number,
   seasonType?: SeasonType,
   view?: string,
+  managerInfo?: ManagerInfo[],
 ) {
   switch (view) {
     case 'roster':
@@ -73,7 +75,12 @@ export async function createTeamEmbed(
         teamInfo.leagueType === LeagueType.SHL ||
         teamInfo.leagueType === LeagueType.SMJHL
       ) {
-        return await createRosterEmbed(interaction, team, teamInfo);
+        return await createRosterEmbed(
+          interaction,
+          team,
+          teamInfo,
+          managerInfo,
+        );
       }
       return;
     case 'schedule':

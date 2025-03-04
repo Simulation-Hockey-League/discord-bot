@@ -153,3 +153,12 @@ export type BasicUserInfo = {
   userID: number;
   username: string;
 };
+
+export type ManagerInfo = {
+  leagueID: number;
+  teamID: number;
+  gmID: number;
+  gmUsername: string;
+  cogmID: number;
+  cogmUsername: string;
+};

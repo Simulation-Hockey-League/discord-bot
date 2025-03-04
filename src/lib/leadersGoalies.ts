@@ -3,6 +3,8 @@ import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { GoalieCategories, LeagueType } from 'src/db/index/shared';
 import { GoalieStats, SeasonType } from 'typings/statsindex';
 
+import { pageSizes } from './config/config';
+
 export const withLeaderStats = async (
   playerStats: GoalieStats[],
   league: LeagueType | undefined,
@@ -11,8 +13,8 @@ export const withLeaderStats = async (
   leader: GoalieCategories,
   viewRookie: boolean,
   abbr: string | null,
-  page: number = 1,
-): Promise<EmbedBuilder> => {
+  page: number,
+): Promise<{ embed: EmbedBuilder; totalPages: number }> => {
   if (!leader) {
     throw new Error('Leader category must be specified');
   }
@@ -61,9 +63,12 @@ export const withLeaderStats = async (
   );
   const embed = new EmbedBuilder().setTitle(headerParts.join(' | '));
 
-  const pageSize = 25;
-  const startIndex = (page - 1) * pageSize;
-  const topPlayers = playerStats.slice(startIndex, startIndex + pageSize);
+  const totalPages = Math.ceil(playerStats.length / pageSizes.global);
+  const startIndex = (page - 1) * pageSizes.global;
+  const topPlayers = playerStats.slice(
+    startIndex,
+    startIndex + pageSizes.global,
+  );
   const playerList = topPlayers
     .map((player, index) => {
       const value =
@@ -80,5 +85,5 @@ export const withLeaderStats = async (
     embed.setDescription(playerList);
   }
 
-  return embed;
+  return { embed, totalPages };
 };

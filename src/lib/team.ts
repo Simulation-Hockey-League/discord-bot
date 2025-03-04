@@ -5,6 +5,7 @@ import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType } from 'src/db/index/shared';
 
 import { PortalClient } from 'src/db/portal/PortalClient';
+import { ManagerInfo } from 'typings/portal';
 import { IndexTeamInfo } from 'typings/statsindex';
 
 import { BaseEmbed } from './embed';
@@ -206,6 +207,7 @@ export async function createRosterEmbed(
   interaction: ChatInputCommandInteraction<CacheType>,
   teamData: IndexTeamInfo,
   teamInfo: TeamInfo,
+  managerInfo?: ManagerInfo[],
 ) {
   const players = await PortalClient.getActivePlayers();
   const rosterPlayers = players
@@ -265,8 +267,17 @@ export async function createRosterEmbed(
   const rosterEmbed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamData.colors.primary,
-  })
-    .setTitle(`${teamInfo.fullName} Roster`)
+  }).setTitle(`${teamInfo.fullName} Roster`);
+
+  if (managerInfo) {
+    rosterEmbed.addFields({
+      name: 'Manager',
+      value: `gm: ${managerInfo[0].gmUsername} | co-gm: ${managerInfo[0].cogmUsername}`,
+      inline: false,
+    });
+  }
+
+  rosterEmbed
     .addFields({
       name: 'Players',
       value: rosterPlayers

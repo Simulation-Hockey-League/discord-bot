@@ -1,14 +1,13 @@
 import { SlashCommandBuilder } from 'discord.js';
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ComponentType,
-} from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType, SkaterCategory } from 'src/db/index/shared';
 import { skaterRookieCutoffs } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
+import {
+  GetPageFn,
+  backForwardButtons,
+  createPaginator,
+} from 'src/lib/helpers/buttons/button';
 import { withLeaderStats } from 'src/lib/leadersSkaters';
 import { logger } from 'src/lib/logger';
 import { findTeamByAbbr } from 'src/lib/teams';
@@ -130,8 +129,6 @@ export default {
       const viewRookie = interaction.options.getBoolean('rookie') ?? false;
       const abbr = interaction.options.getString('abbr');
 
-      let currentPage = 1;
-
       let seasonBefore: PlayerStats[] = [];
 
       let playerStats = await IndexApiClient.get(league).getPlayerStats(
@@ -189,52 +186,8 @@ export default {
         return;
       }
 
-      const embed = await withLeaderStats(
-        playerStats,
-        league,
-        season,
-        seasonType,
-        position,
-        leader,
-        viewRookie,
-        abbr,
-        currentPage,
-      );
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('prev')
-          .setLabel('Previous')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId('next')
-          .setLabel('Next')
-          .setStyle(ButtonStyle.Primary),
-      );
-
-      const message = await interaction.editReply({
-        embeds: [embed],
-        components: [row],
-      });
-
-      const collector = message.createMessageComponentCollector({
-        componentType: ComponentType.Button,
-        time: 60000,
-      });
-
-      collector.on('collect', async (btnInteraction) => {
-        if (btnInteraction.user.id !== interaction.user.id) {
-          return btnInteraction.reply({
-            content: 'You cannot interact with these buttons.',
-            ephemeral: true,
-          });
-        }
-        if (btnInteraction.customId === 'next') {
-          currentPage++;
-        } else if (btnInteraction.customId === 'prev' && currentPage > 1) {
-          currentPage--;
-        }
-
-        const newEmbed = await withLeaderStats(
+      const getLeaderStatsPage: GetPageFn = async (page) => {
+        const { embed, totalPages } = await withLeaderStats(
           playerStats,
           league,
           season,
@@ -243,20 +196,18 @@ export default {
           leader,
           viewRookie,
           abbr,
-          currentPage,
+          page,
         );
-        await btnInteraction.update({
-          embeds: [newEmbed],
-          components: [row],
-        });
-      });
 
-      collector.on('end', () => {
-        row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] }).catch((error) => {
-          logger.error(error);
-        });
+        const buttons = backForwardButtons(page, totalPages);
+        return { embed, buttons, totalPages };
+      };
+
+      const message = await interaction.editReply({
+        embeds: [(await getLeaderStatsPage(1)).embed],
+        components: [(await getLeaderStatsPage(1)).buttons],
       });
+      await createPaginator(message, interaction.user.id, getLeaderStatsPage);
     } catch (error) {
       logger.error(error);
       await interaction.editReply({

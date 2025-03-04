@@ -3,6 +3,7 @@ import { logger } from 'src/lib/logger';
 import {
   BasicUserInfo,
   InternalChecklist,
+  ManagerInfo,
   PlayerAchievement,
   PortalPlayer,
   TeamAchievement,
@@ -17,6 +18,7 @@ class PortalApiClient {
   #getAwards: Array<PlayerAchievement> = [];
   #getTeamAwards: Array<TeamAchievement> = [];
   #getUserAwards: Array<UserAchievement> = [];
+  #getManagerInfo: Array<ManagerInfo> = [];
 
   #loaded = false;
   #lastLoadTimestamp = 0;
@@ -112,6 +114,15 @@ class PortalApiClient {
     return this.getChecklist(reload, league, userID);
   }
 
+  async getManagerInfo(
+    reload: boolean = false,
+    league?: string,
+  ): Promise<Array<ManagerInfo>> {
+    return await this.#getData(this.#getManagerInfo, reload, ['manager'], {
+      ...(league && { league }),
+    });
+  }
+
   async getPlayer(
     portalID: string,
     reload: boolean = false,
@@ -172,6 +183,7 @@ class PortalApiClient {
       await this.getPlayerAwards(true),
       await this.getTeamAwards(true),
       await this.getUserAwards(true),
+      await this.getManagerInfo(true),
     ]);
 
     this.#lastLoadTimestamp = Date.now();
