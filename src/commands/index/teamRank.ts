@@ -35,13 +35,13 @@ export default {
   command: new SlashCommandBuilder()
     .setName('team-rank')
     .setDescription('Retrieve team rankings')
-    .addStringOption((option) =>
+    .addNumberOption((option) =>
       option
         .setName('league')
         .setDescription('Which League to get team rankings')
         .addChoices(
-          { name: 'SHL', value: String(LeagueType.SHL) },
-          { name: 'SMJHL', value: String(LeagueType.SMJHL) },
+          { name: 'SHL', value: LeagueType.SHL },
+          { name: 'SMJHL', value: LeagueType.SMJHL },
         )
         .setRequired(true),
     )
@@ -56,7 +56,7 @@ export default {
 
   execute: async (interaction) => {
     await interaction.deferReply();
-    const targetLeague = interaction.options.getString('league');
+    const targetLeague = interaction.options.getNumber('league') as LeagueType;
     const currentSeason = DynamicConfig.currentSeason.get();
     const targetSeason =
       interaction.options.getNumber('season') ?? currentSeason;
