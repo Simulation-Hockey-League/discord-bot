@@ -5,6 +5,7 @@ import {
 } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
+import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import {
@@ -15,6 +16,8 @@ import { logger } from 'src/lib/logger';
 import { Teams, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
+import { ManagerInfo } from 'typings/portal';
+
 export default {
   command: new SlashCommandBuilder()
     .setName('team')
@@ -129,6 +132,16 @@ export default {
         });
         return;
       }
+      let managerInfo: ManagerInfo[] = [];
+
+      if (
+        teamInfo.leagueType === LeagueType.SHL ||
+        teamInfo.leagueType === LeagueType.SMJHL
+      ) {
+        managerInfo = (
+          await PortalClient.getManagerInfo(false, String(teamInfo.leagueType))
+        ).filter((manager) => manager.teamID === team.id);
+      }
       const row = createActionRow(abbr, season, view, teamInfo.leagueType);
 
       const initialEmbed = await createTeamEmbed(
@@ -138,6 +151,7 @@ export default {
         season,
         seasonType,
         view,
+        managerInfo,
       );
 
       if (!initialEmbed) {
@@ -187,6 +201,7 @@ export default {
           selectedSeason,
           seasonType,
           action,
+          managerInfo,
         );
 
         const updatedRow = createActionRow(

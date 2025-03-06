@@ -1,43 +1,34 @@
 import { SlashCommandBuilder } from 'discord.js';
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ComponentType,
-} from 'discord.js';
+
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
+import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
-import { GoalieCategories } from 'src/db/index/shared';
 import { goalieRookieCutoffs } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import { withLeaderStats } from 'src/lib/leadersGoalies';
+import { getGSAAInfo } from 'src/lib/helpers/playerHelpers';
+import { createLeadersSelector } from 'src/lib/leaders';
 import { logger } from 'src/lib/logger';
 import { TeamInfo, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
 import { GoalieStats } from 'typings/statsindex';
 
+export const goalieCategories = {
+  gamesPlayed: 'Games Played',
+  wins: 'Wins',
+  losses: 'Losses',
+  ot: 'OT',
+  shotsAgainst: 'Shots Against',
+  saves: 'Saves',
+  goalsAgainst: 'Goals Against',
+  shutouts: 'Shutouts',
+  savePct: 'Save %',
+  GSAA: 'GSAA',
+};
+
 export default {
   command: new SlashCommandBuilder()
     .setName('leaders-goalies')
-    .addStringOption((option) =>
-      option
-        .setName('category')
-        .setDescription('The leader in a set position')
-        .setChoices(
-          { name: 'gamesPlayed', value: 'gamesPlayed' },
-          { name: 'wins', value: 'wins' },
-          { name: 'losses', value: 'losses' },
-          { name: 'ot', value: 'ot' },
-          { name: 'shotsAgainst', value: 'shotsAgainst' },
-          { name: 'saves', value: 'saves' },
-          { name: 'goalsAgainst', value: 'goalsAgainst' },
-          { name: 'shutouts', value: 'shutouts' },
-          { name: 'savePct', value: 'savePct' },
-          { name: 'GSAA', value: 'GSAA' },
-        )
-        .setRequired(true),
-    )
     .addNumberOption((option) =>
       option
         .setName('season')
@@ -88,33 +79,28 @@ export default {
         )
         .setRequired(false),
     )
-    .setDescription('Get Goalie Statistics.'),
+    .setDescription('Get Goalie Statistics. Defaults to wins'),
 
   execute: async (interaction) => {
-    await interaction.deferReply({ ephemeral: false });
-    const currentSeason = DynamicConfig.get('currentSeason');
-    const season = interaction.options.getNumber('season') ?? currentSeason;
-    const league = interaction.options.getNumber('league') as
-      | LeagueType
-      | undefined;
-    const seasonType = interaction.options.getString('type') as
-      | SeasonType
-      | undefined;
-    const leader = interaction.options.getString(
-      'category',
-    ) as GoalieCategories;
-    const viewRookie = interaction.options.getBoolean('rookie') ?? false;
-    const abbr = interaction.options.getString('abbr');
-    let currentPage = 1;
-
-    await interaction.deferReply();
-
     try {
+      await interaction.deferReply({ ephemeral: false });
+      const currentSeason = DynamicConfig.get('currentSeason');
+      const season = interaction.options.getNumber('season') ?? currentSeason;
+      const league = interaction.options.getNumber('league') as
+        | LeagueType
+        | undefined;
+      const seasonType = interaction.options.getString('type') as
+        | SeasonType
+        | undefined;
+      const viewRookie = interaction.options.getBoolean('rookie') ?? false;
+      const abbr = interaction.options.getString('abbr');
+
       let seasonBefore: GoalieStats[] = [];
       let playerStats = await IndexApiClient.get(league).getGoalieStats(
         seasonType ?? SeasonType.REGULAR,
         season,
       );
+
       if (viewRookie) {
         seasonBefore = await IndexApiClient.get(league).getGoalieStats(
           seasonType ?? SeasonType.REGULAR,
@@ -132,12 +118,13 @@ export default {
         );
         playerStats = rookieStats;
       }
+
       let teamInfo: TeamInfo | undefined;
       if (abbr) {
         teamInfo = findTeamByAbbr(abbr, league);
         if (!teamInfo) {
           await interaction.editReply({
-            content: `Could not find team with abbreviation ${abbr}.`,
+            content: `Could not find team with abbreviation ${abbr}. Please double-check the abbreviation.`,
           });
           return;
         }
@@ -145,94 +132,36 @@ export default {
           (player) => teamInfo && player.teamId === teamInfo.teamID,
         );
       }
-      if (!playerStats.length) {
-        const filters = [
-          abbr ? `Team: ${abbr.toUpperCase()}` : null,
-          season ? `Season: ${season}` : null,
-          seasonType ? `Type: ${seasonType}` : null,
-          leader ? `Category: ${leader}` : null,
-          viewRookie ? 'Rookie Only' : null,
-        ]
-          .filter(Boolean)
-          .join(' | ');
 
-        await interaction.editReply({
-          content: `No player stats found${filters ? ` for ${filters}` : ''}.`,
-        });
-        return;
-      }
-
-      const embed = await withLeaderStats(
-        playerStats,
-        league,
-        season,
-        seasonType,
-        leader,
-        viewRookie,
-        abbr,
-        currentPage,
-      );
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('prev')
-          .setLabel('Previous')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId('next')
-          .setLabel('Next')
-          .setStyle(ButtonStyle.Primary),
-      );
-
-      const message = await interaction.editReply({
-        embeds: [embed],
-        components: [row],
-      });
-
-      const collector = message.createMessageComponentCollector({
-        componentType: ComponentType.Button,
-        time: 60000,
-      });
-
-      collector.on('collect', async (btnInteraction) => {
-        if (btnInteraction.user.id !== interaction.user.id) {
-          return btnInteraction.reply({
-            content: 'You cannot interact with these buttons.',
-            ephemeral: true,
-          });
-        }
-        if (btnInteraction.customId === 'next') {
-          currentPage++;
-        } else if (btnInteraction.customId === 'prev' && currentPage > 1) {
-          currentPage--;
-        }
-
-        const newEmbed = await withLeaderStats(
-          playerStats,
-          league,
-          season,
-          seasonType,
-          leader,
-          viewRookie,
-          abbr,
-          currentPage,
+      const leagueAvgSavePct = getGSAAInfo(playerStats);
+      playerStats.forEach((g) => {
+        g.GSAA = Number(
+          (g.saves - leagueAvgSavePct * g.shotsAgainst).toFixed(2),
         );
-        await btnInteraction.update({
-          embeds: [newEmbed],
-          components: [row],
-        });
       });
 
-      collector.on('end', () => {
-        row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] }).catch((error) => {
-          logger.error(error);
-        });
-      });
+      let titleParts = ['Player Rankings'];
+
+      if (season) titleParts.unshift(`S${season}`);
+      if (abbr) titleParts.push(abbr.toUpperCase());
+      if (league) titleParts.push(leagueTypeToString(league));
+      if (seasonType) titleParts.push(seasonType);
+      if (viewRookie) titleParts.push('Rookies');
+      const getTitle = titleParts.join(' | ');
+
+      await createLeadersSelector(
+        interaction,
+        playerStats,
+        goalieCategories,
+        'wins',
+        getTitle,
+      );
     } catch (error) {
+      logger.error('Error while executing /leaders-goalies command', error);
       await interaction.editReply({
-        content: 'An error occurred while fetching player stats.',
+        content:
+          'An error occurred while fetching player stats. Please try again later.',
       });
-      return;
     }
   },
 } satisfies SlashCommand;

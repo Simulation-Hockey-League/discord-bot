@@ -5,6 +5,7 @@ import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 import { DynamicConfig } from './config/dynamicConfig';
 import { getSkaterFantasyPoints } from './helpers/fantasyHelpers';
+import { getGSAAInfo } from './helpers/playerHelpers';
 
 export const toToi = (minutes: number, games: number): string => {
   const avg = minutes / (games || 0) / 60;
@@ -122,17 +123,7 @@ export const withPlayerStats = async (
     const allGoalies = await IndexApiClient.get(
       playerStats.league,
     ).getGoalieStats(playerStats.seasonType, playerStats.season);
-    const { totalSaves, totalShotsAgainst } = allGoalies.reduce(
-      (acc, g) => {
-        acc.totalSaves += g.saves;
-        acc.totalShotsAgainst += g.shotsAgainst;
-        return acc;
-      },
-      { totalSaves: 0, totalShotsAgainst: 0 },
-    );
-    const leagueAvgSavePct = totalShotsAgainst
-      ? totalSaves / totalShotsAgainst
-      : 0;
+    const leagueAvgSavePct = getGSAAInfo(allGoalies);
 
     const gsaa =
       playerStats.saves - leagueAvgSavePct * playerStats.shotsAgainst;

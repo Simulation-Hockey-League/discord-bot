@@ -1,14 +1,14 @@
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
   ButtonInteraction,
-  ButtonStyle,
   ComponentType,
   InteractionEditReplyOptions,
   MessagePayload,
   SlashCommandBuilder,
 } from 'discord.js';
-import { handleHelpButtons } from 'src/lib/helpers/buttons/helpButton';
+import {
+  getMainHelpButtons,
+  handleHelpButtons,
+} from 'src/lib/helpers/buttons/helpButton';
 import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 
@@ -18,17 +18,7 @@ export default {
     .setDescription('Display all available commands'),
 
   execute: async (interaction) => {
-    // Create initial button row
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId('help_main')
-        .setLabel('Help')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId('help_abbr')
-        .setLabel('Abbr Helper')
-        .setStyle(ButtonStyle.Primary),
-    );
+    const row = getMainHelpButtons();
 
     const reply = await interaction.reply({
       content: 'Loading help information...',
