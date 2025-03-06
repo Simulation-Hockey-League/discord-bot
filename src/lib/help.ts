@@ -73,7 +73,13 @@ export const createAboutEmbed = async () => {
     .addFields({
       name: 'SHL V1.0.1 Udpates',
       value:
-        'Latest Updates\n Added new Hamilton and Manhattan Logos \n Added  /leaderboard command \n Added about section in /help \n Added Gms to current roster on /teams \n Added difference for swaps on /fantasy',
+        'Latest Updates\n' +
+        'Added new Hamilton and Manhattan Logos \n' +
+        ' Added  /leaderboard command \n' +
+        ' Added about section in /help \n' +
+        ' Added Gms to current roster on /teams \n' +
+        ' Added difference for swaps on /fantasy \n' +
+        'for /leaders-goalies/skaters added selector so you can swap between categories after running a command',
       inline: false,
     });
   return embed;

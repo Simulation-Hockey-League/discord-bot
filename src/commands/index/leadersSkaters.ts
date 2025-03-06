@@ -97,7 +97,7 @@ export default {
         )
         .setRequired(false),
     )
-    .setDescription('Get Skater Statistics.'),
+    .setDescription('Get Skater Statistics. Defaults to points'),
 
   execute: async (interaction) => {
     try {

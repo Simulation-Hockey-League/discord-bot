@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { create } from 'node_modules/@types/lodash';
 
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
@@ -80,7 +79,7 @@ export default {
         )
         .setRequired(false),
     )
-    .setDescription('Get Goalie Statistics.'),
+    .setDescription('Get Goalie Statistics. Defaults to wins'),
 
   execute: async (interaction) => {
     try {
