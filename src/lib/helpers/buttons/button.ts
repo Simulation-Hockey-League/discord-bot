@@ -41,13 +41,17 @@ export async function createPaginator(
   message: Message,
   userId: string,
   getPage: GetPageFn,
+  staticComponents: ActionRowBuilder<any>[] = [],
   initialPage = 1,
   timeout = 60000,
 ) {
   let currentPage = initialPage;
   let { embed, buttons, totalPages } = await getPage(currentPage);
 
-  await message.edit({ embeds: [embed], components: [buttons] });
+  await message.edit({
+    embeds: [embed],
+    components: [...staticComponents, buttons],
+  });
 
   const collector = message.createMessageComponentCollector({
     componentType: ComponentType.Button,
@@ -67,7 +71,10 @@ export async function createPaginator(
     buttons = result.buttons;
     totalPages = result.totalPages;
 
-    await interaction.update({ embeds: [embed], components: [buttons] });
+    await interaction.update({
+      embeds: [embed],
+      components: [...staticComponents, buttons],
+    });
   });
 
   collector.on('end', async () => {

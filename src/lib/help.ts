@@ -63,7 +63,7 @@ export const createMainHelpEmbed = async (interaction: ButtonInteraction) => {
 export const createAboutEmbed = async () => {
   const embed = new EmbedBuilder()
     .setTitle('SHL Bot V1.0.1')
-    .setDescription('Latest Version of the SHL Bot: 3/3/25')
+    .setDescription('Latest Version of the SHL Bot: 3/5/25')
     .addFields({
       name: 'Feedback',
       value:
@@ -73,7 +73,7 @@ export const createAboutEmbed = async () => {
     .addFields({
       name: 'SHL V1.0.1 Udpates',
       value:
-        'Latest Updates\n Added new Hamilton and Manhattan Logos \n Added  /leaderboard command \n added about section in /help \n Added Gms to current roster on /teams \n',
+        'Latest Updates\n Added new Hamilton and Manhattan Logos \n Added  /leaderboard command \n Added about section in /help \n Added Gms to current roster on /teams \n Added difference for swaps on /fantasy',
       inline: false,
     });
   return embed;

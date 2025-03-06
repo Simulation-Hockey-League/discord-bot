@@ -1,43 +1,35 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { create } from 'node_modules/@types/lodash';
 
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
+import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
-import { GoalieCategories } from 'src/db/index/shared';
 import { goalieRookieCutoffs } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import { GetPageFn } from 'src/lib/helpers/buttons/button';
-import {
-  backForwardButtons,
-  createPaginator,
-} from 'src/lib/helpers/buttons/button';
-import { withLeaderStats } from 'src/lib/leadersGoalies';
+import { getGSAAInfo } from 'src/lib/helpers/playerHelpers';
+import { createLeadersSelector } from 'src/lib/leaders';
 import { logger } from 'src/lib/logger';
 import { TeamInfo, findTeamByAbbr } from 'src/lib/teams';
 
 import { SlashCommand } from 'typings/command';
 import { GoalieStats } from 'typings/statsindex';
 
+export const goalieCategories = {
+  gamesPlayed: 'Games Played',
+  wins: 'Wins',
+  losses: 'Losses',
+  ot: 'OT',
+  shotsAgainst: 'Shots Against',
+  saves: 'Saves',
+  goalsAgainst: 'Goals Against',
+  shutouts: 'Shutouts',
+  savePct: 'Save %',
+  GSAA: 'GSAA',
+};
+
 export default {
   command: new SlashCommandBuilder()
     .setName('leaders-goalies')
-    .addStringOption((option) =>
-      option
-        .setName('category')
-        .setDescription('The leader in a set position')
-        .setChoices(
-          { name: 'gamesPlayed', value: 'gamesPlayed' },
-          { name: 'wins', value: 'wins' },
-          { name: 'losses', value: 'losses' },
-          { name: 'ot', value: 'ot' },
-          { name: 'shotsAgainst', value: 'shotsAgainst' },
-          { name: 'saves', value: 'saves' },
-          { name: 'goalsAgainst', value: 'goalsAgainst' },
-          { name: 'shutouts', value: 'shutouts' },
-          { name: 'savePct', value: 'savePct' },
-          { name: 'GSAA', value: 'GSAA' },
-        )
-        .setRequired(true),
-    )
     .addNumberOption((option) =>
       option
         .setName('season')
@@ -101,9 +93,6 @@ export default {
       const seasonType = interaction.options.getString('type') as
         | SeasonType
         | undefined;
-      const leader = interaction.options.getString(
-        'category',
-      ) as GoalieCategories;
       const viewRookie = interaction.options.getBoolean('rookie') ?? false;
       const abbr = interaction.options.getString('abbr');
 
@@ -145,43 +134,29 @@ export default {
         );
       }
 
-      if (!playerStats.length) {
-        const filters = [
-          abbr ? `Team: ${abbr.toUpperCase()}` : null,
-          season ? `Season: ${season}` : null,
-          seasonType ? `Type: ${seasonType}` : null,
-          leader ? `Category: ${leader}` : null,
-          viewRookie ? 'Rookie Only' : null,
-        ]
-          .filter(Boolean)
-          .join(' | ');
-
-        await interaction.editReply({
-          content: `No player stats found${filters ? ` for ${filters}` : ''}.`,
-        });
-        return;
-      }
-      const getLeaderStatsPage: GetPageFn = async (page) => {
-        const { embed, totalPages } = await withLeaderStats(
-          playerStats,
-          league,
-          season,
-          seasonType,
-          leader,
-          viewRookie,
-          abbr,
-          page,
+      const leagueAvgSavePct = getGSAAInfo(playerStats);
+      playerStats.forEach((g) => {
+        g.GSAA = Number(
+          (g.saves - leagueAvgSavePct * g.shotsAgainst).toFixed(2),
         );
-
-        const buttons = backForwardButtons(page, totalPages);
-        return { embed, buttons, totalPages };
-      };
-
-      const message = await interaction.editReply({
-        embeds: [(await getLeaderStatsPage(1)).embed],
-        components: [(await getLeaderStatsPage(1)).buttons],
       });
-      await createPaginator(message, interaction.user.id, getLeaderStatsPage);
+
+      let titleParts = ['Player Rankings'];
+
+      if (season) titleParts.unshift(`S${season}`);
+      if (abbr) titleParts.push(abbr.toUpperCase());
+      if (league) titleParts.push(leagueTypeToString(league));
+      if (seasonType) titleParts.push(seasonType);
+      if (viewRookie) titleParts.push('Rookies');
+      const getTitle = titleParts.join(' | ');
+
+      await createLeadersSelector(
+        interaction,
+        playerStats,
+        goalieCategories,
+        'wins',
+        getTitle,
+      );
     } catch (error) {
       logger.error('Error while executing /leaders-goalies command', error);
       await interaction.editReply({

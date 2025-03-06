@@ -1,14 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
-import { LeagueType, SeasonType, SkaterCategory } from 'src/db/index/shared';
+import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
+import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { skaterRookieCutoffs } from 'src/lib/config/config';
 import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import {
-  GetPageFn,
-  backForwardButtons,
-  createPaginator,
-} from 'src/lib/helpers/buttons/button';
-import { withLeaderStats } from 'src/lib/leadersSkaters';
+
+import { createLeadersSelector } from 'src/lib/leaders';
 import { logger } from 'src/lib/logger';
 import { findTeamByAbbr } from 'src/lib/teams';
 
@@ -16,34 +13,28 @@ import { TeamInfo } from 'src/lib/teams';
 import { SlashCommand } from 'typings/command';
 import { PlayerStats } from 'typings/statsindex';
 
+const skaterCategories = {
+  goals: 'Goals',
+  assists: 'Assists',
+  points: 'Points',
+  plusMinus: 'Plus/Minus',
+  pim: 'PIM',
+  shotsOnGoal: 'Shots on Goal',
+  gwg: 'GWG',
+  faceoffs: 'Faceoffs',
+  faceoffWins: 'Faceoff Wins',
+  giveaways: 'Giveaways',
+  takeaways: 'Takeaways',
+  shotsBlocked: 'Shots Blocked',
+  hits: 'Hits',
+  fights: 'Fights',
+  fightWins: 'Fight Wins',
+  fightLosses: 'Fight Losses',
+};
+
 export default {
   command: new SlashCommandBuilder()
     .setName('leaders-skaters')
-    .addStringOption((option) =>
-      option
-        .setName('category')
-        .setDescription('The leader in a set position')
-        .setChoices(
-          { name: 'goals', value: 'goals' },
-          { name: 'assists', value: 'assists' },
-          { name: 'points', value: 'points' },
-          { name: 'plusMinus', value: 'plusMinus' },
-          { name: 'pim', value: 'pim' },
-          { name: 'shotsOnGoal', value: 'shotsOnGoal' },
-          { name: 'gwg', value: 'gwg' },
-          { name: 'faceoffs', value: 'faceoffs' },
-          { name: 'faceoffWins', value: 'faceoffWins' },
-          { name: 'giveaways', value: 'giveaways' },
-          { name: 'takeaways', value: 'takeaways' },
-          { name: 'shotsBlocked', value: 'shotsBlocked' },
-          { name: 'hits', value: 'hits' },
-          { name: 'shotsOnGoal', value: 'shotsOnGoal' },
-          { name: 'fights', value: 'fights' },
-          { name: 'fightWins', value: 'fightWins' },
-          { name: 'fightLosses', value: 'fightLosses' },
-        )
-        .setRequired(true),
-    )
     .addNumberOption((option) =>
       option
         .setName('season')
@@ -123,9 +114,6 @@ export default {
         | 'F'
         | 'D'
         | undefined;
-      const leader = interaction.options.getString(
-        'category',
-      ) as SkaterCategory;
       const viewRookie = interaction.options.getBoolean('rookie') ?? false;
       const abbr = interaction.options.getString('abbr');
 
@@ -152,6 +140,20 @@ export default {
         );
         playerStats = rookieStats;
       }
+      if (position) {
+        if (position === 'F') {
+          playerStats = playerStats.filter(
+            (player) =>
+              player.position === 'C' ||
+              player.position === 'LW' ||
+              player.position === 'RW',
+          );
+        } else if (position === 'D') {
+          playerStats = playerStats.filter(
+            (player) => player.position === 'LD' || player.position === 'RD',
+          );
+        }
+      }
 
       let teamInfo: TeamInfo | undefined;
       if (abbr) {
@@ -166,48 +168,28 @@ export default {
           (player) => teamInfo && player.teamId === teamInfo.teamID,
         );
       }
-      if (!playerStats.length) {
-        const filters = [
-          abbr ? `Team: ${abbr.toUpperCase()}` : null,
-          season ? `Season: ${season}` : null,
-          seasonType ? `Type: ${seasonType}` : null,
-          position
-            ? `Position: ${position === 'F' ? 'Forward' : 'Defenseman'}`
-            : null,
-          leader ? `Category: ${leader}` : null,
-          viewRookie ? 'Rookie Only' : null,
-        ]
-          .filter(Boolean)
-          .join(' | ');
 
-        await interaction.editReply({
-          content: `No player stats found${filters ? ` for ${filters}` : ''}.`,
-        });
-        return;
-      }
+      let titleParts = ['Player Rankings'];
 
-      const getLeaderStatsPage: GetPageFn = async (page) => {
-        const { embed, totalPages } = await withLeaderStats(
-          playerStats,
-          league,
-          season,
-          seasonType,
-          position,
-          leader,
-          viewRookie,
-          abbr,
-          page,
-        );
+      if (position)
+        titleParts[0] = `${
+          position.charAt(0).toUpperCase() + position.slice(1)
+        } Rankings`;
+      if (season) titleParts.unshift(`S${season}`);
+      if (abbr) titleParts.push(abbr.toUpperCase());
+      if (league) titleParts.push(leagueTypeToString(league));
+      if (seasonType) titleParts.push(seasonType);
+      if (viewRookie) titleParts.push('Rookies');
 
-        const buttons = backForwardButtons(page, totalPages);
-        return { embed, buttons, totalPages };
-      };
+      const getTitle = titleParts.join(' - ');
 
-      const message = await interaction.editReply({
-        embeds: [(await getLeaderStatsPage(1)).embed],
-        components: [(await getLeaderStatsPage(1)).buttons],
-      });
-      await createPaginator(message, interaction.user.id, getLeaderStatsPage);
+      await createLeadersSelector(
+        interaction,
+        playerStats,
+        skaterCategories,
+        'points',
+        getTitle,
+      );
     } catch (error) {
       logger.error(error);
       await interaction.editReply({
