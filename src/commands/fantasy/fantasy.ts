@@ -69,13 +69,13 @@ export default {
         if (swap.oldSkater !== 'None' && swap.newSkater !== 'None') {
           swapsDict[swap.oldSkater] = `**${swap.oldSkater}** ${swap.osa} -> **${
             swap.newSkater
-          }** - ${(swap.nsc - swap.nsa).toFixed(2)}`;
+          }** ${(swap.nsc - swap.nsa).toFixed(2)} (${swap.difference})`;
         }
 
         if (swap.oldGoalie !== 'None' && swap.newGoalie !== 'None') {
           swapsDict[swap.oldGoalie] = `**${swap.oldGoalie}** ${swap.osa} -> **${
             swap.newGoalie
-          }** - ${(swap.nsc - swap.nsa).toFixed(2)}`;
+          }** ${(swap.nsc - swap.nsa).toFixed(2)} (${swap.difference})`;
         }
       });
 
@@ -84,7 +84,7 @@ export default {
         if (swapsDict[player.player]) {
           playersSection += `${swapsDict[player.player]}\n`;
         } else {
-          playersSection += `${player.player} - ${player.score}\n`;
+          playersSection += `${player.player}: ${player.score}\n`;
         }
       });
 
