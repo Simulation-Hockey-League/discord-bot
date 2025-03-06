@@ -79,7 +79,8 @@ export const createAboutEmbed = async () => {
         ' Added about section in /help \n' +
         ' Added Gms to current roster on /teams \n' +
         ' Added difference for swaps on /fantasy \n' +
-        'for /leaders-goalies/skaters added selector so you can swap between categories after running a command',
+        'for /leaders-goalies/skaters added selector so you can swap between categories after running a command' +
+        'Added /team-rank command for any season S66 and above for SHL and SMJHL',
       inline: false,
     });
   return embed;
