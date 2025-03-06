@@ -51,6 +51,25 @@ const SKATER_CATEGORIES = [
   'fightLosses',
 ] as const;
 
+export const SkaterCategories = {
+  goals: 'goals',
+  assists: 'assists',
+  points: 'points',
+  plusMinus: 'plusMinus',
+  pim: 'pim',
+  shotsOnGoal: 'shotsOnGoal',
+  gwg: 'gwg',
+  faceoffs: 'faceoffs',
+  faceoffWins: 'faceoffWins',
+  giveaways: 'giveaways',
+  takeaways: 'takeaways',
+  shotsBlocked: 'shotsBlocked',
+  hits: 'hits',
+  fights: 'fights',
+  fightWins: 'fightWins',
+  fightLosses: 'fightLosses',
+};
+
 export type SkaterCategory = (typeof SKATER_CATEGORIES)[number];
 
 export const toLeagueType = (league: string | null | undefined): LeagueType => {
