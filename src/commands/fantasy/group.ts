@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { connectToDatabase } from 'src/db/fantasy';
 import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 
-import {
-  fetchGlobalSheetData,
-  generateLeaderboard,
-} from '../../lib/helpers/fantasyHelpers';
+import { Global_DB } from 'typings/fantasy';
+
+import { generateLeaderboard } from '../../lib/helpers/fantasyHelpers';
 
 export default {
   command: new SlashCommandBuilder()
@@ -24,7 +24,16 @@ export default {
     const groupNumber = interaction.options.getInteger('group');
 
     try {
-      const players = await fetchGlobalSheetData();
+      const db = await connectToDatabase();
+      const players: Global_DB[] = await new Promise((resolve, reject) => {
+        db.all(`SELECT * FROM fantasy_groups`, (err, rows) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(rows as Global_DB[]);
+        });
+      });
       if (!players.length) {
         await interaction.editReply({
           content: 'Failed to retrieve data from Google Sheets.',
@@ -33,8 +42,8 @@ export default {
       }
 
       const groupPlayers = players
-        .filter((p) => p.group === groupNumber)
-        .sort((a, b) => a.groupRank - b.groupRank);
+        .filter((p) => p.group_number === groupNumber)
+        .sort((a, b) => a.score - b.score);
 
       if (groupPlayers.length === 0) {
         await interaction.editReply({

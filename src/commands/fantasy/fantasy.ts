@@ -1,13 +1,14 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { Database } from 'node_modules/sqlite3/lib/sqlite3';
+import { connectToDatabase } from 'src/db/fantasy';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
 import { SlashCommand } from 'typings/command';
 
+import { Fantasy_Groups_DB, Global_DB } from 'typings/fantasy';
+
 import {
-  fetchGlobalSheetData,
-  fetchPlayersData,
-  fetchSwapsData,
   generateLeaderboard,
   getUserByFuzzy,
 } from '../../lib/helpers/fantasyHelpers';
@@ -38,15 +39,20 @@ export default {
         return;
       }
 
-      const players = await fetchGlobalSheetData();
-      if (!players.length) {
-        await interaction.editReply({
-          content: 'Failed to retrieve data from Google Sheets.',
-        });
-        return;
-      }
+      const db: Database = await connectToDatabase();
 
-      const user = await getUserByFuzzy(name, players);
+      const fantasy_groups: Fantasy_Groups_DB[] = await new Promise(
+        (resolve, reject) => {
+          db.all(`SELECT * FROM fantasy_groups`, (err, rows) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(rows as Fantasy_Groups_DB[]);
+          });
+        },
+      );
+      const user = await getUserByFuzzy(name, fantasy_groups);
       if (!user) {
         await interaction.editReply({
           content: `Could not find user "${name}". Please check your spelling.`,
@@ -54,46 +60,51 @@ export default {
         return;
       }
 
-      const groupNumber = user.group;
-      const groupPlayers = players
-        .filter((p) => p.group === groupNumber)
-        .sort((a, b) => a.groupRank - b.groupRank);
+      const filtered_fantasy = fantasy_groups.filter(
+        (entry) => entry.username === user.username,
+      );
 
-      const leaderboard = generateLeaderboard(groupPlayers, user.username);
+      const filtered_group: Global_DB[] = await new Promise(
+        (resolve, reject) => {
+          db.all(
+            `SELECT * FROM global_users WHERE group_number = ?`,
+            [user.group_number],
+            (err, rows) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(rows as Global_DB[]);
+            },
+          );
+        },
+      );
+      const userData = filtered_group.find(
+        (entry) => entry.username === user.username,
+      );
+      if (!userData) {
+        await interaction.editReply({
+          content: `Could not find user data for "${name}".`,
+        });
+        return;
+      }
 
-      const playerData = await fetchPlayersData(user.username);
-      const swapData = await fetchSwapsData(user.username);
-
-      let swapsDict: { [key: string]: string } = {};
-      swapData.forEach((swap) => {
-        if (swap.oldSkater !== 'None' && swap.newSkater !== 'None') {
-          swapsDict[swap.oldSkater] = `**${swap.oldSkater}** ${swap.osa} -> **${
-            swap.newSkater
-          }** ${(swap.nsc - swap.nsa).toFixed(2)} (${swap.difference})`;
-        }
-
-        if (swap.oldGoalie !== 'None' && swap.newGoalie !== 'None') {
-          swapsDict[swap.oldGoalie] = `**${swap.oldGoalie}** ${swap.osa} -> **${
-            swap.newGoalie
-          }** ${(swap.nsc - swap.nsa).toFixed(2)} (${swap.difference})`;
-        }
-      });
-
+      const leaderboard = generateLeaderboard(filtered_group, user.username);
       let playersSection = '';
-      playerData.forEach((player) => {
-        if (swapsDict[player.player]) {
-          playersSection += `${swapsDict[player.player]}\n`;
+      filtered_fantasy.forEach((player) => {
+        if (player.new_player) {
+          playersSection += `${player.player} ${player.OSA} -> ${player.new_player} ${player.NSA} (${player.Difference})\n`;
         } else {
-          playersSection += `${player.player}: ${player.score}\n`;
+          playersSection += `${player.player}: ${player.fantasyPoints}\n`;
         }
       });
 
       const embed = BaseEmbed(interaction, {})
-        .setTitle(`Fantasy Group ${groupNumber}`)
+        .setTitle(`Fantasy Group ${userData.group_number}`)
         .setDescription(leaderboard)
         .addFields({
           name: '🌍 Global Rank',
-          value: `${user.username} - **${user.score}** (Rank: ${user.globalRank})`,
+          value: `${user.username} - **${userData.score}** (Rank: ${userData.rank})`,
         })
         .addFields({
           name: 'Players',

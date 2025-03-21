@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { updateFantasy } from 'src/db/fantasy/updateFantasy';
 import {
   IihfIndexApiClient,
   ShlIndexApiClient,
@@ -37,12 +38,15 @@ export default {
     }
 
     await interaction.deferReply({ ephemeral: true });
+    let fantasyUpdateMessage = '';
 
     try {
       switch (reloadOption) {
-        case 'shl':
+        case 'shl': {
           await ShlIndexApiClient.reload();
+          fantasyUpdateMessage = await updateFantasy();
           break;
+        }
         case 'smjhl':
           await SmjhlIndexApiClient.reload();
           break;
@@ -61,8 +65,9 @@ export default {
           });
           return;
       }
+
       await interaction.editReply({
-        content: `Cache has been successfully updated for ${reloadOption}`,
+        content: `Cache has been successfully updated for ${reloadOption}\n${fantasyUpdateMessage}`,
       });
     } catch (error) {
       await interaction.editReply({

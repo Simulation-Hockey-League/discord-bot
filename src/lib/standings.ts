@@ -208,6 +208,8 @@ const formatPlayoffSeries = (team1: any, team2: any): string => {
 
   if (leadingTeam.wins >= 4) {
     return `${leadingTeam.abbr}(${leadingTeam.wins}) ${trailingTeam.abbr}(${trailingTeam.wins})\n`;
+  } else if (leadingTeam.wins === trailingTeam.wins) {
+    return `${leadingTeam.abbr} and ${trailingTeam.abbr} are tied (${leadingTeam.wins}-${trailingTeam.wins})\n`;
   } else {
     return `${leadingTeam.abbr} leads ${trailingTeam.abbr} (${leadingTeam.wins}-${trailingTeam.wins})\n`;
   }
