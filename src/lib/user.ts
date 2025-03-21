@@ -11,7 +11,6 @@ export async function withUserInfo(
   interaction: ChatInputCommandInteraction<CacheType>,
   user: BasicUserInfo,
 ) {
-  await interaction.deferReply();
   if (!user) {
     await interaction.editReply({
       content: 'Could not find user with that username.',

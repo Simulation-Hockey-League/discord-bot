@@ -108,6 +108,7 @@ export default {
         });
       });
     } catch (error) {
+      logger.error(error);
       await interaction.editReply({
         content: 'An error occurred while retrieving player info.',
       });

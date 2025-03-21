@@ -1,17 +1,15 @@
 import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
+import { Database } from 'node_modules/sqlite3/lib/sqlite3';
+import { connectToDatabase } from 'src/db/fantasy';
+import { FantasyInfo, Global_DB } from 'typings/fantasy';
+
 import { BaseEmbed } from './embed';
-import {
-  fetchGlobalSheetData,
-  fetchPlayersOnlyData,
-  groupRecords,
-  playersOnlyRecords,
-} from './helpers/fantasyHelpers';
 
 const PAGE_SIZE = 25;
 
-const paginateData = (data: playersOnlyRecords[], page: number) => {
-  const sortedData = data.sort((a, b) => b.score - a.score);
+const paginateData = (data: FantasyInfo[], page: number) => {
+  const sortedData = data.sort((a, b) => b.fantasyPoints - a.fantasyPoints);
   const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
   const startIndex = (page - 1) * PAGE_SIZE;
   const endIndex = Math.min(startIndex + PAGE_SIZE, sortedData.length);
@@ -24,8 +22,8 @@ const paginateData = (data: playersOnlyRecords[], page: number) => {
   };
 };
 
-const paginateGroupData = (data: groupRecords[], page: number) => {
-  const sortedData = data.sort((a, b) => a.globalRank - b.globalRank);
+const paginateGroupData = (data: Global_DB[], page: number) => {
+  const sortedData = data.sort((a, b) => a.rank - b.rank);
   const totalPages = Math.ceil(sortedData.length / PAGE_SIZE);
   const startIndex = (page - 1) * PAGE_SIZE;
   const endIndex = Math.min(startIndex + PAGE_SIZE, sortedData.length);
@@ -43,7 +41,22 @@ export const createGlobalPlayerRank = async (
   position?: string | null,
   page: number = 1,
 ) => {
-  const fantasyData = await fetchPlayersOnlyData(position ?? null);
+  const db: Database = await connectToDatabase();
+
+  const fantasyData: FantasyInfo[] = await new Promise((resolve, reject) => {
+    let query = `SELECT * FROM fantasy`;
+    if (position) {
+      query += ` WHERE position = ?`;
+    }
+    db.all(query, position || [], (err, rows) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(rows as FantasyInfo[]);
+    });
+  });
+
   const { totalPages, startIndex, currentPageData } = paginateData(
     fantasyData,
     page,
@@ -61,9 +74,9 @@ export const createGlobalPlayerRank = async (
           ? currentPageData
               .map(
                 (player, index) =>
-                  `${startIndex + index + 1}. ${player.playerName} - ${
-                    player.score
-                  }`,
+                  `${startIndex + index + 1}. (${player.position}) ${
+                    player.name
+                  } - ${player.fantasyPoints}`,
               )
               .join('\n')
           : 'No players found',
@@ -77,7 +90,20 @@ export const createGlobalRank = async (
   interaction: ChatInputCommandInteraction<CacheType>,
   page: number = 1,
 ) => {
-  const fantasyData = await fetchGlobalSheetData();
+  const db: Database = await connectToDatabase();
+
+  const fantasyData: Global_DB[] = await new Promise((resolve, reject) => {
+    db.all(
+      `SELECT username, group_number, score, rank FROM global_users`,
+      (err, rows) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(rows as Global_DB[]);
+      },
+    );
+  });
   const { totalPages, currentPageData } = paginateGroupData(fantasyData, page);
 
   const embed = BaseEmbed(interaction, {})
@@ -88,10 +114,7 @@ export const createGlobalRank = async (
       value:
         currentPageData.length > 0
           ? currentPageData
-              .map(
-                (user) =>
-                  `${user.globalRank}. ${user.username} - ${user.score}`,
-              )
+              .map((user) => `${user.rank}. ${user.username} - ${user.score}`)
               .join('\n')
           : 'No rankings found',
       inline: false,
