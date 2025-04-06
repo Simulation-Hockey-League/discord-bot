@@ -1,14 +1,15 @@
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
   ButtonInteraction,
-  ButtonStyle,
   CommandInteraction,
   EmbedBuilder,
 } from 'discord.js';
 import { commandCountDB, userCountDB } from 'src/db/users';
 
-import { logger } from './logger';
+import {
+  GetPageFn,
+  backForwardButtons,
+  createPaginator,
+} from './helpers/buttons/button';
 
 const LEADERBOARD_PAGE_SIZE = 20;
 
@@ -41,55 +42,61 @@ export async function sendLeaderboard(
     discordId?: string;
     count: number;
   }[],
-  type: string,
-  page: number,
+  type: 'global' | 'player',
+  initialPage = 1,
 ) {
-  const totalPages = Math.ceil(leaderboardData.length / LEADERBOARD_PAGE_SIZE);
-  const start = page * LEADERBOARD_PAGE_SIZE;
-  const end = start + LEADERBOARD_PAGE_SIZE;
-  const pageData = leaderboardData.slice(start, end);
+  const getLeaderboardPage: GetPageFn = async (page) => {
+    const totalPages = Math.ceil(
+      leaderboardData.length / LEADERBOARD_PAGE_SIZE,
+    );
+    const start = page * LEADERBOARD_PAGE_SIZE;
+    const end = start + LEADERBOARD_PAGE_SIZE;
+    const pageData = leaderboardData.slice(start, end);
 
-  const embed = new EmbedBuilder()
-    .setTitle(
-      type === 'global'
-        ? 'Global Command Leaderboard'
-        : 'Player Command Leaderboard',
-    )
-    .setDescription(
-      pageData
-        .map((entry, index) =>
-          type === 'global'
-            ? `**${start + index + 1}.** \`${entry.commandName}\` - ${
-                entry.count
-              } uses`
-            : `**${start + index + 1}.** ${entry.discordId} - ${
-                entry.count
-              } uses`,
-        )
-        .join('\n'),
-    )
-    .setFooter({ text: `Page ${page + 1} of ${totalPages}` });
+    const embed = new EmbedBuilder()
+      .setTitle(
+        type === 'global'
+          ? 'Global Command Leaderboard'
+          : 'Player Command Leaderboard',
+      )
+      .setDescription(
+        pageData
+          .map((entry, index) =>
+            type === 'global'
+              ? `**${start + index + 1}.** \`${entry.commandName}\` - ${
+                  entry.count
+                } uses`
+              : `**${start + index + 1}.** <@${entry.discordId}> - ${
+                  entry.count
+                } uses`,
+          )
+          .join('\n') || 'No data available.',
+      )
+      .setFooter({ text: `Page ${page + 1} of ${totalPages}` });
 
-  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`leaderboard_prev_${type}_${page}`)
-      .setLabel('Previous')
-      .setStyle(ButtonStyle.Primary)
-      .setDisabled(page === 0),
-    new ButtonBuilder()
-      .setCustomId(`leaderboard_next_${type}_${page}`)
-      .setLabel('Next')
-      .setStyle(ButtonStyle.Primary)
-      .setDisabled(page + 1 >= totalPages),
-  );
+    const buttons = backForwardButtons(page, totalPages);
+    return { embed, buttons, totalPages };
+  };
+
+  const page = initialPage;
+  const { embed, buttons } = await getLeaderboardPage(page);
 
   if (interaction.replied || interaction.deferred) {
-    await interaction
-      .editReply({ embeds: [embed], components: [row] })
-      .catch((error) => {
-        logger.error(error);
-      });
+    const message = await interaction.editReply({
+      embeds: [embed],
+      components: [buttons],
+    });
+
+    await createPaginator(message, interaction.user.id, getLeaderboardPage);
   } else {
-    await interaction.reply({ embeds: [embed], components: [row] });
+    const message = await interaction.reply({
+      embeds: [embed],
+      components: [buttons],
+      fetchReply: true,
+    });
+
+    if ('id' in message) {
+      await createPaginator(message, interaction.user.id, getLeaderboardPage);
+    }
   }
 }
