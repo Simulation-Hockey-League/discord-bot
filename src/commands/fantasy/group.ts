@@ -26,7 +26,7 @@ export default {
     try {
       const db = await connectToDatabase();
       const players: Global_DB[] = await new Promise((resolve, reject) => {
-        db.all(`SELECT * FROM fantasy_groups`, (err, rows) => {
+        db.all(`SELECT * FROM global_users`, (err, rows) => {
           if (err) {
             reject(err);
             return;
