@@ -162,3 +162,28 @@ export type ManagerInfo = {
   cogmID: number;
   cogmUsername: string;
 };
+
+export type PortalTPEEarned = {
+  playerUpdateID: number;
+  season: number;
+  name: string;
+  position: string;
+  currentLeague: string;
+  currentTeamID: number;
+  shlRightsTeamID: number;
+  draftSeason: number;
+  userID: number;
+  username: string;
+  earnedTPE: number;
+  rank: number;
+  regression: number;
+  activitycheck: number;
+  training: number;
+  trainingcamp: number;
+  coaching: number;
+  pt: number;
+  fantasy: number;
+  recruitment: number;
+  correction: number;
+  other: number;
+};

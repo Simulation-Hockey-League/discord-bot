@@ -190,3 +190,51 @@ export async function withUserAwards(
     });
   }
 }
+
+export async function withTPEEarned(
+  interaction: ChatInputCommandInteraction<CacheType>,
+  user: BasicUserInfo,
+) {
+  try {
+    const players = await PortalClient.getActivePlayers();
+    const player = players.find((p) => p.uid === user.userID);
+
+    if (!player) {
+      await interaction.editReply({
+        content: 'Could not find active player with that username.',
+      });
+      return;
+    }
+
+    const tpeEarned = await PortalClient.getTPEEarned(
+      false,
+      String(player.pid),
+    );
+    if (!tpeEarned.length) {
+      await interaction.editReply({
+        content: `No TPE earned data found for ${user.username}.`,
+      });
+      return;
+    }
+
+    const embed = BaseEmbed(interaction, {})
+      .setTitle(`${user.username}'s TPE Earned`)
+      .setDescription(
+        tpeEarned
+          .sort((a, b) => b.season - a.season)
+          .map(
+            (entry) =>
+              `S${entry.season} - ${entry.currentLeague} - ${entry.earnedTPE} (${entry.rank} Global)`,
+          )
+          .join('\n'),
+      );
+
+    await interaction.editReply({ embeds: [embed] });
+  } catch (error) {
+    await interaction.editReply({
+      content: `An error occurred while fetching TPE earned: ${
+        error instanceof Error ? error.message : 'unknown error'
+      }.`,
+    });
+  }
+}
