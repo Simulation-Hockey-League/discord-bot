@@ -2,6 +2,7 @@ import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 import { getTeamStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 
+import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { SeasonType } from 'src/db/index/shared';
 
 import { PortalClient } from 'src/db/portal/PortalClient';
@@ -9,6 +10,7 @@ import { ManagerInfo } from 'typings/portal';
 import { IndexTeamInfo } from 'typings/statsindex';
 
 import { BaseEmbed } from './embed';
+import { applySafeEmbedDescription } from './helpers/embedHelper';
 import {
   formatFutureGame,
   formatPastGame,
@@ -351,115 +353,189 @@ export async function createStatsEmbed(
     pdoRank,
     corsiRank,
   } = teamStats;
-  const PP = 100 * (detailedStats.ppGoalsFor / detailedStats.ppOpportunities);
+
+  const safeDiv = (a: number, b: number) => (b === 0 ? 0 : a / b);
+  const PP =
+    100 * safeDiv(detailedStats.ppGoalsFor, detailedStats.ppOpportunities);
   const PK =
-    (100 * (detailedStats.shOpportunities - detailedStats.ppGoalsAgainst)) /
-    (detailedStats.shOpportunities <= 0 ? 1 : detailedStats.shOpportunities);
+    100 *
+    safeDiv(
+      detailedStats.shOpportunities - detailedStats.ppGoalsAgainst,
+      detailedStats.shOpportunities,
+    );
 
   const last10Games = await getLast10Games(teamInfo, season, seasonType);
 
   let embed = BaseEmbed(interaction, {
     logoUrl: teamInfo.logoUrl,
     teamColor: teamStats.teamInfo.colors.primary,
-  })
-    .setTitle(`${teamInfo.fullName} S${season}`)
-    .addFields(
-      {
-        name: 'Regular Season',
-        value: `${teamStats.wins}-${teamStats.losses}-${teamStats.OTL}`,
-        inline: true,
-      },
-      {
-        name: 'Home',
-        value: `${teamStats.home.wins}-${teamStats.home.losses}-${teamStats.home.OTL}`,
-        inline: true,
-      },
-      {
-        name: 'Away',
-        value: `${teamStats.away.wins}-${teamStats.away.losses}-${teamStats.away.OTL}`,
-        inline: true,
-      },
-      {
-        name: 'Division',
-        value: `#${divisionPosition}`,
-        inline: true,
-      },
-      {
-        name: 'Conference',
-        value: `#${conferencePosition}`,
-        inline: true,
-      },
-      {
-        name: 'League',
-        value: `#${leaguePosition}`,
-        inline: true,
-      },
-      {
-        name: 'GF',
-        value: `${goalsPerGame.toFixed(2)} (#${teamStats.goalsForRank})`,
-        inline: true,
-      },
-      {
-        name: 'GA',
-        value: `${goalsAgainstPerGame.toFixed(2)} (#${
-          teamStats.goalsAgainstRank
-        })`,
-        inline: true,
-      },
-    );
-  // Additional stats for FHM8 & 10 Era
-  if (season && season > 65) {
-    embed = embed.addFields(
-      {
-        name: 'SF',
-        value: `${teamStats.shotsPerGame} (#${teamStats.shotsForRank})`,
-        inline: true,
-      },
-      {
-        name: 'SA',
-        value: `${teamStats.shotsAgainstPerGame} (#${teamStats.shotsAgainstRank})`,
-        inline: true,
-      },
-      {
-        name: 'Diff',
-        value: `${teamStats.shotDiff} (#${teamStats.shotDiffRank})`,
-        inline: true,
-      },
-      {
-        name: 'PIM',
-        value: `${detailedStats.penaltyMinutesPerGame} (#${pimsRank})`,
-        inline: true,
-      },
-      {
-        name: 'PP',
-        value: `${PP.toFixed(2)} (#${ppRank})`,
-        inline: true,
-      },
-      {
-        name: 'PK',
-        value: `${PK.toFixed(2)} (#${pkRank})`,
-        inline: true,
-      },
-      {
-        name: 'PDO',
-        value: `${pdo} (#${pdoRank})`,
-        inline: true,
-      },
-      {
-        name: 'Corsi',
-        value: `${corsi} (#${corsiRank})`,
-        inline: true,
-      },
-    );
-  }
+  }).setTitle(`${teamInfo.fullName} S${season}`);
+
+  const coreFields = [
+    {
+      name: 'Regular Season',
+      value: `${teamStats.wins}-${teamStats.losses}-${teamStats.OTL}`,
+      inline: true,
+    },
+    {
+      name: 'Home',
+      value: `${teamStats.home?.wins ?? 0}-${teamStats.home?.losses ?? 0}-${
+        teamStats.home?.OTL ?? 0
+      }`,
+      inline: true,
+    },
+    {
+      name: 'Away',
+      value: `${teamStats.away?.wins ?? 0}-${teamStats.away?.losses ?? 0}-${
+        teamStats.away?.OTL ?? 0
+      }`,
+      inline: true,
+    },
+    {
+      name: 'Division',
+      value: `#${divisionPosition ?? 'N/A'}`,
+      inline: true,
+    },
+    {
+      name: 'Conference',
+      value: `#${conferencePosition ?? 'N/A'}`,
+      inline: true,
+    },
+    {
+      name: 'League',
+      value: `#${leaguePosition ?? 'N/A'}`,
+      inline: true,
+    },
+    {
+      name: 'GF',
+      value: `${goalsPerGame?.toFixed(2) ?? '0.00'} (#${
+        teamStats.goalsForRank ?? 'N/A'
+      })`,
+      inline: true,
+    },
+    {
+      name: 'GA',
+      value: `${goalsAgainstPerGame?.toFixed(2) ?? '0.00'} (#${
+        teamStats.goalsAgainstRank ?? 'N/A'
+      })`,
+      inline: true,
+    },
+  ];
+
+  const advancedFields =
+    season && season > 65
+      ? [
+          {
+            name: 'SF',
+            value: `${teamStats.shotsPerGame ?? 0} (#${
+              teamStats.shotsForRank ?? 'N/A'
+            })`,
+            inline: true,
+          },
+          {
+            name: 'SA',
+            value: `${teamStats.shotsAgainstPerGame ?? 0} (#${
+              teamStats.shotsAgainstRank ?? 'N/A'
+            })`,
+            inline: true,
+          },
+          {
+            name: 'Diff',
+            value: `${teamStats.shotDiff ?? 0} (#${
+              teamStats.shotDiffRank ?? 'N/A'
+            })`,
+            inline: true,
+          },
+          {
+            name: 'PIM',
+            value: `${detailedStats.penaltyMinutesPerGame ?? 0} (#${
+              pimsRank ?? 'N/A'
+            })`,
+            inline: true,
+          },
+          {
+            name: 'PP',
+            value: `${PP.toFixed(2)} (#${ppRank ?? 'N/A'})`,
+            inline: true,
+          },
+          {
+            name: 'PK',
+            value: `${PK.toFixed(2)} (#${pkRank ?? 'N/A'})`,
+            inline: true,
+          },
+          {
+            name: 'PDO',
+            value: `${pdo ?? 0} (#${pdoRank ?? 'N/A'})`,
+            inline: true,
+          },
+          {
+            name: 'Corsi',
+            value: `${corsi ?? 0} (#${corsiRank ?? 'N/A'})`,
+            inline: true,
+          },
+        ]
+      : [];
+
+  embed = embed.addFields(
+    ...[...coreFields, ...advancedFields].filter(
+      (f) => f.name.trim().length > 0 && f.value.trim().length > 0,
+    ),
+  );
+
   if (season && season >= 53) {
-    return embed.addFields({
-      name: 'Last 10 Games',
-      value: last10Games
-        .map((game: { result: string }) => game.result)
-        .join(''),
-      inline: false,
-    });
+    const last10String = last10Games
+      .map((game: { result: string }) => game.result)
+      .join('')
+      .trim();
+    if (last10String.length > 0) {
+      embed = embed.addFields({
+        name: 'Last 10 Games',
+        value: last10String,
+        inline: false,
+      });
+    }
   }
+
+  return embed;
+}
+
+export async function createTPEEarnedEmbed(
+  interaction: ChatInputCommandInteraction<CacheType>,
+  teamInfo: TeamInfo,
+  season: number,
+) {
+  if (season && season < 73) {
+    await interaction.editReply({
+      content: 'Cannot fetch TPE earned for seasons before Season 73.',
+    });
+    return;
+  }
+  const leagueString = leagueTypeToString(teamInfo.leagueType);
+  const tpeEarned = await PortalClient.getTPEEarnedByTeam(
+    false,
+    teamInfo.teamID.toString(),
+    leagueString,
+    season.toString(),
+  );
+  if (!tpeEarned.length) {
+    await interaction.editReply({
+      content: `No TPE earned data found for ${teamInfo.fullName}.`,
+    });
+    return;
+  }
+
+  const lines = tpeEarned
+    .sort((a, b) => b.earnedTPE - a.earnedTPE)
+    .map(
+      (tpe) =>
+        `(S${tpe.draftSeason}) ${tpe.name} - ${tpe.earnedTPE} TPE (#${tpe.rank} Global)`,
+    );
+
+  const embed = BaseEmbed(interaction, {
+    logoUrl: teamInfo.logoUrl,
+  }).setTitle(`${teamInfo.fullName} TPE Earned S${season}`);
+
+  applySafeEmbedDescription(embed, lines, { shortenNames: true });
+
   return embed;
 }

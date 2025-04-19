@@ -10,6 +10,7 @@ import {
   createRosterEmbed,
   createScheduleEmbed,
   createStatsEmbed,
+  createTPEEarnedEmbed,
 } from 'src/lib/team';
 import { TeamInfo } from 'src/lib/teams';
 import { ManagerInfo } from 'typings/portal';
@@ -56,6 +57,15 @@ export function createActionRow(
       .setStyle(ButtonStyle.Primary)
       .setDisabled(view === 'leaders'),
   );
+  if (season && season >= 73) {
+    actionRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`tpeearned_${abbr}_${season ?? 'current'}`)
+        .setLabel('TPE Earned')
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(view === 'tpeearned'),
+    );
+  }
 
   return actionRow;
 }
@@ -103,6 +113,11 @@ export async function createTeamEmbed(
         season,
         seasonType,
       );
+    case 'tpeearned':
+      if (season && season >= 73) {
+        return await createTPEEarnedEmbed(interaction, teamInfo, season);
+      }
+      return;
     default:
       return await createStatsEmbed(interaction, teamInfo, season, seasonType);
   }
