@@ -199,6 +199,20 @@ class PortalApiClient {
     );
   }
 
+  async getTPEEarnedBySeason(
+    reload: boolean = false,
+    season?: string,
+  ): Promise<Array<PortalTPEEarned>> {
+    return await this.#getData(
+      this.#getTPEEarned,
+      reload,
+      ['analytics/earned-tpe'],
+      {
+        ...(season && { season }),
+      },
+    );
+  }
+
   async getTPEEarnedByTeam(
     reload: boolean = false,
     currentTeamID?: string,
@@ -230,6 +244,7 @@ class PortalApiClient {
       await this.getManagerInfo(true),
       await this.getTPEEarned(true),
       await this.getTPEEarnedByTeam(true),
+      await this.getTPEEarnedBySeason(true),
     ]);
 
     this.#lastLoadTimestamp = Date.now();

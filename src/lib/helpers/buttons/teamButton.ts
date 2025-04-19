@@ -57,7 +57,12 @@ export function createActionRow(
       .setStyle(ButtonStyle.Primary)
       .setDisabled(view === 'leaders'),
   );
-  if (season && season >= 73) {
+  if (
+    season &&
+    season >= 73 &&
+    league !== LeagueType.IIHF &&
+    league !== LeagueType.WJC
+  ) {
     actionRow.addComponents(
       new ButtonBuilder()
         .setCustomId(`tpeearned_${abbr}_${season ?? 'current'}`)
