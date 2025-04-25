@@ -340,17 +340,39 @@ export const getPlayerStats = async (
   season?: number,
   league?: LeagueType,
 ) => {
+  const normalizedName = name.toLowerCase().replace(/[.,]/g, '').trim();
   const candidates = league
     ? await Promise.all([
-        getPlayerStatsByFuzzyName(league, name, season, seasonType),
-        getGoalieStatsByFuzzyName(league, name, season, seasonType),
+        getPlayerStatsByFuzzyName(league, normalizedName, season, seasonType),
+        getGoalieStatsByFuzzyName(league, normalizedName, season, seasonType),
       ])
     : await Promise.all([
-        getPlayerStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
-        getPlayerStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
-        getGoalieStatsByFuzzyName(LeagueType.SHL, name, season, seasonType),
-        getGoalieStatsByFuzzyName(LeagueType.SMJHL, name, season, seasonType),
+        getPlayerStatsByFuzzyName(
+          LeagueType.SHL,
+          normalizedName,
+          season,
+          seasonType,
+        ),
+        getPlayerStatsByFuzzyName(
+          LeagueType.SMJHL,
+          normalizedName,
+          season,
+          seasonType,
+        ),
+        getGoalieStatsByFuzzyName(
+          LeagueType.SHL,
+          normalizedName,
+          season,
+          seasonType,
+        ),
+        getGoalieStatsByFuzzyName(
+          LeagueType.SMJHL,
+          normalizedName,
+          season,
+          seasonType,
+        ),
       ]);
+
   return _.maxBy(candidates, (candidate) => candidate?.score ?? -1)?.obj;
 };
 
