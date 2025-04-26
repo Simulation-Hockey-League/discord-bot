@@ -49,7 +49,7 @@ export async function sendLeaderboard(
     const totalPages = Math.ceil(
       leaderboardData.length / LEADERBOARD_PAGE_SIZE,
     );
-    const start = page * LEADERBOARD_PAGE_SIZE;
+    const start = (page - 1) * LEADERBOARD_PAGE_SIZE;
     const end = start + LEADERBOARD_PAGE_SIZE;
     const pageData = leaderboardData.slice(start, end);
 
@@ -72,7 +72,7 @@ export async function sendLeaderboard(
           )
           .join('\n') || 'No data available.',
       )
-      .setFooter({ text: `Page ${page + 1} of ${totalPages}` });
+      .setFooter({ text: `Page ${page} of ${totalPages}` });
 
     const buttons = backForwardButtons(page, totalPages);
     return { embed, buttons, totalPages };

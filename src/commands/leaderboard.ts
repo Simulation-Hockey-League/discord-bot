@@ -40,7 +40,7 @@ export default {
       return;
     }
 
-    await sendLeaderboard(interaction, leaderboardData, type, 0);
+    await sendLeaderboard(interaction, leaderboardData, type, 1);
     return;
   },
 } satisfies SlashCommand;

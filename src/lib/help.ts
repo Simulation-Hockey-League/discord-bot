@@ -79,7 +79,7 @@ export const createAboutEmbed = async () => {
         'Added TPE Rank to /user. See how much TPE you earned each season  \n' +
         'Added TPE Earned to /team. See how your team is fairing earning TPE \n' +
         'Added Goalie and Skater Ratings to /player \n' +
-        'Added /tpeearned command. See where you land globably ',
+        'Added /tpeearned command. See where you land globaly ',
       inline: false,
     });
   return embed;
