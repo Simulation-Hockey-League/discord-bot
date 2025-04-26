@@ -21,6 +21,14 @@ export default {
         )
         .setRequired(false),
     )
+    .addNumberOption((option) =>
+      option
+        .setName('draftseason')
+        .setDescription(
+          'The draft season you want to search for TPE Earned. If not provided, will return all seasons',
+        )
+        .setRequired(false),
+    )
     .setDescription('Retrieve TPE rankings from the portal.'),
 
   execute: async (interaction) => {
@@ -28,11 +36,22 @@ export default {
     const currentSeason = DynamicConfig.get('currentSeason');
     const targetSeason =
       interaction.options.getNumber('season') ?? currentSeason;
+    const draftSeason =
+      interaction.options.getNumber('draftseason') ?? undefined;
 
     try {
-      const earnedTPE = (
+      let earnedTPE = (
         await PortalClient.getTPEEarnedBySeason(false, targetSeason)
       ).sort((a, b) => b.earnedTPE - a.earnedTPE);
+
+      if (draftSeason) {
+        earnedTPE = earnedTPE.filter(
+          (player) => player.draftSeason === draftSeason,
+        );
+        earnedTPE.forEach((player, index) => {
+          player.rank = index + 1;
+        });
+      }
 
       const getLeaderStatsPage: GetPageFn = async (page) => {
         const { embed, totalPages } = await getRankingEmbed(earnedTPE, page);

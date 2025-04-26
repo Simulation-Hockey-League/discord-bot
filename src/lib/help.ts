@@ -62,8 +62,8 @@ export const createMainHelpEmbed = async (interaction: ButtonInteraction) => {
 
 export const createAboutEmbed = async () => {
   const embed = new EmbedBuilder()
-    .setTitle('SHL Bot V1.0.1')
-    .setDescription('Latest Version of the SHL Bot: 3/5/25')
+    .setTitle('SHL Bot V1.1.1')
+    .setDescription('Latest Version of the SHL Bot: 4/26/25')
     .addFields({
       name: 'Feedback',
       value:
@@ -71,16 +71,15 @@ export const createAboutEmbed = async () => {
       inline: false,
     })
     .addFields({
-      name: 'SHL V1.0.1 Udpates',
+      name: 'SHL V1.1.1 Udpates',
       value:
         'Latest Updates\n' +
-        'Added new Hamilton and Manhattan Logos \n' +
-        ' Added  /leaderboard command \n' +
-        ' Added about section in /help \n' +
-        ' Added Gms to current roster on /teams \n' +
-        ' Added difference for swaps on /fantasy \n' +
-        'for /leaders-goalies/skaters added selector so you can swap between categories after running a command' +
-        'Added /team-rank command for any season S66 and above for SHL and SMJHL',
+        'Fixed pagination for /leaderboard \n' +
+        'Fixed Issue where players with a period wont return their player \n' +
+        'Added TPE Rank to /user. See how much TPE you earned each season  \n' +
+        'Added TPE Earned to /team. See how your team is fairing earning TPE \n' +
+        'Added Goalie and Skater Ratings to /player \n' +
+        'Added /tpeearned command. See where you land globably ',
       inline: false,
     });
   return embed;
