@@ -24,7 +24,9 @@ export default {
   execute: async (interaction: ChatInputCommandInteraction) => {
     await interaction.deferReply();
 
-    const type = interaction.options.getString('type', true);
+    const type = interaction.options.getString('type', true) as
+      | 'global'
+      | 'player';
     let leaderboardData;
 
     if (type === 'global') {

@@ -72,6 +72,7 @@ export default {
           { name: 'Current Roster', value: 'roster' },
           { name: 'Schedule', value: 'schedule' },
           { name: 'Team Leaders', value: 'leaders' },
+          { name: 'TPE Earned', value: 'tpeearned' },
         )
         .setRequired(false),
     )

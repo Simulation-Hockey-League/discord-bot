@@ -9,7 +9,7 @@ import {
 import { getUserByFuzzy } from 'src/db/portal';
 import { users } from 'src/db/users';
 import { logger } from 'src/lib/logger';
-import { withUserAwards, withUserInfo } from 'src/lib/user';
+import { withTPEEarned, withUserAwards, withUserInfo } from 'src/lib/user';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -58,6 +58,10 @@ export default {
           .setCustomId(`awards_${user.userID}`)
           .setLabel('User Awards')
           .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+          .setCustomId(`tpe_earned_${user.userID}`)
+          .setLabel('TPE Earned')
+          .setStyle(ButtonStyle.Secondary),
       );
 
       await withUserInfo(interaction, user);
@@ -97,6 +101,8 @@ export default {
           await withUserInfo(interaction, user);
         } else if (i.customId.startsWith('awards')) {
           await withUserAwards(interaction, user);
+        } else if (i.customId.startsWith('tpe_earned')) {
+          await withTPEEarned(interaction, user);
         }
 
         await i.editReply({ components: [row] });

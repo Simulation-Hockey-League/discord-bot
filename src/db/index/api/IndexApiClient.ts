@@ -9,10 +9,12 @@ import {
   AvailableSeason,
   DetailedTeamStats,
   GameInfo,
+  GoalieRatings,
   GoalieStats,
   IndexTeamInfo,
   LeagueConference,
   LeagueDivision,
+  PlayerRatings,
   PlayerStats,
   PlayoffSeries,
   TeamStats,
@@ -39,6 +41,10 @@ export class IndexApiClient {
   #goalieStats: Map<SeasonType, Map<number, Array<GoalieStats>>> = new Map();
   #schedule: Map<SeasonType, Map<number, Array<GameInfo>>> = new Map();
   #playoffs: Map<number, Array<Array<PlayoffSeries>>> = new Map();
+  #goalieRatings: Map<SeasonType, Map<number, Array<GoalieRatings>>> =
+    new Map();
+  #skaterRatings: Map<SeasonType, Map<number, Array<PlayerRatings>>> =
+    new Map();
 
   #loaded: boolean = false;
   #lastLoadTimestamp = 0;
@@ -314,6 +320,81 @@ export class IndexApiClient {
     return isGoalie
       ? (this.getGoalieStats(seasonType, season) as any)
       : (this.getPlayerStats(seasonType, season) as any);
+  }
+
+  async getPlayerRatings(
+    playerID: number,
+    seasonType: SeasonType,
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<PlayerRatings>> {
+    if (!this.#skaterRatings.has(seasonType)) {
+      this.#skaterRatings.set(seasonType, new Map());
+    }
+
+    const result = (
+      await this.#getData(
+        this.#skaterRatings.get(seasonType)!,
+        reload,
+        'v1',
+        ['players/ratings/' + playerID],
+        season,
+        { type: seasonTypeToApiName(seasonType) },
+      )
+    ).map((player) => ({
+      ...player,
+      seasonType,
+    }));
+
+    if (season) {
+      this.#skaterRatings.get(seasonType)!.set(season, result);
+    }
+    return result;
+  }
+
+  async getGoalieRatings(
+    playerID: number,
+    seasonType: SeasonType,
+    season?: number,
+    reload: boolean = false,
+  ): Promise<Array<GoalieRatings>> {
+    if (!this.#goalieRatings.has(seasonType)) {
+      this.#goalieRatings.set(seasonType, new Map());
+    }
+
+    const result = (
+      await this.#getData(
+        this.#goalieRatings.get(seasonType)!,
+        reload,
+        'v1',
+        ['goalies/ratings/' + playerID],
+        season,
+        { type: seasonTypeToApiName(seasonType) },
+      )
+    ).map((player) => ({
+      ...player,
+      seasonType,
+    }));
+
+    if (season) {
+      this.#goalieRatings.get(seasonType)!.set(season, result);
+    }
+    return result;
+  }
+
+  async getRatings<T extends boolean>(
+    playerID: number,
+    seasonType: SeasonType,
+    season?: number,
+    isGoalie: T = false as T,
+  ): Promise<T extends true ? GoalieRatings : PlayerRatings> {
+    if (isGoalie) {
+      const result = await this.getGoalieRatings(playerID, seasonType, season);
+      return result[0] as any;
+    } else {
+      const result = await this.getPlayerRatings(playerID, seasonType, season);
+      return result[0] as any;
+    }
   }
 
   async #getSchedule(

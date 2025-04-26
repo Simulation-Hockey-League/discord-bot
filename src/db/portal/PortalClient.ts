@@ -6,6 +6,7 @@ import {
   ManagerInfo,
   PlayerAchievement,
   PortalPlayer,
+  PortalTPEEarned,
   TeamAchievement,
   UserAchievement,
 } from 'typings/portal';
@@ -19,6 +20,7 @@ class PortalApiClient {
   #getTeamAwards: Array<TeamAchievement> = [];
   #getUserAwards: Array<UserAchievement> = [];
   #getManagerInfo: Array<ManagerInfo> = [];
+  #getTPEEarned: Array<PortalTPEEarned> = [];
 
   #loaded = false;
   #lastLoadTimestamp = 0;
@@ -173,6 +175,62 @@ class PortalApiClient {
     );
   }
 
+  async getTPEEarned(
+    reload: boolean = false,
+    playerUpdateID?: string,
+    currentTeamID?: string,
+    currentLeague?: string,
+    draftSeason?: string,
+    season?: string,
+    userID?: string,
+  ): Promise<Array<PortalTPEEarned>> {
+    return await this.#getData(
+      this.#getTPEEarned,
+      reload,
+      ['analytics/earned-tpe'],
+      {
+        ...(playerUpdateID && { playerUpdateID }),
+        ...(currentTeamID && { currentTeamID }),
+        ...(currentLeague && { currentLeague }),
+        ...(draftSeason && { draftSeason }),
+        ...(season && { season }),
+        ...(userID && { userID }),
+      },
+    );
+  }
+
+  async getTPEEarnedBySeason(
+    reload: boolean = false,
+    season?: string,
+  ): Promise<Array<PortalTPEEarned>> {
+    return await this.#getData(
+      this.#getTPEEarned,
+      reload,
+      ['analytics/earned-tpe'],
+      {
+        ...(season && { season }),
+      },
+    );
+  }
+
+  async getTPEEarnedByTeam(
+    reload: boolean = false,
+    currentTeamID?: string,
+    currentLeague?: string,
+    season?: string,
+  ): Promise<Array<PortalTPEEarned>> {
+    return await this.#getData(
+      this.#getTPEEarned,
+      reload,
+      ['analytics/earned-tpe'],
+      {
+        ...(currentTeamID && { currentTeamID }),
+        ...(currentLeague && { currentLeague }),
+        ...(season && { season }),
+      },
+    );
+  }
+
   async reload(): Promise<void> {
     this.#loaded = false;
 
@@ -184,6 +242,9 @@ class PortalApiClient {
       await this.getTeamAwards(true),
       await this.getUserAwards(true),
       await this.getManagerInfo(true),
+      await this.getTPEEarned(true),
+      await this.getTPEEarnedByTeam(true),
+      await this.getTPEEarnedBySeason(true),
     ]);
 
     this.#lastLoadTimestamp = Date.now();

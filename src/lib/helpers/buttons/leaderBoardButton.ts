@@ -13,7 +13,8 @@ export async function handleLeaderboardButtons(interaction: ButtonInteraction) {
   const newPage = action === 'prev' ? currentPage - 1 : currentPage + 1;
 
   let leaderboardData;
-  if (type === 'global') {
+  const leaderboardType = type === 'global' ? 'global' : 'player';
+  if (leaderboardType === 'global') {
     leaderboardData = await getGlobalLeaderboard();
   } else {
     leaderboardData = await getPlayerLeaderboard();
@@ -21,6 +22,6 @@ export async function handleLeaderboardButtons(interaction: ButtonInteraction) {
 
   if (!leaderboardData.length) return;
 
-  await sendLeaderboard(interaction, leaderboardData, type, newPage);
+  await sendLeaderboard(interaction, leaderboardData, leaderboardType, newPage);
   await interaction.deferUpdate();
 }
