@@ -100,12 +100,14 @@ export default {
       const teams = await IndexApiClient.get(playerStats.league).getTeamInfo();
       const team = teams.find((team) => team.id === playerStats?.teamId);
 
+      const determinedSeason = playerStats.season;
+
       const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId(`player_${playerStats.gamesPlayed}`)
           .setLabel('Player')
           .setStyle(ButtonStyle.Primary),
-        ...(season && season >= 53
+        ...(determinedSeason >= 53
           ? [
               new ButtonBuilder()
                 .setCustomId(`ratings_${playerStats.gamesPlayed}`)
