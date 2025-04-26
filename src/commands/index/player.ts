@@ -1,13 +1,19 @@
-import { SlashCommandBuilder } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+  ComponentType,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { getPlayerStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType } from 'src/db/index/shared';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
-import { withPlayerStats } from 'src/lib/player';
+import { withPlayerRatings, withPlayerStats } from 'src/lib/player';
 import { findTeamByName } from 'src/lib/teams';
-
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -75,27 +81,112 @@ export default {
       });
       return;
     }
+    let isGoalie = false;
+    if (playerStats.position === 'G') {
+      isGoalie = true;
+    }
 
-    const teamInfo = findTeamByName(playerStats.team);
-    const teams = await IndexApiClient.get(playerStats.league).getTeamInfo();
-    const team = teams.find((team) => team.id === playerStats?.teamId);
+    const playerRatings = await IndexApiClient.get(
+      playerStats.league,
+    ).getRatings(
+      playerStats.id,
+      playerStats.seasonType,
+      playerStats.season,
+      isGoalie,
+    );
 
-    await interaction
-      .editReply({
-        embeds: [
-          (
-            await withPlayerStats(
-              BaseEmbed(interaction, {
-                logoUrl: teamInfo?.logoUrl,
-                teamColor: team?.colors.primary,
-              }).setTitle(`${playerStats.name} - ${playerStats.position}`),
-              playerStats,
-            )
-          ).data,
-        ],
-      })
-      .catch((error) => {
-        logger.error(error);
+    try {
+      const teamInfo = findTeamByName(playerStats.team);
+      const teams = await IndexApiClient.get(playerStats.league).getTeamInfo();
+      const team = teams.find((team) => team.id === playerStats?.teamId);
+
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`player_${playerStats.gamesPlayed}`)
+          .setLabel('Player')
+          .setStyle(ButtonStyle.Primary),
+        ...(season && season >= 53
+          ? [
+              new ButtonBuilder()
+                .setCustomId(`ratings_${playerStats.gamesPlayed}`)
+                .setLabel('Player Ratings')
+                .setStyle(ButtonStyle.Secondary),
+            ]
+          : []),
+      );
+
+      const embed = await withPlayerStats(
+        BaseEmbed(interaction, {
+          logoUrl: teamInfo?.logoUrl,
+          teamColor: team?.colors.primary,
+        }).setTitle(`${playerStats.name} - ${playerStats.position}`),
+        playerStats,
+      );
+
+      const response = await interaction
+        .editReply({ embeds: [embed], components: [row] })
+        .catch((error) => {
+          logger.error(error);
+          return null;
+        });
+      if (!response) {
+        return;
+      }
+
+      const collector = response.createMessageComponentCollector({
+        componentType: ComponentType.Button,
+        time: 60000,
       });
+
+      collector.on('collect', async (i: ButtonInteraction) => {
+        if (i.user.id !== interaction.user.id) {
+          await i.reply({
+            content: 'Only the command user can use these buttons.',
+            ephemeral: true,
+          });
+          return;
+        }
+
+        await i.deferUpdate().catch((error) => {
+          logger.error('Failed to defer update:', error);
+          if (error.code === 10008) {
+            collector.stop();
+            return;
+          }
+        });
+
+        let newEmbed;
+        if (i.customId.startsWith('player')) {
+          newEmbed = await withPlayerStats(
+            BaseEmbed(interaction, {
+              logoUrl: teamInfo?.logoUrl,
+              teamColor: team?.colors.primary,
+            }).setTitle(`${playerStats.name} - ${playerStats.position}`),
+            playerStats,
+          );
+        } else if (i.customId.startsWith('ratings')) {
+          newEmbed = await withPlayerRatings(
+            BaseEmbed(interaction, {
+              logoUrl: teamInfo?.logoUrl,
+              teamColor: team?.colors.primary,
+            }).setTitle(`${playerStats.name} - ${playerStats.position}`),
+            playerRatings,
+          );
+        }
+
+        if (!newEmbed) return;
+        await i.editReply({ embeds: [newEmbed], components: [row] });
+      });
+      collector.on('end', () => {
+        interaction.editReply({ components: [] }).catch((error) => {
+          logger.error(error);
+        });
+      });
+    } catch (error) {
+      logger.error(error);
+      await interaction.editReply({
+        content: 'An error occurred while retrieving player info.',
+      });
+    }
   },
 } satisfies SlashCommand;

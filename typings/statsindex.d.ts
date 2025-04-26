@@ -239,3 +239,47 @@ export type PlayoffSeries = {
   team1: PlayoffSeriesTeam;
   team2: PlayoffSeriesTeam;
 };
+
+export type PlayerRatings = {
+  screening: number;
+  gettingOpen: number;
+  passing: number;
+  puckhandling: number;
+  shootingAccuracy: number;
+  shootingRange: number;
+  offensiveRead: number;
+  checking: number;
+  hitting: number;
+  positioning: number;
+  stickchecking: number;
+  shotBlocking: number;
+  faceoffs: number;
+  defensiveRead: number;
+  acceleration: number;
+  agility: number;
+  balance: number;
+  speed: number;
+  stamina: number;
+  strength: number;
+  fighting: number;
+  aggression: number;
+  bravery: number;
+  appliedTPE?: number;
+};
+
+export type GoalieRatings = {
+  blocker: number;
+  glove: number;
+  passing: number;
+  pokeCheck: number;
+  positioning: number;
+  rebound: number;
+  recovery: number;
+  puckhandling: number;
+  lowShots: number;
+  reflexes: number;
+  skating: number;
+  mentalToughness: number;
+  goalieStamina: number;
+  appliedTPE?: number;
+};

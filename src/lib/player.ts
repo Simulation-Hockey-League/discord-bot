@@ -1,7 +1,12 @@
 import { EmbedBuilder } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType } from 'src/db/index/shared';
-import { GoalieStats, PlayerStats } from 'typings/statsindex';
+import {
+  GoalieRatings,
+  GoalieStats,
+  PlayerRatings,
+  PlayerStats,
+} from 'typings/statsindex';
 
 import { DynamicConfig } from './config/dynamicConfig';
 import { getSkaterFantasyPoints } from './helpers/fantasyHelpers';
@@ -148,5 +153,99 @@ export const withPlayerStats = async (
       ].join('\n'),
       inline: true,
     });
+  }
+};
+
+export const withPlayerRatings = async (
+  embed: EmbedBuilder,
+  playerRatings: PlayerRatings | GoalieRatings,
+): Promise<EmbedBuilder> => {
+  embed.setDescription(
+    'The player ratings are defined by the index ratings, not by the portal ratings.',
+  );
+
+  if ('mentalToughness' in playerRatings) {
+    return embed.addFields(
+      {
+        name: 'Goalie Ratings',
+        value: [
+          `Blocker: ${playerRatings.blocker}`,
+          `Glove: ${playerRatings.glove}`,
+          `Passing: ${playerRatings.passing}`,
+          `Poke Check: ${playerRatings.pokeCheck}`,
+          `Positioning: ${playerRatings.positioning}`,
+          `Rebound: ${playerRatings.rebound}`,
+          `Recovery: ${playerRatings.recovery}`,
+          `Puckhandling: ${playerRatings.puckhandling}`,
+          `Low Shots: ${playerRatings.lowShots}`,
+          `Reflexes: ${playerRatings.reflexes}`,
+          `Skating: ${playerRatings.skating}`,
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: 'Mental Ratings',
+        value: [
+          `Mental Toughness: ${playerRatings.mentalToughness}`,
+          `Goalie Stamina: ${playerRatings.goalieStamina}`,
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: '\u200B',
+        value: '\u200B',
+        inline: true,
+      },
+    );
+  } else {
+    return embed.addFields(
+      {
+        name: 'Offensive Ratings',
+        value: [
+          `Screening: ${playerRatings.screening}`,
+          `Getting Open: ${playerRatings.gettingOpen}`,
+          `Passing: ${playerRatings.passing}`,
+          `Puckhandling: ${playerRatings.puckhandling}`,
+          `Shooting Accuracy: ${playerRatings.shootingAccuracy}`,
+          `Shooting Range: ${playerRatings.shootingRange}`,
+          `Offensive Read: ${playerRatings.offensiveRead}`,
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: 'Defensive Ratings',
+        value: [
+          `Checking: ${playerRatings.checking}`,
+          `Hitting: ${playerRatings.hitting}`,
+          `Positioning: ${playerRatings.positioning}`,
+          `Stickchecking: ${playerRatings.stickchecking}`,
+          `Shot Blocking: ${playerRatings.shotBlocking}`,
+          `Faceoffs: ${playerRatings.faceoffs}`,
+          `Defensive Read: ${playerRatings.defensiveRead}`,
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: 'Physical Ratings',
+        value: [
+          `Acceleration: ${playerRatings.acceleration}`,
+          `Agility: ${playerRatings.agility}`,
+          `Balance: ${playerRatings.balance}`,
+          `Speed: ${playerRatings.speed}`,
+          `Stamina: ${playerRatings.stamina}`,
+          `Strength: ${playerRatings.strength}`,
+          `Fighting: ${playerRatings.fighting}`,
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: 'Mental Ratings',
+        value: [
+          `Aggression: ${playerRatings.aggression}`,
+          `Bravery: ${playerRatings.bravery}`,
+        ].join('\n'),
+        inline: true,
+      },
+    );
   }
 };

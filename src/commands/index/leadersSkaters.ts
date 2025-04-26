@@ -131,13 +131,23 @@ export default {
         const previousSeasonIds = new Set(
           seasonBefore.map((player) => player.id),
         );
+
+        const totalGames = playerStats.reduce(
+          (sum, p) => sum + p.gamesPlayed,
+          0,
+        );
+        const avgGamesPlayed = totalGames / playerStats.length;
+
         const cutoff =
           skaterRookieCutoffs.find((cutoff) => cutoff.league === league)
             ?.gamesPlayed ?? 15;
-        const rookieStats = playerStats.filter(
-          (player) =>
-            !previousSeasonIds.has(player.id) && player.gamesPlayed > cutoff,
-        );
+
+        const rookieStats = playerStats.filter((player) => {
+          const isNew = !previousSeasonIds.has(player.id);
+          const applyCutoff = avgGamesPlayed > 15;
+          return isNew && (!applyCutoff || player.gamesPlayed > cutoff);
+        });
+
         playerStats = rookieStats;
       }
       if (position) {
