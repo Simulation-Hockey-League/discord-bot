@@ -1,6 +1,6 @@
 import { LeagueType } from 'src/db/index/shared';
 
-import { botEmojis } from './config/config';
+import { botEmojis } from '../utils/config/config';
 
 export type TeamInfo = {
   teamID: number;
@@ -212,6 +212,46 @@ export const Teams = Object.freeze({
       'https://cdn.discordapp.com/attachments/744955239114997801/1257738649773146143/sonwiVV.png',
     leagueType: LeagueType.SHL,
     emoji: botEmojis.PHI,
+  },
+  CINCINNATI: {
+    teamID: 22,
+    fullName: 'Cincinnati Six',
+    abbr: 'CIN',
+    nameRegex: /CIN|Cincinnati|six/i,
+    logoUrl:
+      'https://cdn.discordapp.com/attachments/711007308846596100/1381293035073179669/CIN_Main_S82-Present.png',
+    leagueType: LeagueType.SHL,
+    emoji: botEmojis.CIN,
+  },
+  NASHVILLE: {
+    teamID: 23,
+    fullName: 'Nashville Sound',
+    abbr: 'NSH',
+    nameRegex: /NSH|Nashville|Sound/i,
+    logoUrl:
+      'https://cdn.discordapp.com/attachments/711007308846596100/1381293036679725086/NSH_Main-S82-Present.png',
+    leagueType: LeagueType.SHL,
+    emoji: botEmojis.NSH,
+  },
+  DENVER: {
+    teamID: 24,
+    fullName: 'Denver Glacier Gaurdians',
+    abbr: 'DEN',
+    nameRegex: /DEN|Denver|Glacier|Gaurdians|DGG/i,
+    logoUrl:
+      'https://cdn.discordapp.com/attachments/711007308846596100/1381293035677155400/DCC_Main-S82-Present.png',
+    leagueType: LeagueType.SHL,
+    emoji: botEmojis.DEN,
+  },
+  MADISON: {
+    teamID: 25,
+    fullName: 'Madison Valkyries',
+    abbr: 'MAD',
+    nameRegex: /MAD|Madison|Valkyries/i,
+    logoUrl:
+      'https://cdn.discordapp.com/attachments/711007308846596100/1381293036289392771/MAD_Main-S82-Present.png',
+    leagueType: LeagueType.SHL,
+    emoji: botEmojis.MAD,
   },
 
   // SMJHL

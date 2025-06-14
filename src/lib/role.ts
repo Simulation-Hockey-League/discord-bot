@@ -2,7 +2,7 @@ import { APIInteractionGuildMember, GuildMember } from 'discord.js';
 
 import { discordMods } from 'src/db/users';
 
-import { Config, UserRole } from './config/config';
+import { Config, UserRole } from '../utils/config/config';
 
 export const checkRole = async (
   member: GuildMember | APIInteractionGuildMember | null,

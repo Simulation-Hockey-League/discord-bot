@@ -7,13 +7,10 @@ import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import {
-  createActionRow,
-  createTeamEmbed,
-} from 'src/lib/helpers/buttons/teamButton';
-import { logger } from 'src/lib/logger';
 import { Teams, findTeamByAbbr } from 'src/lib/teams';
+import { createActionRow, createTeamEmbed } from 'src/utils/buttons/teamButton';
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 
 import { SlashCommand } from 'typings/command';
 import { ManagerInfo } from 'typings/portal';
@@ -125,7 +122,8 @@ export default {
       const teams = await IndexApiClient.get(teamInfo.leagueType).getTeamInfo(
         season,
       );
-      const team = teams.find((team) => team.abbreviation === teamInfo.abbr);
+
+      const team = teams.find((team) => team.id === teamInfo.teamID);
 
       if (!team) {
         await interaction.editReply({
@@ -165,7 +163,7 @@ export default {
           components: [row],
         })
         .catch(async (error) => {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
           await interaction.editReply({
             content: 'An error occurred while fetching team info.',
           });
@@ -225,7 +223,7 @@ export default {
             components: [],
           });
         } catch (error) {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
         }
       });
     } catch (error) {

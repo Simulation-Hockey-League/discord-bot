@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { UserRole } from 'src/lib/config/config';
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
+import { UserRole } from 'src/utils/config/config';
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
 
 import { SlashCommand } from 'typings/command';
 

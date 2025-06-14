@@ -4,7 +4,7 @@ import { LeagueType, SeasonType } from 'src/db/index/shared';
 import { TeamInfo } from 'src/lib/teams';
 import { GameInfo } from 'typings/statsindex';
 
-import { botEmojis } from '../config/config';
+import { botEmojis } from './config/config';
 
 export const gameTypeToSeasonType = (gameType: string): SeasonType => {
   switch (gameType) {

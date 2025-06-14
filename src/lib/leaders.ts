@@ -8,15 +8,16 @@ import {
 } from 'discord.js';
 import { leagueNumberToType } from 'src/db/index/helpers/leagueToString';
 
-import { GoalieStats, PlayerStats } from 'typings/statsindex';
-
-import { pageSizes } from './config/config';
 import {
   GetPageFn,
   backForwardButtons,
   createPaginator,
-} from './helpers/buttons/button';
-import { logger } from './logger';
+} from 'src/utils/buttons/button';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
+import { GoalieStats, PlayerStats } from 'typings/statsindex';
+
+import { pageSizes } from '../utils/config/config';
+
 import { findTeamByID } from './teams';
 
 export async function createLeadersSelector<
@@ -116,7 +117,7 @@ export async function createLeadersSelector<
   // Use your paginator to handle the pagination buttons.
   await createPaginator(message, interaction.user.id, getPage, [menuRow]).catch(
     async (error) => {
-      logger.error(error);
+      logUnhandledCommandError(interaction, error);
       await interaction.editReply({
         content: 'An error occurred while fetching player stats.',
       });

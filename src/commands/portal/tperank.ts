@@ -1,11 +1,11 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { PortalClient } from 'src/db/portal/PortalClient';
-import { pageSizes } from 'src/lib/config/config';
+import { pageSizes } from 'src/utils/config/config';
 import {
   GetPageFn,
   backForwardButtons,
   createPaginator,
-} from 'src/lib/helpers/buttons/button';
+} from 'src/utils/buttons/button';
 import { SlashCommand } from 'typings/command';
 
 export default {

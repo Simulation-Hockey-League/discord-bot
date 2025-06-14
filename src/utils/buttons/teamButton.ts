@@ -16,7 +16,7 @@ import { TeamInfo } from 'src/lib/teams';
 import { ManagerInfo } from 'typings/portal';
 import { IndexTeamInfo, SeasonType } from 'typings/statsindex';
 
-import { LeagueType } from '../../../db/index/shared';
+import { LeagueType } from '../../db/index/shared';
 
 export function createActionRow(
   abbr: string,

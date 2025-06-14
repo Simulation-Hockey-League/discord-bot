@@ -2,7 +2,8 @@ import { ButtonInteraction, EmbedBuilder } from 'discord.js';
 import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType } from 'src/db/index/shared';
 
-import { inviteLink } from './config/config';
+import { inviteLink } from '../utils/config/config';
+
 import { checkRole } from './role';
 import { Teams } from './teams';
 

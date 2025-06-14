@@ -2,10 +2,11 @@ import { SlashCommandBuilder } from 'discord.js';
 import { getStandings } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { LeagueType } from 'src/db/index/shared';
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
 import { playoffStandings, regularSeasonStandings } from 'src/lib/standings';
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 
 import { SlashCommand } from 'typings/command';
 
@@ -98,7 +99,17 @@ export default {
             ],
           })
           .catch((error) => {
-            logger.error(error);
+            logger.error(
+              `Unhandled error in command "${
+                interaction.commandName
+              }" by user ${interaction.user.tag} (${
+                interaction.user.id
+              }) in channel ${
+                interaction.channel?.id
+              } (${interaction.channel?.toString()}) in guild ${
+                interaction.guild?.name ?? 'DM'
+              } (${interaction.guild?.id}): ${error}`,
+            );
           });
         return;
       }
@@ -120,7 +131,7 @@ export default {
           ],
         })
         .catch((error) => {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
         });
     } catch (error) {
       await interaction.editReply({

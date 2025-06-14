@@ -10,14 +10,14 @@ import { ManagerInfo } from 'typings/portal';
 import { IndexTeamInfo } from 'typings/statsindex';
 
 import { BaseEmbed } from './embed';
-import { applySafeEmbedDescription } from './helpers/embedHelper';
+import { applySafeEmbedDescription } from '../utils/embedHelper';
 import {
   formatFutureGame,
   formatPastGame,
   gameTypeToSeasonType,
   getLast10Games,
   leagueNametoType,
-} from './helpers/teamHelpers';
+} from '../utils/teamHelpers';
 import { TeamInfo } from './teams';
 
 export async function createScheduleEmbed(

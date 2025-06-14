@@ -7,7 +7,7 @@ import {
   WjcIndexApiClient,
 } from 'src/db/index/api/IndexApiClient';
 import { PortalClient } from 'src/db/portal/PortalClient';
-import { UserRole } from 'src/lib/config/config';
+import { UserRole } from 'src/utils/config/config';
 import { SlashCommand } from 'typings/command';
 
 export default {

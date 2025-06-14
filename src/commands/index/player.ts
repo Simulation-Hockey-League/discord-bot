@@ -14,6 +14,7 @@ import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
 import { withPlayerRatings, withPlayerStats } from 'src/lib/player';
 import { findTeamByName } from 'src/lib/teams';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -128,7 +129,7 @@ export default {
       const response = await interaction
         .editReply({ embeds: [embed], components: [row] })
         .catch((error) => {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
           return null;
         });
       if (!response) {
@@ -181,7 +182,7 @@ export default {
       });
       collector.on('end', () => {
         interaction.editReply({ components: [] }).catch((error) => {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
         });
       });
     } catch (error) {

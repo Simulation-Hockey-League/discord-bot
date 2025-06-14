@@ -6,7 +6,7 @@ import {
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
 } from 'discord.js';
-import { UserRole } from 'src/lib/config/config';
+import { UserRole } from 'src/utils/config/config';
 
 export interface SlashCommand {
   command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;

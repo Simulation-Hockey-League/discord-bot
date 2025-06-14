@@ -4,7 +4,7 @@ import { PortalClient } from 'src/db/portal/PortalClient';
 
 import { BasicUserInfo } from 'typings/portal';
 
-import { DynamicConfig } from './config/dynamicConfig';
+import { DynamicConfig } from '../utils/config/dynamicConfig';
 import { BaseEmbed } from './embed';
 
 export async function withUserInfo(

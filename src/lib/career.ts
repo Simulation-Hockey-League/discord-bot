@@ -2,10 +2,10 @@ import { ChatInputCommandInteraction } from 'discord.js';
 
 import { SeasonType } from 'src/db/index/shared';
 import { PortalClient } from 'src/db/portal/PortalClient';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 import { BaseEmbed } from './embed';
-import { logger } from './logger';
 
 export const displaySkaterCareer = async (
   interaction: ChatInputCommandInteraction,
@@ -62,9 +62,7 @@ export const displaySkaterCareer = async (
         } Statistics`,
       });
 
-    await interaction.editReply({ embeds: [embed] }).catch((error) => {
-      logger.error(error);
-    });
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
   const header = `\`\`\`
@@ -96,9 +94,7 @@ GP ${totals.gamesPlayed} | G ${totals.goals} | A ${totals.assists} | ${totals.po
 
   // Get around the 2000 character limit
   if (fullMessage.length <= 2000) {
-    await interaction.editReply({ content: fullMessage }).catch((error) => {
-      logger.error(error);
-    });
+    await interaction.editReply({ content: fullMessage });
   } else {
     const chunks = [];
     let currentChunk = header;
@@ -114,9 +110,7 @@ GP ${totals.gamesPlayed} | G ${totals.goals} | A ${totals.assists} | ${totals.po
 
     chunks.push(currentChunk + totalsText);
 
-    await interaction.editReply({ content: chunks.shift() }).catch((error) => {
-      logger.error(error);
-    });
+    await interaction.editReply({ content: chunks.shift() });
     for (const chunk of chunks) {
       await interaction.followUp({ content: chunk });
     }
@@ -180,7 +174,7 @@ export const displayGoalieCareer = async (
       });
 
     await interaction.editReply({ embeds: [embed] }).catch((error) => {
-      logger.error(error);
+      logUnhandledCommandError(interaction, error);
     });
     return;
   }
@@ -211,9 +205,7 @@ GP ${totals.gamesPlayed} | W ${totals.wins} | L ${totals.losses} | OT ${totals.o
   let fullMessage = header + statsText + totalsText;
 
   if (fullMessage.length <= 2000) {
-    await interaction.editReply({ content: fullMessage }).catch((error) => {
-      logger.error(error);
-    });
+    await interaction.editReply({ content: fullMessage });
   } else {
     const chunks = [];
     let currentChunk = header;
@@ -229,9 +221,7 @@ GP ${totals.gamesPlayed} | W ${totals.wins} | L ${totals.losses} | OT ${totals.o
 
     chunks.push(currentChunk + totalsText);
 
-    await interaction.editReply({ content: chunks.shift() }).catch((error) => {
-      logger.error(error);
-    });
+    await interaction.editReply({ content: chunks.shift() });
     for (const chunk of chunks) {
       await interaction.followUp({ content: chunk });
     }
@@ -315,9 +305,7 @@ export const displayPlayerAwards = async (
       });
     }
 
-    await interaction.editReply({ embeds: [awardsEmbed] }).catch((error) => {
-      logger.error(error);
-    });
+    await interaction.editReply({ embeds: [awardsEmbed] });
   } catch (error) {
     await interaction.editReply({
       content: `An error occurred while fetching awards: ${

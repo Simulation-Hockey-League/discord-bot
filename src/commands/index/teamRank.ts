@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { getDetailedStats } from 'src/db/index';
 import { LeagueType } from 'src/db/index/shared';
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import { createTeamStatsSelector } from 'src/lib/helpers/menus/menuHelper';
-import { logger } from 'src/lib/logger';
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
+import { createTeamStatsSelector } from 'src/utils/menus/menuHelper';
 import { SlashCommand } from 'typings/command';
 import { DetailedTeamStats } from 'typings/statsindex';
 
@@ -122,7 +122,7 @@ export default {
         getSortingOrder,
       );
     } catch (error) {
-      logger.error(error);
+      logUnhandledCommandError(interaction, error);
       await interaction.editReply({
         content: 'An error occurred while retrieving rankings.',
       });

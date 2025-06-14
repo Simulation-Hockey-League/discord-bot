@@ -3,7 +3,7 @@ import { Database } from 'node_modules/sqlite3/lib/sqlite3';
 import { connectToDatabase } from 'src/db/fantasy';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
-import { logger } from 'src/lib/logger';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 import { SlashCommand } from 'typings/command';
 
 import { Fantasy_Groups_DB, Global_DB } from 'typings/fantasy';
@@ -11,7 +11,7 @@ import { Fantasy_Groups_DB, Global_DB } from 'typings/fantasy';
 import {
   generateLeaderboard,
   getUserByFuzzy,
-} from '../../lib/helpers/fantasyHelpers';
+} from '../../utils/fantasyHelpers';
 
 export default {
   command: new SlashCommandBuilder()
@@ -111,7 +111,7 @@ export default {
           value: playersSection,
         });
       await interaction.editReply({ embeds: [embed] }).catch((error) => {
-        logger.error(error);
+        logUnhandledCommandError(interaction, error);
       });
     } catch (error) {
       await interaction.editReply({

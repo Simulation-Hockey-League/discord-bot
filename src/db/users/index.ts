@@ -1,5 +1,5 @@
 import Keyv from 'keyv';
-import { UserRole } from 'src/lib/config/config';
+import { UserRole } from 'src/utils/config/config';
 import { logger } from 'src/lib/logger';
 
 export type UserInfo = {

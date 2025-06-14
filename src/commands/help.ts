@@ -5,11 +5,11 @@ import {
   MessagePayload,
   SlashCommandBuilder,
 } from 'discord.js';
+import { logger } from 'src/lib/logger';
 import {
   getMainHelpButtons,
   handleHelpButtons,
-} from 'src/lib/helpers/buttons/helpButton';
-import { logger } from 'src/lib/logger';
+} from 'src/utils/buttons/helpButton';
 import { SlashCommand } from 'typings/command';
 
 export default {

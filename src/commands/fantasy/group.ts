@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { connectToDatabase } from 'src/db/fantasy';
 import { BaseEmbed } from 'src/lib/embed';
-import { logger } from 'src/lib/logger';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 import { SlashCommand } from 'typings/command';
 
 import { Global_DB } from 'typings/fantasy';
 
-import { generateLeaderboard } from '../../lib/helpers/fantasyHelpers';
+import { generateLeaderboard } from '../../utils/fantasyHelpers';
 
 export default {
   command: new SlashCommandBuilder()
@@ -59,7 +59,7 @@ export default {
         .setDescription(leaderboard);
 
       await interaction.editReply({ embeds: [embed] }).catch((error) => {
-        logger.error(error);
+        logUnhandledCommandError(interaction, error);
       });
     } catch (error) {
       await interaction.editReply({

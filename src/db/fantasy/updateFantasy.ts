@@ -2,8 +2,8 @@ import axios from 'axios';
 import { parse } from 'csv-parse/sync';
 
 import { Database } from 'sqlite3';
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
-import { getSkaterFantasyPoints } from 'src/lib/helpers/fantasyHelpers';
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
+import { getSkaterFantasyPoints } from 'src/utils/fantasyHelpers';
 
 import { logger } from 'src/lib/logger';
 

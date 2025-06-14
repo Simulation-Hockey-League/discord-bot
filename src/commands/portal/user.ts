@@ -10,6 +10,7 @@ import { getUserByFuzzy } from 'src/db/portal';
 import { users } from 'src/db/users';
 import { logger } from 'src/lib/logger';
 import { withTPEEarned, withUserAwards, withUserInfo } from 'src/lib/user';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -34,7 +35,7 @@ export default {
           content: 'No player name provided or stored.',
         })
         .catch((error) => {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
         });
       return;
     }
@@ -68,7 +69,7 @@ export default {
       const response = await interaction
         .editReply({ components: [row] })
         .catch((error) => {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
           return null;
         });
       if (!response) {
@@ -110,11 +111,11 @@ export default {
 
       collector.on('end', () => {
         interaction.editReply({ components: [] }).catch((error) => {
-          logger.error(error);
+          logUnhandledCommandError(interaction, error);
         });
       });
     } catch (error) {
-      logger.error(error);
+      logUnhandledCommandError(interaction, error);
       await interaction.editReply({
         content: 'An error occurred while retrieving player info.',
       });

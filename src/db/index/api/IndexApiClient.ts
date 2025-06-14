@@ -1,10 +1,10 @@
 import { assertUnreachable } from 'src/lib/assertUnreachable';
-import { Config } from 'src/lib/config/config';
-
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 import { logger } from 'src/lib/logger';
-
 import { TeamInfo } from 'src/lib/teams';
+import { Config } from 'src/utils/config/config';
+
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
+
 import {
   AvailableSeason,
   DetailedTeamStats,
@@ -326,7 +326,7 @@ export class IndexApiClient {
     playerID: number,
     seasonType: SeasonType,
     season?: number,
-    reload: boolean = false,
+    reload: boolean = true,
   ): Promise<Array<PlayerRatings>> {
     if (!this.#skaterRatings.has(seasonType)) {
       this.#skaterRatings.set(seasonType, new Map());
@@ -356,7 +356,7 @@ export class IndexApiClient {
     playerID: number,
     seasonType: SeasonType,
     season?: number,
-    reload: boolean = false,
+    reload: boolean = true,
   ): Promise<Array<GoalieRatings>> {
     if (!this.#goalieRatings.has(seasonType)) {
       this.#goalieRatings.set(seasonType, new Map());

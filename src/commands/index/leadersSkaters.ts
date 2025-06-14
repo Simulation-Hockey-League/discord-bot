@@ -2,14 +2,14 @@ import { SlashCommandBuilder } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
-import { skaterRookieCutoffs } from 'src/lib/config/config';
-import { DynamicConfig } from 'src/lib/config/dynamicConfig';
 
 import { createLeadersSelector } from 'src/lib/leaders';
-import { logger } from 'src/lib/logger';
 import { findTeamByAbbr } from 'src/lib/teams';
 
 import { TeamInfo } from 'src/lib/teams';
+import { skaterRookieCutoffs } from 'src/utils/config/config';
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
+import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 import { SlashCommand } from 'typings/command';
 import { PlayerStats } from 'typings/statsindex';
 
@@ -201,7 +201,7 @@ export default {
         getTitle,
       );
     } catch (error) {
-      logger.error(error);
+      logUnhandledCommandError(interaction, error);
       await interaction.editReply({
         content: 'An error occurred while fetching player stats.',
       });

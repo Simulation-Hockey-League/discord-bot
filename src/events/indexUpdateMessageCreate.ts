@@ -5,7 +5,7 @@ import {
   SmjhlIndexApiClient,
 } from 'src/db/index/api/IndexApiClient';
 
-import { Config } from 'src/lib/config/config';
+import { Config } from 'src/utils/config/config';
 import { logger } from 'src/lib/logger';
 import { BotEvent } from 'typings/event';
 

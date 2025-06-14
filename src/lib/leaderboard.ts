@@ -4,12 +4,11 @@ import {
   EmbedBuilder,
 } from 'discord.js';
 import { commandCountDB, userCountDB } from 'src/db/users';
-
 import {
   GetPageFn,
   backForwardButtons,
   createPaginator,
-} from './helpers/buttons/button';
+} from 'src/utils/buttons/button';
 
 const LEADERBOARD_PAGE_SIZE = 20;
 

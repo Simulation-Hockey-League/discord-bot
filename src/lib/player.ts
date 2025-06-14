@@ -8,9 +8,9 @@ import {
   PlayerStats,
 } from 'typings/statsindex';
 
-import { DynamicConfig } from './config/dynamicConfig';
-import { getSkaterFantasyPoints } from './helpers/fantasyHelpers';
-import { getGSAAInfo } from './helpers/playerHelpers';
+import { DynamicConfig } from '../utils/config/dynamicConfig';
+import { getSkaterFantasyPoints } from '../utils/fantasyHelpers';
+import { getGSAAInfo } from '../utils/playerHelpers';
 
 export const toToi = (minutes: number, games: number): string => {
   const avg = minutes / (games || 0) / 60;

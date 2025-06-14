@@ -1,6 +1,6 @@
 import { Events, Interaction } from 'discord.js';
 import { commandCountDB, userCountDB } from 'src/db/users';
-import { Config } from 'src/lib/config/config';
+import { Config } from 'src/utils/config/config';
 import { ErrorEmbed } from 'src/lib/embed';
 
 import { pluralize } from 'src/lib/format';
