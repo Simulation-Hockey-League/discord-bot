@@ -1,8 +1,9 @@
-import { Config } from 'src/utils/config/config';
 import { logger } from 'src/lib/logger';
+import { Config } from 'src/utils/config/config';
 import {
   BasicUserInfo,
   InternalChecklist,
+  InternalIndexPlayerID,
   ManagerInfo,
   PlayerAchievement,
   PortalPlayer,
@@ -21,6 +22,7 @@ class PortalApiClient {
   #getUserAwards: Array<UserAchievement> = [];
   #getManagerInfo: Array<ManagerInfo> = [];
   #getTPEEarned: Array<PortalTPEEarned> = [];
+  #getIndexPlayerID: Array<InternalIndexPlayerID> = [];
 
   #loaded = false;
   #lastLoadTimestamp = 0;
@@ -133,6 +135,20 @@ class PortalApiClient {
       pid: portalID,
     });
     return players[0];
+  }
+
+  async getPlayerIndexID(
+    portalID: string,
+    reload: boolean = true,
+  ): Promise<Array<InternalIndexPlayerID>> {
+    return await this.#getData(
+      this.#getIndexPlayerID,
+      reload,
+      ['player/index-ids'],
+      {
+        pid: portalID,
+      },
+    );
   }
 
   async getPlayerAwards(

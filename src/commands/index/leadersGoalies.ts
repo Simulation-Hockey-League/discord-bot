@@ -3,12 +3,12 @@ import { SlashCommandBuilder } from 'discord.js';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { leagueTypeToString } from 'src/db/index/helpers/leagueToString';
 import { LeagueType, SeasonType } from 'src/db/index/shared';
-import { goalieRookieCutoffs } from 'src/utils/config/config';
-import { DynamicConfig } from 'src/utils/config/dynamicConfig';
-import { getGSAAInfo } from 'src/utils/playerHelpers';
 import { createLeadersSelector } from 'src/lib/leaders';
 import { logger } from 'src/lib/logger';
 import { TeamInfo, findTeamByAbbr } from 'src/lib/teams';
+import { goalieRookieCutoffs } from 'src/utils/config/config';
+import { DynamicConfig } from 'src/utils/config/dynamicConfig';
+import { getGSAAInfo } from 'src/utils/playerHelpers';
 
 import { SlashCommand } from 'typings/command';
 import { GoalieStats } from 'typings/statsindex';
@@ -106,6 +106,12 @@ export default {
           seasonType ?? SeasonType.REGULAR,
           season - 1,
         );
+        // if SMJHL, only use players who played > 12 games the previous season
+        if (league === LeagueType.SMJHL) {
+          seasonBefore = seasonBefore.filter(
+            (player) => player.gamesPlayed > 12,
+          );
+        }
         const cutoff =
           goalieRookieCutoffs.find((cutoff) => cutoff.league === league)
             ?.gamesPlayed ?? 12; // default to SHL games played for rookie cutoff

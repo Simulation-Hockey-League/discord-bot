@@ -187,3 +187,10 @@ export type PortalTPEEarned = {
   correction: number;
   other: number;
 };
+
+export type InternalIndexPlayerID = {
+  playerUpdateID: number;
+  leagueID: number;
+  indexID: number;
+  startSeason: number;
+};

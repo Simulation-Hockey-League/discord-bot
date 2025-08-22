@@ -43,7 +43,7 @@ export default {
 
       const groupPlayers = players
         .filter((p) => p.group_number === groupNumber)
-        .sort((a, b) => a.score - b.score);
+        .sort((a, b) => b.score - a.score);
 
       if (groupPlayers.length === 0) {
         await interaction.editReply({

@@ -235,7 +235,7 @@ export const Teams = Object.freeze({
   },
   DENVER: {
     teamID: 24,
-    fullName: 'Denver Glacier Gaurdians',
+    fullName: 'Denver Glacier Guardians',
     abbr: 'DEN',
     nameRegex: /DEN|Denver|Glacier|Gaurdians|DGG/i,
     logoUrl:

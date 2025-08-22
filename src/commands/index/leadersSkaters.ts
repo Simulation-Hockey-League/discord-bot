@@ -128,6 +128,12 @@ export default {
           seasonType ?? SeasonType.REGULAR,
           season - 1,
         );
+        // if SMJHL, only use players who played > 25 games the previous season
+        if (league === LeagueType.SMJHL) {
+          seasonBefore = seasonBefore.filter(
+            (player) => player.gamesPlayed > 25,
+          );
+        }
         const previousSeasonIds = new Set(
           seasonBefore.map((player) => player.id),
         );
@@ -145,6 +151,9 @@ export default {
         const rookieStats = playerStats.filter((player) => {
           const isNew = !previousSeasonIds.has(player.id);
           const applyCutoff = avgGamesPlayed > 15;
+          // removing Jim Wieners from rookie stats
+          if (player.name === 'Jim Wieners' && player.season === 83)
+            return false;
           return isNew && (!applyCutoff || player.gamesPlayed > cutoff);
         });
 
