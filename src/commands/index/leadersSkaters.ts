@@ -142,7 +142,7 @@ export default {
           (sum, p) => sum + p.gamesPlayed,
           0,
         );
-        const avgGamesPlayed = totalGames / playerStats.length;
+        const avgGamesPlayed = Math.floor(totalGames / playerStats.length);
 
         const cutoff =
           skaterRookieCutoffs.find((cutoff) => cutoff.league === league)
@@ -151,9 +151,6 @@ export default {
         const rookieStats = playerStats.filter((player) => {
           const isNew = !previousSeasonIds.has(player.id);
           const applyCutoff = avgGamesPlayed > 15;
-          // removing Jim Wieners from rookie stats
-          if (player.name === 'Jim Wieners' && player.season === 83)
-            return false;
           return isNew && (!applyCutoff || player.gamesPlayed > cutoff);
         });
 

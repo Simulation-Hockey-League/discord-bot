@@ -1,14 +1,9 @@
-import { Events, Interaction } from 'discord.js';
+import { DiscordAPIError, Events, Interaction } from 'discord.js';
 import { commandCountDB, userCountDB } from 'src/db/users';
-import { Config } from 'src/utils/config/config';
-import { ErrorEmbed } from 'src/lib/embed';
-
 import { pluralize } from 'src/lib/format';
 import { logger } from 'src/lib/logger';
 import { checkRole } from 'src/lib/role';
 import { BotEvent } from 'typings/event';
-
-// Initialize Keyv with SQLite
 
 export default {
   name: Events.InteractionCreate,
@@ -61,30 +56,67 @@ export default {
         const userUsage = (await userCountDB.get(userKey)) || 0;
         await userCountDB.set(userKey, userUsage + 1);
 
-        await command.execute(interaction);
-      } catch (e) {
-        if (!interaction.replied && !interaction.deferred) {
-          interaction.reply({
-            content:
-              'There was an internal error while executing this command. If you see this message let a developer know.',
-            ephemeral: true,
-          });
-        } else {
-          interaction.followUp({
-            content:
-              'There was an internal error while executing this command. If you see this message let a developer know.',
-          });
+        if (!interaction.channel) {
+          logger.warn(
+            `Command "${interaction.commandName}" used by ${interaction.user.tag} no valid channel`,
+          );
+          return interaction
+            .reply({
+              content:
+                'I couldn’t find the channel to respond in. This command might not work in DMs — please try again in a server channel. If this was not in a DM, let Luke know.',
+              ephemeral: true,
+            })
+            .catch(() => {});
         }
 
-        const channel = interaction.client.channels.cache.get(
-          Config.botErrorChannelId,
-        );
-        if (channel?.isTextBased() && 'send' in channel) {
-          channel.send({ embeds: [ErrorEmbed(interaction, e)] });
+        await command.execute(interaction);
+      } catch (e) {
+        if (e instanceof DiscordAPIError && e.code === 50001) {
+          logger.warn(
+            `Missing Access error in "${interaction.commandName}" by ${interaction.user.tag}`,
+          );
+
+          const msg = interaction.guild
+            ? 'I don’t have access or permission to send messages in that channel. Please check my role permissions.'
+            : 'I couldn’t send a message in this DM. You might have privacy settings that block me.';
+
+          if (!interaction.replied && !interaction.deferred) {
+            await interaction
+              .reply({ content: msg, ephemeral: true })
+              .catch(() => {});
+          } else {
+            await interaction
+              .followUp({ content: msg, ephemeral: true })
+              .catch(() => {});
+          }
+          return;
         }
-        logger.error(
-          'An Unhandled Error occurred, check the Developer Discord for more information',
-        );
+
+        if (!interaction.replied && !interaction.deferred) {
+          interaction
+            .reply({
+              content:
+                'There was an internal error while executing this command. If you see this message let a developer know.',
+              ephemeral: true,
+            })
+            .catch(() => {});
+        } else {
+          interaction
+            .followUp({
+              content:
+                'There was an internal error while executing this command. If you see this message let a developer know.',
+            })
+            .catch(() => {});
+        }
+
+        logger.error({
+          user: interaction.user.tag,
+          userId: interaction.user.id,
+          command: interaction.commandName,
+          guild: interaction.guild?.name ?? 'DM',
+          channel: interaction.channel?.id ?? 'Unknown',
+          error: e,
+        });
       }
     }
   },

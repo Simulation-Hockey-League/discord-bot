@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { discordMods } from 'src/db/users';
-import { UserRole } from 'src/utils/config/config';
 import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
+import { UserRole } from 'src/utils/config/config';
 import { SlashCommand } from 'typings/command';
 
 export default {
