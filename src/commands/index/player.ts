@@ -9,7 +9,6 @@ import {
 import { getPlayerStats } from 'src/db/index';
 import { IndexApiClient } from 'src/db/index/api/IndexApiClient';
 import { SeasonType } from 'src/db/index/shared';
-import { PortalClient } from 'src/db/portal/PortalClient';
 import { users } from 'src/db/users';
 import { BaseEmbed } from 'src/lib/embed';
 import { logger } from 'src/lib/logger';
@@ -69,13 +68,6 @@ export default {
     }
 
     await interaction.deferReply();
-
-    let indexID;
-    if (currentUserInfo && currentUserInfo.portalID) {
-      indexID = await PortalClient.getPlayerIndexID(currentUserInfo.portalID);
-    }
-    console.log(indexID);
-
     const playerStats = await getPlayerStats(
       name,
       seasonType ?? SeasonType.REGULAR,

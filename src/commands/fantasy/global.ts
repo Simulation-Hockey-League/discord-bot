@@ -1,11 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ComponentType,
-} from 'discord.js';
-import { createGlobalPlayerRank, createGlobalRank } from 'src/lib/fantasy';
+import { users } from 'src/db/users';
+import { createPaginator } from 'src/utils/buttons/button';
+import { createGlobalButton } from 'src/utils/buttons/globalButton';
 import { logUnhandledCommandError } from 'src/utils/logUnhandledError';
 import { SlashCommand } from 'typings/command';
 
@@ -40,107 +36,46 @@ export default {
     .setDescription('Get global fantasy rankings.'),
 
   execute: async (interaction) => {
-    const type = interaction.options.getString('type');
-    const position = interaction.options.getString('position') || null;
-    let currentPage = 1;
-
-    await interaction.deferReply();
-
     try {
-      let embed;
+      await interaction.deferReply();
 
-      switch (type) {
-        case 'global':
-          embed = await createGlobalRank(interaction, currentPage);
-          break;
-        case 'player':
-          embed = await createGlobalPlayerRank(
-            interaction,
-            position,
-            currentPage,
-          );
-          break;
-        default:
-          await interaction.editReply({
-            content: 'Invalid type.',
-          });
-          return;
-      }
+      const type = interaction.options.getString('type', true) as
+        | 'global'
+        | 'player';
+      const position = interaction.options.getString('position');
+      const currentUserInfo = await users.get(interaction.user.id);
 
-      // Create pagination buttons
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('prev')
-          .setLabel('Previous')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId('next')
-          .setLabel('Next')
-          .setStyle(ButtonStyle.Primary),
-      );
+      const getGlobalRankings = createGlobalButton({
+        interaction,
+        type,
+        currentUserInfo: currentUserInfo ?? null,
+        position,
+      });
 
       const message = await interaction.editReply({
-        embeds: [embed],
-        components: [row],
+        embeds: [(await getGlobalRankings(1)).embed],
+        components: [(await getGlobalRankings(1)).buttons],
       });
 
-      // Set up collector for button interactions
-      const collector = message.createMessageComponentCollector({
-        componentType: ComponentType.Button,
-        time: 60000, // 1 minute timeout
-      });
-
-      collector.on('collect', async (btnInteraction) => {
-        try {
-          if (btnInteraction.user.id !== interaction.user.id) {
-            return btnInteraction.reply({
-              content: 'You cannot interact with these buttons.',
-              ephemeral: true,
-            });
-          }
-
-          if (btnInteraction.customId === 'next') {
-            currentPage++;
-          } else if (btnInteraction.customId === 'prev' && currentPage > 1) {
-            currentPage--;
-          }
-
-          let newEmbed;
-          switch (type) {
-            case 'global':
-              newEmbed = await createGlobalRank(interaction, currentPage);
-              break;
-            case 'player':
-              newEmbed = await createGlobalPlayerRank(
-                interaction,
-                position,
-                currentPage,
-              );
-              break;
-          }
-
-          await btnInteraction.update({
-            embeds: [newEmbed],
-            components: [row],
-          });
-        } catch (error) {
-          await btnInteraction.reply({
-            content: 'An error occurred while fetching fantasy rankings.',
-            ephemeral: true,
-          });
-        }
-      });
-
-      collector.on('end', () => {
-        row.components.forEach((button) => button.setDisabled(true));
-        message.edit({ components: [row] }).catch((error) => {
-          logUnhandledCommandError(interaction, error);
-        });
-      });
+      await createPaginator(
+        message,
+        interaction.user.id,
+        getGlobalRankings,
+        [],
+      );
     } catch (error) {
-      await interaction.editReply({
-        content: 'An error occurred while retrieving fantasy rankings.',
-      });
+      logUnhandledCommandError(interaction, error);
+
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({
+          content: 'Error has occured while fetching global things',
+        });
+      } else {
+        await interaction.reply({
+          content: 'Error has occured while fetching global things',
+          ephemeral: true,
+        });
+      }
     }
   },
 } satisfies SlashCommand;

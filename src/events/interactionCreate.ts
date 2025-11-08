@@ -108,15 +108,6 @@ export default {
             })
             .catch(() => {});
         }
-
-        logger.error({
-          user: interaction.user.tag,
-          userId: interaction.user.id,
-          command: interaction.commandName,
-          guild: interaction.guild?.name ?? 'DM',
-          channel: interaction.channel?.id ?? 'Unknown',
-          error: e,
-        });
       }
     }
   },

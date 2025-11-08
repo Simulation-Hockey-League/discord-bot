@@ -1,5 +1,6 @@
 import fuzzysort from 'fuzzysort';
-import { Fantasy_Groups_DB, Global_DB } from 'typings/fantasy';
+import { Database } from 'node_modules/sqlite3/lib/sqlite3';
+import { Global_DB } from 'typings/fantasy';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 export function getSkaterFantasyPoints(playerStats: PlayerStats | GoalieStats) {
@@ -29,22 +30,31 @@ export function getSkaterFantasyPoints(playerStats: PlayerStats | GoalieStats) {
 
   return fantasyPoints;
 }
+export const getUserFromFantasyGroups = async (name: string, db: Database) => {
+  const fantasy_groups: string[] = await new Promise((resolve, reject) => {
+    db.all(
+      `SELECT DISTINCT(username) FROM fantasy_groups`,
+      (err, rows: { username: string }[] | undefined) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (!rows) {
+          resolve([]);
+          return;
+        }
+        resolve(rows.map((row) => row.username));
+      },
+    );
+  });
 
-export const getUserByFuzzy = async (
-  name: string,
-  users: Fantasy_Groups_DB[],
-) => {
-  const match = fuzzysort.go(name, users, {
-    key: 'username',
+  const match = fuzzysort.go(name, fantasy_groups, {
     limit: 1,
     threshold: -10000,
   });
-  const matchedUser = match[0]?.obj;
+  const matchedUser = match[0]?.target;
   if (!matchedUser) return undefined;
-  return {
-    username: matchedUser.username,
-    group_number: matchedUser.group_number,
-  };
+  return matchedUser;
 };
 
 export const generateLeaderboard = (

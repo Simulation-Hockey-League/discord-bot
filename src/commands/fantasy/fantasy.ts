@@ -10,7 +10,7 @@ import { Fantasy_Groups_DB, Global_DB } from 'typings/fantasy';
 
 import {
   generateLeaderboard,
-  getUserByFuzzy,
+  getUserFromFantasyGroups,
 } from '../../utils/fantasyHelpers';
 
 export default {
@@ -27,10 +27,10 @@ export default {
   execute: async (interaction) => {
     try {
       await interaction.deferReply({ ephemeral: false });
-      const target = interaction.options.getString('username');
+      const targetName = interaction.options.getString('username');
 
       const currentUserInfo = await users.get(interaction.user.id);
-      const name = target || currentUserInfo?.forumName;
+      const name = targetName || currentUserInfo?.forumName;
 
       if (!name) {
         await interaction.editReply({
@@ -41,34 +41,42 @@ export default {
 
       const db: Database = await connectToDatabase();
 
-      const fantasy_groups: Fantasy_Groups_DB[] = await new Promise(
-        (resolve, reject) => {
-          db.all(`SELECT * FROM fantasy_groups`, (err, rows) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(rows as Fantasy_Groups_DB[]);
-          });
-        },
-      );
-      const user = await getUserByFuzzy(name, fantasy_groups);
-      if (!user) {
+      const username = await getUserFromFantasyGroups(name, db);
+      if (!username) {
         await interaction.editReply({
-          content: `Could not find user "${name}". Please check your spelling.`,
+          content: `Could not find fantasy data for "${name}".`,
         });
         return;
       }
 
-      const filtered_fantasy = fantasy_groups.filter(
-        (entry) => entry.username === user.username,
+      const fantasy_groups: Fantasy_Groups_DB[] = await new Promise(
+        (resolve, reject) => {
+          db.all(
+            `SELECT * from fantasy_groups WHERE group_number= (SELECT DISTINCT(group_number) from fantasy_groups WHERE LOWER(username) = LOWER(?))`,
+            [username],
+            (err, rows) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(rows as Fantasy_Groups_DB[]);
+            },
+          );
+        },
       );
+
+      if (!fantasy_groups.length) {
+        await interaction.editReply({
+          content: `Could not find user "${name}" attached to a Fantasy Group. Please check your spelling.`,
+        });
+        return;
+      }
 
       const filtered_group: Global_DB[] = await new Promise(
         (resolve, reject) => {
           db.all(
             `SELECT * FROM global_users WHERE group_number = ?`,
-            [user.group_number],
+            [fantasy_groups[0].group_number],
             (err, rows) => {
               if (err) {
                 reject(err);
@@ -79,44 +87,47 @@ export default {
           );
         },
       );
+      db.close();
       const userData = filtered_group.find(
-        (entry) => entry.username === user.username,
+        (entry) => entry.username === username,
       );
-      if (!userData) {
-        await interaction.editReply({
-          content: `Could not find user data for "${name}".`,
-        });
-        return;
-      }
 
-      const leaderboard = generateLeaderboard(filtered_group, user.username);
-      let playersSection = '';
-      filtered_fantasy.forEach((player) => {
-        if (player.new_player) {
-          playersSection += `${player.player} ${player.OSA} -> ${player.new_player} ${player.NSA} (${player.Difference})\n`;
-        } else {
-          playersSection += `${player.player}: ${player.fantasyPoints}\n`;
-        }
-      });
+      const leaderboard = generateLeaderboard(filtered_group, username);
+      const playersSection = fantasy_groups
+        .filter((player) => player.username === username)
+        .map((player) => {
+          if (player.new_player) {
+            return `${player.player} ${player.OSA} -> ${player.new_player} ${player.NSA} (${player.Difference})`;
+          }
+          return `${player.player}: ${player.fantasyPoints}`;
+        })
+        .join('\n');
 
       const embed = BaseEmbed(interaction, {})
-        .setTitle(`Fantasy Group ${userData.group_number}`)
+        .setTitle(`Fantasy Group ${userData?.group_number}`)
         .setDescription(leaderboard)
         .addFields({
           name: '🌍 Global Rank',
-          value: `${user.username} - **${userData.score}** (Rank: ${userData.rank})`,
+          value: `${username} - **${userData?.score}** (Rank: ${userData?.rank})`,
         })
         .addFields({
           name: 'Players',
           value: playersSection,
         });
-      await interaction.editReply({ embeds: [embed] }).catch((error) => {
-        logUnhandledCommandError(interaction, error);
-      });
+      await interaction.editReply({ embeds: [embed] });
     } catch (error) {
-      await interaction.editReply({
-        content: `An error occurred while retrieving fantasy rankings.`,
-      });
+      logUnhandledCommandError(interaction, error);
+
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({
+          content: 'unexpected error occurred while fetching fantasy data.',
+        });
+      } else {
+        await interaction.reply({
+          content: 'unexpected error occurred while fetching fantasy data.',
+          ephemeral: true,
+        });
+      }
     }
   },
 } satisfies SlashCommand;
