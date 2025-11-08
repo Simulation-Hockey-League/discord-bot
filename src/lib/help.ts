@@ -63,8 +63,8 @@ export const createMainHelpEmbed = async (interaction: ButtonInteraction) => {
 
 export const createAboutEmbed = async () => {
   const embed = new EmbedBuilder()
-    .setTitle('SHL Bot V1.1.1')
-    .setDescription('Latest Version of the SHL Bot: 4/26/25')
+    .setTitle('SHL Bot V1.2.1')
+    .setDescription('Latest Version of the SHL Bot: 11/7/25')
     .addFields({
       name: 'Feedback',
       value:
@@ -75,12 +75,11 @@ export const createAboutEmbed = async () => {
       name: 'SHL V1.1.1 Udpates',
       value:
         'Latest Updates\n' +
-        'Fixed pagination for /leaderboard \n' +
-        'Fixed Issue where players with a period wont return their player \n' +
-        'Added TPE Rank to /user. See how much TPE you earned each season  \n' +
-        'Added TPE Earned to /team. See how your team is fairing earning TPE \n' +
-        'Added Goalie and Skater Ratings to /player \n' +
-        'Added /tpeearned command. See where you land globaly ',
+        'Fantasy command improvments to find users better. \n' +
+        'Added to the global rankings that bolds player names that are drafted in your fantasy group.' +
+        'Updated error handling to hopefully get people to dm me more :) \n ' +
+        'Added rookie cutoffs for players' +
+        'Various little fixes and changes',
       inline: false,
     });
   return embed;
