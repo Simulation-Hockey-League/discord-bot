@@ -75,7 +75,7 @@ export const regularSeasonStandings = (
   if (configuration === 'league') {
     const sortedStats = [...validTeamStats].sort((a, b) => b.points - a.points);
     outputString = sortedStats
-      .map((team) => formatTeamStanding(team, league))
+      .map((team, index) => `${index + 1}. ${formatTeamStanding(team, league)}`)
       .join('\n');
   } else if (configuration === 'conference') {
     const conferenceGroups: Record<number, TeamStats[]> = {};
@@ -105,8 +105,12 @@ export const regularSeasonStandings = (
 
       outputString += `**${conferenceName}**\n`;
       outputString +=
-        sortedTeams.map((team) => formatTeamStanding(team, league)).join('\n') +
-        '\n\n';
+        sortedTeams
+          .map(
+            (team, index) =>
+              `${index + 1}. ${formatTeamStanding(team, league)}`,
+          )
+          .join('\n') + '\n\n';
     }
   } else if (configuration === 'division') {
     const conferenceGroups: Record<number, Record<number, TeamStats[]>> = {};
@@ -155,7 +159,10 @@ export const regularSeasonStandings = (
         outputString += `  **${divisionName}**\n`;
         outputString +=
           sortedTeams
-            .map((team) => `  ${formatTeamStanding(team, league)}`)
+            .map(
+              (team, index) =>
+                `  ${index + 1}. ${formatTeamStanding(team, league)}`,
+            )
             .join('\n') + '\n\n';
       }
     }
