@@ -9,6 +9,7 @@ import { SlashCommand } from 'typings/command';
 import { Fantasy_Groups_DB, Global_DB } from 'typings/fantasy';
 
 import {
+  formatSwapInfo,
   generateLeaderboard,
   getUserFromFantasyGroups,
 } from '../../utils/fantasyHelpers';
@@ -97,11 +98,25 @@ export default {
         .filter((player) => player.username === username)
         .map((player) => {
           if (player.new_player) {
-            return `${player.player} ${player.OSA} -> ${player.new_player} ${player.NSA} (${player.Difference})`;
+            return `${player.player} ${player.OSA} -> ${player.new_player} ${(
+              (player.NSC ?? 0) - (player.NSA ?? 0)
+            ).toFixed(1)} [${(
+              (player.OSA ?? 0) +
+              (player.NSC ?? 0) -
+              (player.NSA ?? 0)
+            ).toFixed(1)}]`;
           }
           return `${player.player}: ${player.fantasyPoints}`;
         })
         .join('\n');
+      const swappedPlayers = fantasy_groups.filter(
+        (p) => p.username === username && p.new_player,
+      );
+
+      const swapSections = swappedPlayers.map(formatSwapInfo);
+
+      const swapSection = swapSections.map((s) => s.pointsAfterSwap).join('\n');
+      const swapSection2 = swapSections.map((s) => s.costToSwap).join('\n');
 
       const embed = BaseEmbed(interaction, {})
         .setTitle(`Fantasy Group ${userData?.group_number}`)
@@ -114,6 +129,16 @@ export default {
           name: 'Players',
           value: playersSection,
         });
+      if (swapSection) {
+        embed.addFields({ name: 'Points After Swap', value: swapSection });
+      }
+      if (swapSection2 && username === 'Keven') {
+        embed.addFields({
+          name: 'Cost to Swap (Hi Keven)',
+          value: swapSection2,
+        });
+      }
+
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
       logUnhandledCommandError(interaction, error);

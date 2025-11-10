@@ -1,6 +1,6 @@
 import fuzzysort from 'fuzzysort';
 import { Database } from 'node_modules/sqlite3/lib/sqlite3';
-import { Global_DB } from 'typings/fantasy';
+import { Fantasy_Groups_DB, Global_DB } from 'typings/fantasy';
 import { GoalieStats, PlayerStats } from 'typings/statsindex';
 
 export function getSkaterFantasyPoints(playerStats: PlayerStats | GoalieStats) {
@@ -83,6 +83,25 @@ export const generateLeaderboard = (
       )
       .join('\n')
   );
+};
+
+export const formatSwapInfo = (player: Fantasy_Groups_DB) => {
+  const oldScoreChange = (player.OSC ?? 0) - (player.OSA ?? 0);
+  const newScoreChange = (player.NSC ?? 0) - (player.NSA ?? 0);
+  const totalDiff = player.Difference;
+  const swapCost = (player.OSC ?? 0) - (player.NSC ?? 0);
+
+  return {
+    pointsAfterSwap: `${player.player} ${oldScoreChange.toFixed(1)} -> ${
+      player.new_player
+    } ${newScoreChange.toFixed(1)} (${totalDiff})\n${player.player} ${
+      player.OSC
+    }\n${player.new_player} ${player.NSC}`,
+
+    costToSwap: `${player.player} ${player.OSC} -> (${swapCost.toFixed(1)}) ${
+      player.new_player
+    } ${player.NSC}`,
+  };
 };
 
 /*
