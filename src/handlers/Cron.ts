@@ -28,11 +28,6 @@ module.exports = async () => {
     return;
   }
 
-  new CronJob('0 * * * *', async () => {
-    ShlIndexApiClient.reloadIfError();
-    SmjhlIndexApiClient.reloadIfError();
-  }).start();
-
   new CronJob('0 */30 * * *', async () => {
     PortalClient.reloadIfError();
   }).start();
