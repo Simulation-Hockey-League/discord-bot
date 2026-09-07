@@ -5,6 +5,7 @@ import { Client, Collection, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
 
 import { SlashCommand } from 'typings/command';
+import './indexUpdate';
 
 const client = new Client({
   intents: [

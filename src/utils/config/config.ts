@@ -15,6 +15,7 @@ export const Config = {
   indexApiUrlV1: `https://index.simulationhockey.com/api/v1`,
   indexApiUrlV2: `https://index.simulationhockey.com/api/v2`,
   portalApiUrl: `https://portal.simulationhockey.com/api/v1`,
+  indexUpdatePort: process.env.INDEX_UPDATE_PORT,
   googleSheetUrl: (sheetId: string) =>
     `https://docs.google.com/spreadsheets/d/${sheetId}`,
   devTeamIds: [
@@ -27,10 +28,10 @@ export const Config = {
     '187307011929538560', // JamesT (Discord Moderator)
   ],
   indexUpdateServerId: isDevelopment
-    ? process.env.TEST_SERVER_ID
+    ? '711007308846596097'
     : '602893231621144586',
   indexUpdateChannelId: isDevelopment
-    ? process.env.TEST_CHANNEL_ID
+    ? '1546333782414598284'
     : '816772168045953084',
   botErrorChannelId: '1429184014547157010',
   fantasy: {

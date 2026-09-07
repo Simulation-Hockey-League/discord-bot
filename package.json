@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc && tsc-alias",
+    "notify:index-update": "ts-node -r tsconfig-paths/register src/indexUpdate.ts",
     "start:built": "node -r tsconfig-paths/register build/index.js",
     "start:dev": "NODE_ENV=development & nodemon -r tsconfig-paths/register --files src/index.ts | pino-pretty -i pid,hostname - t 'yyyy-mm-dd HH:MM:ss'",
     "start:prod": "ts-node -r tsconfig-paths/register --files src/index.ts",
@@ -19,6 +20,7 @@
     "csv-parse": "^5.6.0",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
+    "express": "^5.2.1",
     "fuzzysort": "^3.0.2",
     "keyv": "^4.5.4",
     "keyv-file": "^0.3.1",
@@ -26,6 +28,7 @@
     "tsc-alias": "^1.8.11"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/lodash": "^4.17.0",
     "@types/node": "^20.10.2",
     "@typescript-eslint/eslint-plugin": "^6.13.1",

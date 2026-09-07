@@ -1,13 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { updateFantasy } from 'src/db/fantasy/updateFantasy';
-import {
-  IihfIndexApiClient,
-  ShlIndexApiClient,
-  SmjhlIndexApiClient,
-  WjcIndexApiClient,
-} from 'src/db/index/api/IndexApiClient';
-import { PortalClient } from 'src/db/portal/PortalClient';
 import { UserRole } from 'src/utils/config/config';
+import { reloadCache } from 'src/utils/reloadCache';
 import { SlashCommand } from 'typings/command';
 
 export default {
@@ -38,40 +31,21 @@ export default {
     }
 
     await interaction.deferReply({ ephemeral: true });
-    let fantasyUpdateMessage = '';
 
     try {
-      switch (reloadOption) {
-        case 'shl': {
-          await ShlIndexApiClient.reload();
-          fantasyUpdateMessage = await updateFantasy();
-          break;
-        }
-        case 'smjhl':
-          await SmjhlIndexApiClient.reload();
-          break;
-        case 'iihf':
-          await IihfIndexApiClient.reload();
-          break;
-        case 'wjc':
-          await WjcIndexApiClient.reload();
-          break;
-        case 'portal':
-          await PortalClient.reload();
-          break;
-        default:
-          await interaction.editReply({
-            content: `Invalid reload option: ${reloadOption}`,
-          });
-          return;
+      const result = await reloadCache(reloadOption);
+
+      if (!result.ok) {
+        await interaction.editReply({ content: result.error });
+        return;
       }
 
       await interaction.editReply({
-        content: `Cache has been successfully updated for ${reloadOption}\n${fantasyUpdateMessage}`,
+        content: `Cache has been successfully updated for ${reloadOption}\n${result.fantasyMessage ?? ''}`,
       });
     } catch (error) {
       await interaction.editReply({
-        content: ` An error occurred while updating the cache`,
+        content: `An error occurred while updating the cache`,
       });
     }
   },
